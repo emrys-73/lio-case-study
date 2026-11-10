@@ -102,7 +102,7 @@ export function AlternativesBox({
   };
 
   return (
-    <div className="mb-4 text-sm text-ink/60">
+    <div className="mt-4 text-sm text-ink/60">
       <button
         type="button"
         aria-expanded={seen.open}
