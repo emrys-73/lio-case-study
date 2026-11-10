@@ -2,6 +2,7 @@
 
 import { apiFetch, apiFetchObjectUrl, clearToken, setToken } from './client';
 import type {
+  Categorisation,
   CommodityGroup,
   OrganizationInvite,
   OrganizationMemberWithProfile,
@@ -83,6 +84,13 @@ export interface UpdateRequestInput {
   totalCost: number;
   department: string;
   orderLines: OrderLineInput[];
+}
+
+export interface CategoriseLineInput {
+  id: string;
+  description: string;
+  quantity: number;
+  unit_price: string;
 }
 
 export interface ExtractedOrderLine {
@@ -296,6 +304,10 @@ export const organizations = {
 export const commodityGroups = {
   list(): Promise<CommodityGroup[]> {
     return apiFetch('/commodity-groups');
+  },
+
+  categorise(lines: CategoriseLineInput[]): Promise<Categorisation> {
+    return apiFetch('/categorise', { body: { lines } });
   },
 };
 

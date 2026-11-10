@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import * as api from '@/lib/api';
 import { useCommodityGroups } from '@/lib/hooks/useCommodityGroups';
 import { Button, Input, Alert, Loader } from '@/components/base';
 import { grossFits } from '@/lib/totals';
+import { AutoSetChip, AutoSetHelper, CorrectedNote, LockedGroupField, isStaff } from '@/components/CommodityAuto';
+import type { Commodity } from '@/types/database';
 
 interface OrderLine {
   positionDescription: string;
@@ -26,6 +28,15 @@ function toFormLine(line: api.ExtractedOrderLine): OrderLine {
 }
 
 const NOT_FOUND = 'Not found in the quote';
+const CATEGORISE_DELAY_MS = 400;
+
+function lineId(index: number): string {
+  return `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`;
+}
+
+async function categorise(lines: api.CategoriseLineInput[]) {
+  return api.commodityGroups.categorise(lines);
+}
 
 export default function NewRequestPage() {
   const router = useRouter();
@@ -52,6 +63,79 @@ export default function NewRequestPage() {
   const [printedTotal, setPrintedTotal] = useState<number | null>(null);
   const [printedVat, setPrintedVat] = useState<number | null>(null);
   const [printedGross, setPrintedGross] = useState<number | null>(null);
+  const [org, setOrg] = useState<api.MyOrganization | null>(null);
+  const [commodity, setCommodity] = useState<Commodity | null>(null);
+  const [savedCommodity, setSavedCommodity] = useState<Commodity | null>(null);
+  const ownGroupId = useRef<number | null>(null);
+  const categoriseRun = useRef(0);
+  const lockedRef = useRef(false);
+  const locked = Boolean(commodity?.locked && commodity.group_id);
+  const staff = isStaff(org?.role, commodity ?? savedCommodity);
+  const groupName = (id: number | null | undefined, fallback?: string | null) =>
+    fallback || commodityGroups?.find((g) => g.id === id)?.name || (id ? `Group ${id}` : '');
+
+  const chooseGroup = (id: number | null) => {
+    ownGroupId.current = id;
+    setCommodityGroupId(id);
+  };
+
+  useEffect(() => {
+    Promise.resolve()
+      .then(() => api.organizations.getMine())
+      .then((mine) => setOrg(mine ?? null))
+      .catch(() => setOrg(null));
+  }, []);
+
+  const categoriseKey = useMemo(
+    () =>
+      JSON.stringify(
+        orderLines.map((line) => [line.positionDescription, line.amount, line.unitPrice]),
+      ),
+    [orderLines],
+  );
+
+  useEffect(() => {
+    const run = ++categoriseRun.current;
+    const lines: api.CategoriseLineInput[] = JSON.parse(categoriseKey).map(
+      ([description, quantity, unitPrice]: [string, number, number], index: number) => ({
+        id: lineId(index),
+        description,
+        quantity,
+        unit_price: Number(unitPrice || 0).toFixed(2),
+      }),
+    );
+    const release = () => {
+      if (lockedRef.current) {
+        lockedRef.current = false;
+        setCommodityGroupId(ownGroupId.current);
+      }
+      setCommodity(null);
+    };
+    if (!lines.some((line) => line.description.trim())) {
+      release();
+      return;
+    }
+    const timer = setTimeout(() => {
+      Promise.resolve()
+        .then(() => categorise(lines))
+        .then((result) => {
+          if (run !== categoriseRun.current) return;
+          const next = result?.commodity;
+          if (next?.locked && next.group_id) {
+            lockedRef.current = true;
+            setCommodity(next);
+            setCommodityGroupId(next.group_id);
+          } else {
+            release();
+          }
+        })
+        .catch(() => {
+          if (run === categoriseRun.current) release();
+        });
+    }, CATEGORISE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [categoriseKey]);
+
   const grossDiffers = printedGross !== null && !grossFits(totalCost, printedVat, printedGross);
   const totalsDiffer =
     printedGross === null && printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
@@ -97,7 +181,8 @@ export default function NewRequestPage() {
       
       // Set commodity group (now included in extraction)
       if (extracted.commodityGroupId) {
-        setCommodityGroupId(extracted.commodityGroupId);
+        ownGroupId.current = extracted.commodityGroupId;
+        if (!lockedRef.current) setCommodityGroupId(extracted.commodityGroupId);
       }
 
       // Show warnings for missing fields
@@ -163,6 +248,7 @@ export default function NewRequestPage() {
     setError('');
     setSuccess('');
     setWarning('');
+    setSavedCommodity(null);
 
     // Validation with scroll to top on error
     if (!commodityGroupId) {
@@ -199,12 +285,13 @@ export default function NewRequestPage() {
         }
       }
 
+      setSavedCommodity(created?.commodity ?? null);
       setSuccess('Request created successfully! Redirecting...');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
         router.push('/dashboard/requests');
         router.refresh();
-      }, 1500);
+      }, created?.commodity?.corrected ? 3000 : 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create request');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -237,6 +324,19 @@ export default function NewRequestPage() {
         </Alert>
       )}
       {success && <Alert variant="success" className="mb-6">{success}</Alert>}
+      {success && (
+        <CorrectedNote
+          commodity={savedCommodity}
+          staff={staff}
+          orgName={org?.name}
+          groupName={groupName(savedCommodity?.group_id, savedCommodity?.group_name)}
+          fromName={
+            savedCommodity?.corrected_from_group_id
+              ? groupName(savedCommodity.corrected_from_group_id)
+              : null
+          }
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* PDF Upload Section */}
@@ -360,24 +460,32 @@ export default function NewRequestPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
               Commodity Group *
+              {locked && <AutoSetChip />}
             </label>
-            <select
-              value={commodityGroupId || ''}
-              onChange={(e) => setCommodityGroupId(Number(e.target.value))}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-accent-deep/60 focus:border-accent-deep/40"
-            >
-              <option value="">
-                {commodityGroups ? 'Select a commodity group' : 'Loading...'}
-              </option>
-              {commodityGroups?.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.id} - {group.category} - {group.name}
+            {locked && commodity ? (
+              <>
+                <LockedGroupField name={groupName(commodity.group_id, commodity.group_name)} />
+                <AutoSetHelper commodity={commodity} staff={staff} orgName={org?.name} />
+              </>
+            ) : (
+              <select
+                value={commodityGroupId || ''}
+                onChange={(e) => chooseGroup(e.target.value ? Number(e.target.value) : null)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-accent-deep/60 focus:border-accent-deep/40"
+              >
+                <option value="">
+                  {commodityGroups ? 'Select a commodity group' : 'Loading...'}
                 </option>
-              ))}
-            </select>
+                {commodityGroups?.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.id} - {group.category} - {group.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
 
