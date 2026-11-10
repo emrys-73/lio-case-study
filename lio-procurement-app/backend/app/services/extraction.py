@@ -57,6 +57,8 @@ REPLY_SCHEMA = _strict_object({
         }),
     },
     "totalCost": _nullable("number"),
+    "vatAmount": _nullable("number"),
+    "grossTotal": _nullable("number"),
     "commodityGroupId": _nullable("integer"),
     "commodityGroupName": _nullable("string"),
 })
@@ -95,7 +97,9 @@ Fields:
    - kind: "item" for goods and services, "charge" for shipping, delivery, installation, packaging, levies and other fees
 6. alternatives: positions offered as an alternative or option, with their total (or unit price if no total is printed).
 7. totalCost: the net total before VAT. Items plus charges.
-8. commodityGroupId and commodityGroupName: the SINGLE most appropriate commodity group from the list below.
+8. vatAmount: the VAT amount (MwSt./USt.) from the totals block. VAT is not an order line.
+9. grossTotal: the total including VAT (Bruttobetrag/Gesamtbetrag/Endbetrag).
+10. commodityGroupId and commodityGroupName: the SINGLE most appropriate commodity group from the list below.
 
 Rules:
 - Charges are order lines, also when the quote prints them under the table or in the totals block (Versandkosten, Fracht, Transport, Lieferung, Montage, Verpackung, Urheberrechtsabgabe). Without them the lines do not add up to the total.

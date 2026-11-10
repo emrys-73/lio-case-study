@@ -166,3 +166,14 @@ def test_extraction_route_passes_the_company_name(monkeypatch):
     client.post("/extraction", json={"text": "Angebot"},
                 headers={"Authorization": f"Bearer {token}"})
     assert seen["buyer_name"] == "Acme Corp"
+
+
+def test_vat_and_gross_have_their_own_fields():
+    for name in ("vatAmount", "grossTotal"):
+        assert REPLY_SCHEMA["properties"][name] == {"type": ["number", "null"]}
+    data = parse_reply(json.dumps(dict(HOFFMANN_REPLY, vatAmount=3230.0, grossTotal=20230.0)))
+    assert (data.vat_amount, data.gross_total) == (3230.0, 20230.0)
+
+
+def test_prompt_says_vat_goes_in_its_own_field():
+    assert "VAT is not an order line" in request_params("Angebot", "1 | IT | Software")["messages"][1]["content"]

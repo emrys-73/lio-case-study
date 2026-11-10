@@ -1,0 +1,157 @@
+{
+  "meta": {
+    "label": "fix3c-rules-after-group-list",
+    "model": "gpt-4o-mini-2024-07-18",
+    "textSource": "pypdf",
+    "runsPerCase": 3,
+    "startedAt": "2026-11-10T15:41:15+00:00"
+  },
+  "overall": {
+    "runs": 15,
+    "crashes": 0,
+    "crashesWhereModelReplyWasUsable": 0,
+    "fullyCorrect": 6,
+    "vendorName": 15,
+    "vatId": 12,
+    "totalCostNet": 9,
+    "totalKinds": {
+      "gross": 3,
+      "other": 3,
+      "net": 9
+    },
+    "itemsFound": 24,
+    "itemsExpected": 24,
+    "chargesFound": 15,
+    "lineFieldsRight": 99,
+    "lineFieldsChecked": 105,
+    "alternativesCounted": 3,
+    "extraLines": 6,
+    "linesSumToTotal": 12,
+    "avgSeconds": 9.1,
+    "promptTokens": 377895,
+    "completionTokens": 3108,
+    "chargesExpected": 15
+  },
+  "perCase": {
+    "apple-mba": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "gross",
+        "gross"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "None"
+      ]
+    },
+    "dream-in-green": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "other",
+        "other",
+        "other"
+      ],
+      "alternativesCounted": [
+        1,
+        1,
+        1
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "None"
+      ]
+    },
+    "gaertner-gregg": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 3,
+      "errors": [],
+      "totalKinds": [
+        "net",
+        "net",
+        "net"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "Raumbegrünung"
+      ]
+    },
+    "hoffmann": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 3,
+      "errors": [],
+      "totalKinds": [
+        "net",
+        "net",
+        "net"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "Einkauf / Technik"
+      ]
+    },
+    "stylegreen": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "net",
+        "net",
+        "net"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "None"
+      ]
+    }
+  }
+}

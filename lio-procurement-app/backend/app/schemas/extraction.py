@@ -41,6 +41,8 @@ class ExtractedVendorData(BaseModel):
     order_lines: list[OrderLineData] = Field(default_factory=list, alias="orderLines")
     total_cost: float | None = Field(default=None, alias="totalCost")
     alternatives: list[AlternativeData] = Field(default_factory=list)
+    vat_amount: float | None = Field(default=None, alias="vatAmount")
+    gross_total: float | None = Field(default=None, alias="grossTotal")
     commodity_group_id: int | None = Field(default=None, alias="commodityGroupId")
     commodity_group_name: str | None = Field(default=None, alias="commodityGroupName")
 
