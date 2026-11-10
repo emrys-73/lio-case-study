@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import {
   AlternativesBox,
+  LineCheck,
+  lineAddsUp,
   PRICE_FROM_TOTAL,
   NOT_IN_QUOTE,
   alternativeLine,
@@ -138,5 +140,24 @@ describe('a line the quote gives no price for', () => {
     const line = fillMissingPrice({ positionDescription: 'Fee', unitPrice: null, amount: null, unit: null, totalPrice: 4.9 });
     expect(markText({ ...line, unitPrice: 5 }, 'unitPrice')).toBeUndefined();
     expect(markText({ ...line, amount: 2 }, 'amount')).toBeUndefined();
+  });
+});
+
+const desk = { positionDescription: 'Desk', unitPrice: 300, amount: 2, unit: 'pcs', totalPrice: 600 };
+const LINE_OFF = "Quantity × price isn't this line's total. Check this line.";
+
+describe('a line where quantity times price is not the line total', () => {
+  it('adds up to the cent', () => {
+    expect(lineAddsUp(desk)).toBe(true);
+    expect(lineAddsUp({ ...desk, totalPrice: 540 })).toBe(false);
+    expect(lineAddsUp({ ...desk, unitPrice: 33.3333, amount: 3, totalPrice: 100 })).toBe(true);
+  });
+
+  it('says which line is off and goes once the line adds up', () => {
+    const { rerender } = render(<LineCheck line={{ ...desk, totalPrice: 540 }} />);
+    expect(screen.getByText(LINE_OFF)).toBeInTheDocument();
+
+    rerender(<LineCheck line={{ ...desk, totalPrice: 600 }} />);
+    expect(screen.queryByText(LINE_OFF)).not.toBeInTheDocument();
   });
 });

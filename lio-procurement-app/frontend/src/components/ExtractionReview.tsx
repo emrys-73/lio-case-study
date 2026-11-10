@@ -131,3 +131,18 @@ export function AlternativesBox({
     </div>
   );
 }
+
+const cents = (value: number) => Math.round(value * 100);
+
+export function lineAddsUp(line: LineValues): boolean {
+  return cents(line.unitPrice * line.amount) === cents(line.totalPrice);
+}
+
+export function LineCheck({ line }: { line: LineValues }) {
+  if (lineAddsUp(line)) return null;
+  return (
+    <p className="mt-2 text-sm text-amber-700">
+      Quantity × price isn&apos;t this line&apos;s total. Check this line.
+    </p>
+  );
+}
