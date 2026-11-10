@@ -21,6 +21,46 @@ function money(n: number): string {
   return `€${(Number.isFinite(n) ? n : 0).toFixed(2)}`;
 }
 
+export const NOT_IN_QUOTE = 'Not found in the quote';
+export const PRICE_FROM_TOTAL = 'Not found in the quote, from the line total';
+
+interface Mark {
+  value: number;
+  text: string;
+}
+
+export interface Marks {
+  unitPrice?: Mark;
+  amount?: Mark;
+}
+
+export type MarkedLine = LineValues & { marks?: Marks };
+
+export function fillMissingPrice(line: api.ExtractedOrderLine): MarkedLine {
+  const marks: Marks = {};
+  const amount = line.amount ?? 1;
+  if (line.amount == null) marks.amount = { value: amount, text: NOT_IN_QUOTE };
+  let unitPrice = line.unitPrice;
+  if (unitPrice == null) {
+    const fromTotal = line.totalPrice != null && amount !== 0;
+    unitPrice = fromTotal ? Math.round(((line.totalPrice as number) / amount) * 10000) / 10000 : 0;
+    marks.unitPrice = { value: unitPrice, text: fromTotal ? PRICE_FROM_TOTAL : NOT_IN_QUOTE };
+  }
+  return {
+    positionDescription: line.positionDescription ?? '',
+    unitPrice,
+    amount,
+    unit: line.unit ?? '',
+    totalPrice: line.totalPrice ?? unitPrice * amount,
+    marks,
+  };
+}
+
+export function markText(line: LineValues, field: keyof Marks): string | undefined {
+  const mark = (line as MarkedLine).marks?.[field];
+  return mark && line[field] === mark.value ? mark.text : undefined;
+}
+
 export function alternativesOf(extraction?: api.ExtractionResponse | null): Alternative[] {
   const data = extraction?.data as
     | (api.ExtractedVendorData & { alternatives?: Alternative[] | null })

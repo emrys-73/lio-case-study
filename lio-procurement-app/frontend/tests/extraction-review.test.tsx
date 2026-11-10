@@ -1,7 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { AlternativesBox, alternativeLine, alternativesOf } from '@/components/ExtractionReview';
+import {
+  AlternativesBox,
+  PRICE_FROM_TOTAL,
+  NOT_IN_QUOTE,
+  alternativeLine,
+  alternativesOf,
+  fillMissingPrice,
+  markText,
+} from '@/components/ExtractionReview';
 import type * as api from '@/lib/api';
 
 function extractionWith(alternatives: unknown): api.ExtractionResponse {
@@ -84,5 +92,51 @@ describe('alternatives the extraction left out of the order lines', () => {
       />,
     );
     expect(screen.getByRole('button', { name: '1 alternative, not included' })).toBeInTheDocument();
+  });
+});
+
+describe('a line the quote gives no price for', () => {
+  it('takes the price from the line total so the line adds up', () => {
+    const line = fillMissingPrice({
+      positionDescription: 'Lieferung und Montage',
+      unitPrice: null,
+      amount: null,
+      unit: null,
+      totalPrice: 4.9,
+    });
+    expect(line).toMatchObject({ unitPrice: 4.9, amount: 1, totalPrice: 4.9, unit: '' });
+    expect(markText(line, 'unitPrice')).toBe(PRICE_FROM_TOTAL);
+    expect(markText(line, 'amount')).toBe(NOT_IN_QUOTE);
+  });
+
+  it('splits the total over the amount when the amount is there', () => {
+    const line = fillMissingPrice({ positionDescription: 'Cable', unitPrice: null, amount: 4, unit: 'pcs', totalPrice: 10 });
+    expect(line).toMatchObject({ unitPrice: 2.5, amount: 4, totalPrice: 10 });
+    expect(markText(line, 'unitPrice')).toBe(PRICE_FROM_TOTAL);
+    expect(markText(line, 'amount')).toBeUndefined();
+  });
+
+  it('marks a price that is nowhere in the quote', () => {
+    const line = fillMissingPrice({ positionDescription: 'Verpackung', unitPrice: null, amount: null, unit: null, totalPrice: null });
+    expect(line).toMatchObject({ unitPrice: 0, amount: 1, totalPrice: 0 });
+    expect(markText(line, 'unitPrice')).toBe(NOT_IN_QUOTE);
+  });
+
+  it('works out a missing line total from price times amount', () => {
+    const line = fillMissingPrice({ positionDescription: 'Desk', unitPrice: 300, amount: 2, unit: 'pcs', totalPrice: null });
+    expect(line).toMatchObject({ unitPrice: 300, amount: 2, totalPrice: 600 });
+  });
+
+  it('leaves a complete line alone and unmarked', () => {
+    const line = fillMissingPrice({ positionDescription: 'Desk', unitPrice: 300, amount: 2, unit: 'pcs', totalPrice: 540 });
+    expect(line).toMatchObject({ unitPrice: 300, amount: 2, totalPrice: 540 });
+    expect(markText(line, 'unitPrice')).toBeUndefined();
+    expect(markText(line, 'amount')).toBeUndefined();
+  });
+
+  it('drops the mark once the person types their own value', () => {
+    const line = fillMissingPrice({ positionDescription: 'Fee', unitPrice: null, amount: null, unit: null, totalPrice: 4.9 });
+    expect(markText({ ...line, unitPrice: 5 }, 'unitPrice')).toBeUndefined();
+    expect(markText({ ...line, amount: 2 }, 'amount')).toBeUndefined();
   });
 });
