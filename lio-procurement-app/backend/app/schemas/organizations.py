@@ -2,13 +2,29 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 MemberRole = Literal["admin", "buyer", "requester"]
 
 # Request fields an organization may optionally mark as required. (The other
 # request fields are always required by the app.)
 ConfigurableRequiredField = Literal["vat_id", "department"]
+
+
+class CommodityRule(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    keywords: list[str] = Field(min_length=1)
+    commodity_group_id: int
+    reason: str = ""
+
+    @field_validator("keywords")
+    @classmethod
+    def _keywords_not_blank(cls, keywords: list[str]) -> list[str]:
+        cleaned = [keyword.strip() for keyword in keywords]
+        if any(not keyword for keyword in cleaned):
+            raise ValueError("keywords can't be blank")
+        return cleaned
 
 
 class OrganizationSettings(BaseModel):
@@ -21,6 +37,14 @@ class OrganizationSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     required_fields: list[ConfigurableRequiredField] = Field(default_factory=list)
+    commodity_rules: list[CommodityRule] = Field(default_factory=list)
+
+
+class OrganizationSettingsUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    required_fields: list[ConfigurableRequiredField] | None = None
+    commodity_rules: list[CommodityRule] | None = None
 
 
 class OrganizationCreate(BaseModel):

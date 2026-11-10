@@ -24,6 +24,7 @@ from app.schemas.requests import (
     RequestUpdate,
     StatusUpdate,
 )
+from app.services.organization_settings import load_settings
 from app.services.totals import add_up, same_amount
 
 router = APIRouter(prefix="/requests", tags=["requests"])
@@ -84,7 +85,7 @@ def _enforce_required_fields(
 ) -> None:
     """Enforce the org's configurable required fields (see OrganizationSettings)."""
     org = db.get(Organization, organization_id)
-    required = (org.settings or {}).get("required_fields", []) if org else []
+    required = load_settings(org).required_fields
     missing = [field for field in required if not getattr(payload, field, None)]
     if missing:
         raise HTTPException(
