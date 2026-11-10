@@ -143,9 +143,9 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
   <h2 id="progress">Progress</h2>
   <div class="progress">
     <div class="prow all">
-      <div class="phead"><span class="pname"><b>Whole case study</b> <span class="pwhat">all four asks plus setup and the PR</span></span><span class="pnum">23 of 25 steps, 92%</span></div>
-      <div class="bar" role="img" aria-label="Whole case study: 23 of 25 steps done"><div class="fill" style="width:92%"></div></div>
-      <p class="pleft">Committed steps only. All four asks are committed and pushed. Status 10 Nov, 18:40.</p>
+      <div class="phead"><span class="pname"><b>Whole case study</b> <span class="pwhat">all four asks plus setup and the PR</span></span><span class="pnum">25 of 25 steps, 100%</span></div>
+      <div class="bar" role="img" aria-label="Whole case study: 25 of 25 steps done"><div class="fill" style="width:100%"></div></div>
+      <p class="pleft">Committed steps only. All four asks are committed and pushed, and the PR is open: <a href="https://github.com/emrys-73/lio-case-study/pull/1">pull request 1</a>, not merged. Final check done. Status 10 Nov, 18:35.</p>
     </div>
     <div class="prow">
       <div class="phead"><span class="pname"><a href="#problem-1">Problem 1</a> <span class="pwhat">PDF extraction</span></span><span class="pnum">9 of 9 steps, 100%</span></div>
@@ -168,15 +168,15 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
       <p class="pleft">Requests under the company limit approve themselves at create and edit, and go back to a buyer when an edit raises the total. For Acme that is €2,000 net, strictly below. Committed in <code>0d4b951</code>, <code>9a389e5</code> and <code>f6cfd9c</code>. Not counted: a screen to set the limit, and catching an order split to stay under it.</p>
     </div>
     <div class="prow">
-      <div class="phead"><span class="pname"><a href="#order">Shared</a> <span class="pwhat">Setup, final check, PR</span></span><span class="pnum">1 of 3 steps, 33%</span></div>
-      <div class="bar" role="img" aria-label="Shared: 1 of 3 steps done"><div class="fill" style="width:33%"></div></div>
-      <p class="pleft">Left: end-to-end check on the 5 quotes and Acme's 3 complaints, the PR with the handoff.</p>
+      <div class="phead"><span class="pname"><a href="#order">Shared</a> <span class="pwhat">Setup, final check, PR</span></span><span class="pnum">3 of 3 steps, 100%</span></div>
+      <div class="bar" role="img" aria-label="Shared: 3 of 3 steps done"><div class="fill" style="width:100%"></div></div>
+      <p class="pleft">The PR with the handoff is open against main. Final check in the running app, 18:35, after a backend restart: see <a href="#final">Final check</a>.</p>
     </div>
   </div>
   <ul>
     <li>A step counts when it is committed with its tests. Steps are not equal in size, so read this as a count, not as time left.</li>
     <li>Only what Acme asked for is counted. Four steps were taken out of the count on 10 Nov, 18:20, because the brief doesn't ask for them: search for groups, the classifier, the group list out of the extraction prompt, vendor tied to the VAT ID owner. The first two were built anyway at 18:21, untested.</li>
-    <li>Problem 1 scores 12/15 quotes fully right in the eval, up from 9/15, after fixes 8 to 10. Run as an Acme user it scored 6/15 before those fixes, not re-run yet. Detail in <a href="#status">Where we are</a>.</li>
+    <li>Problem 1 scores 12/15 quotes fully right in the eval, up from 9/15, after fixes 8 to 10. Run as an Acme user it scored 6/15 before those fixes. The eval was not re-run that way, but one live upload per quote as Acme at 18:35 still shows styleGREEN's vendor coming back as the customer. Detail in <a href="#status">Where we are</a>.</li>
   </ul>
 
   <h2 id="asks">The four asks</h2>
@@ -200,17 +200,17 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
   <p><span class="status wait">10 Nov, 18:23</span> All four asks are built, committed and pushed.</p>
   <div class="tablewrap">
   <table>
-    <thead><tr><th>Extraction, 15 live runs</th><th class="t">Before</th><th class="t">Now</th></tr></thead>
+    <thead><tr><th>Extraction, 15 live runs (run "fix10")</th><th class="t">Before</th><th class="t">Now</th></tr></thead>
     <tbody>
       <tr><td>Upload crashes</td><td class="t">6/15</td><td class="t">0/15</td></tr>
-      <tr><td><b>Quotes fully right</b></td><td class="t"><b>0/15</b></td><td class="t"><b>9/15</b></td></tr>
+      <tr><td><b>Quotes fully right</b></td><td class="t"><b>0/15</b></td><td class="t"><b>12/15</b></td></tr>
       <tr><td>Vendor right</td><td class="t">9/15</td><td class="t">15/15</td></tr>
       <tr><td>VAT ID right</td><td class="t">9/15</td><td class="t">15/15</td></tr>
-      <tr><td>Total is the net cost</td><td class="t">0/15</td><td class="t">9/15</td></tr>
-      <tr><td>Shipping and fees found</td><td class="t">3/15</td><td class="t">14/15</td></tr>
-      <tr><td>Alternatives bought by mistake</td><td class="t">9</td><td class="t">3</td></tr>
-      <tr><td>Wrong answers the form says nothing about</td><td class="t">not measured</td><td class="t">0/6</td></tr>
-      <tr><td>Seconds per quote</td><td class="t">10.6</td><td class="t">20.1</td></tr>
+      <tr><td>Total is the net cost</td><td class="t">0/15</td><td class="t">12/15</td></tr>
+      <tr><td>Shipping and fees found</td><td class="t">3/15</td><td class="t">12/15</td></tr>
+      <tr><td>Alternatives bought by mistake</td><td class="t">9</td><td class="t">0</td></tr>
+      <tr><td>Wrong answers the form says nothing about</td><td class="t">not measured</td><td class="t">0/3</td></tr>
+      <tr><td>Seconds per quote</td><td class="t">10.6</td><td class="t">11.8</td></tr>
       <tr><td>Input tokens per quote</td><td class="t">24.8k</td><td class="t">45.1k</td></tr>
     </tbody>
   </table>
@@ -245,10 +245,6 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
       </ul>
     </div>
     <div>
-      <p class="label">Not started</p>
-      <ul>
-        <li>End-to-end check and the PR.</li>
-      </ul>
       <p class="label">Later, not asked by Acme</p>
       <ul>
         <li>Tests and an eval for the classifier. It is built (<code>678e4f9</code>): code shortlists 15 of the 380 groups, one model call picks one or none. Nobody has measured how good its picks are.</li>
@@ -259,6 +255,28 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
   </div>
   <ul>
     <li>Detail and every run: <a href="#problem-1">Problem 1</a>, "Fixes, in order".</li>
+  </ul>
+
+  <h2 id="final">Final check</h2>
+  <p><span class="status ok">10 Nov, 18:35</span> Run against the live app as an Acme requester, after restarting the backend. Test requests were deleted afterwards.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Check</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Test suites</td><td>324 backend and 62 frontend tests pass. Type check clean.</td></tr>
+      <tr><td>Problem 3: cable ties, toner, small software sent as "Software"</td><td>Saved as Electrical Engineering, Hardware and Office Equipment. Each save says it was corrected.</td></tr>
+      <tr><td>Problem 3: a €7,000 software subscription</td><td>Left as Software. The rule's €500 limit holds.</td></tr>
+      <tr><td>Problem 2: "Toner schwarz XL"</td><td>Suggests "Toner cartridge black, high-yield" at €139.00. A switched line is logged with the article, the offer price and the catalogue price.</td></tr>
+      <tr><td>Bonus: requests under €2,000</td><td>Approved automatically and logged. €2,000.00 exactly, €2,500 and €7,000 wait for a buyer.</td></tr>
+      <tr><td>Problem 1: the 5 sample quotes uploaded once each</td><td>5 of 5 come back, no crash, 6 to 20 seconds each.</td></tr>
+      <tr><td>Problem 1: vendor</td><td>Right on 4 of 5. styleGREEN's comes back as "Lio Technologies GmbH", the customer. Known: the sample quotes are addressed to Lio and the demo runs as Acme.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul>
+    <li>Not checked by hand: Switch, Undo and "Switch all" in the browser, the corrected note after a save, the classifier's suggestion in the form. Tests cover all but the classifier.</li>
+    <li>The uploads were checked for crashes and vendor only. Lines and totals are scored by the eval, not re-read here.</li>
+    <li>The classifier has no tests and no eval.</li>
   </ul>
 
   <h2 id="flow">One flow for every request</h2>
@@ -641,7 +659,7 @@ action: "auto_approved"
     <li>Frontend tests land with the step that changes the form: 3, 5 and 8.</li>
     <li>Step 5b comes after step 5. Until the schema allows an empty VAT ID, styleGREEN crashes and the gain can't be measured.</li>
     <li>Step 5b rebuilt the backend image (tesseract with German). Done 10 Nov, the container was recreated.</li>
-    <li>Steps 0 to 6 and 8 are committed. The classifier (7) is built but not tested. The approval limit (9) is committed. Next: the end-to-end check and the PR.</li>
+    <li>Steps 0 to 6 and 8 are committed. The classifier (7) is built but not tested. The approval limit (9) is committed. The end-to-end check is done and the PR is open.</li>
     <li>Step 7 waits for the classifier on purpose. Otherwise uploads lose their group suggestion in between.</li>
   </ul>
 
@@ -1686,7 +1704,7 @@ Available Commodity Groups (ID | Category | Name):
     </div>
   </details>
 
-  <footer><span>One page for all four asks. Status as of 10 Nov 2026, 17:20.</span><span>Lio FDE case study</span></footer>
+  <footer><span>One page for all four asks. Status as of 10 Nov 2026, 18:35.</span><span>Lio FDE case study</span></footer>
 </main>
 
 <script>
