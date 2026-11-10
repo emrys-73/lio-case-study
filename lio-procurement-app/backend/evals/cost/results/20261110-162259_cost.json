@@ -1,0 +1,642 @@
+{
+  "createdAt": "20261110-162259",
+  "prices": {
+    "sources": {
+      "openai-pricing": "https://developers.openai.com/api/docs/pricing",
+      "openai-vision": "https://developers.openai.com/api/docs/guides/images-vision"
+    },
+    "unit": "USD per 1M tokens, standard tier",
+    "models": {
+      "gpt-4o-mini-2024-07-18": {
+        "input": 0.15,
+        "cachedInput": 0.075,
+        "output": 0.6,
+        "image": {
+          "method": "tile",
+          "base": 2833,
+          "tile": 5667
+        },
+        "source": "openai-pricing",
+        "checked": "2026-11-10"
+      },
+      "gpt-4.1": {
+        "input": 2.0,
+        "cachedInput": 0.5,
+        "output": 8.0,
+        "image": {
+          "method": "tile",
+          "base": 85,
+          "tile": 170
+        },
+        "source": "openai-pricing",
+        "checked": "2026-11-10"
+      },
+      "gpt-4.1-mini-2025-04-14": {
+        "input": 0.4,
+        "cachedInput": 0.1,
+        "output": 1.6,
+        "image": {
+          "method": "patch",
+          "multiplier": 1.62,
+          "maxDim": 2048,
+          "patchBudget": 6144
+        },
+        "source": "openai-pricing",
+        "checked": "2026-11-10"
+      },
+      "gpt-5.4-mini": {
+        "input": 0.75,
+        "cachedInput": 0.075,
+        "output": 4.5,
+        "image": {
+          "method": "patch",
+          "multiplier": 1.2,
+          "maxDim": 2048,
+          "patchBudget": 2500
+        },
+        "source": "openai-pricing",
+        "checked": "2026-11-10"
+      },
+      "gpt-5.6-luna": {
+        "input": 0.2,
+        "cachedInput": 0.02,
+        "output": 1.2,
+        "image": {
+          "method": "patch",
+          "multiplier": 1.2,
+          "maxDim": 2048,
+          "patchBudget": 2500
+        },
+        "source": "openai-pricing",
+        "checked": "2026-11-10"
+      },
+      "text-embedding-3-small": {
+        "input": 0.02,
+        "cachedInput": 0.02,
+        "output": 0.0,
+        "source": "openai-pricing",
+        "checked": "2026-11-10"
+      }
+    },
+    "imageRules": {
+      "source": "openai-vision",
+      "checked": "2026-11-10",
+      "tile": "fit in 2048x2048, shortest side to 768, count 512px tiles, add base",
+      "patch": "fit in maxDim, scale down until 32px patches fit the budget, patches x multiplier"
+    }
+  },
+  "constants": {
+    "groupListTokens": 23030,
+    "groupListMeasured": "2,000 commodity groups as the prompt lists them, o200k_base tokenizer, 2026-11-10",
+    "pagesPerPictureCall": 2,
+    "pagesPerPictureCallMeasured": "Hoffmann, the only quote that got the picture call, has 2 pages",
+    "pagesPerQuote": 1.8,
+    "pagesPerQuoteMeasured": "9 pages over the 5 Acme quotes",
+    "pagePixels": [
+      1240,
+      1754
+    ],
+    "pagePixelsMeaning": "A4 at 150 dpi, what the picture call renders",
+    "quotesPerMonth": 1000
+  },
+  "runs": {
+    "before": "20261110-151527_baseline-checked-keys",
+    "fixes": "20261110-155125_after-fixes-1-5",
+    "noGroupList": "20261110-155125_diag-without-group-list",
+    "now": "20261110-160109_fix7b-ocr-letterhead-and-footer"
+  },
+  "groupListShare": 0.6131114808652246,
+  "scenarios": [
+    {
+      "id": "before",
+      "name": "Before the fixes",
+      "group": "path",
+      "status": null,
+      "evidence": "measured",
+      "from": {
+        "run": "before"
+      },
+      "ops": [],
+      "result": "6 in 15 uploads crash. None fully right",
+      "proveWith": null,
+      "perQuote": 0.00385956,
+      "perMonth": 3.85956,
+      "inputTokens": 24750,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.0,
+      "readingSeconds": 0.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 24750.4,
+        "cached": 0,
+        "pictures": 0.0,
+        "output": 245.0,
+        "calls": 1.0,
+        "extra": [],
+        "readingSeconds": 0.03800000000000203,
+        "seconds": 10.632666666666667
+      },
+      "run": "20261110-151527_baseline-checked-keys",
+      "fullyRight": "0/15",
+      "crashes": "6/15",
+      "seconds": 10.6,
+      "perFullyRight": null
+    },
+    {
+      "id": "fixes",
+      "name": "Fixes 1 to 4 and totals in code",
+      "group": "path",
+      "status": null,
+      "evidence": "measured",
+      "from": {
+        "run": "fixes"
+      },
+      "ops": [],
+      "result": "No crashes. 6 in 15 fully right",
+      "proveWith": null,
+      "perQuote": 0.00391161,
+      "perMonth": 3.9116100000000005,
+      "inputTokens": 25215,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.0,
+      "readingSeconds": 0.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 25215.0,
+        "cached": 0,
+        "pictures": 0.0,
+        "output": 215.6,
+        "calls": 1.0,
+        "extra": [],
+        "readingSeconds": 0.04733333333333345,
+        "seconds": 4.846
+      },
+      "run": "20261110-155125_after-fixes-1-5",
+      "fullyRight": "6/15",
+      "crashes": "0/15",
+      "seconds": 4.8,
+      "perFullyRight": 0.009779025
+    },
+    {
+      "id": "now",
+      "name": "Now: plus text in pictures",
+      "group": "path",
+      "status": null,
+      "evidence": "measured",
+      "from": {
+        "run": "now"
+      },
+      "ops": [],
+      "result": "9 in 15 fully right. VAT ID 15/15. Hoffmann gets a picture call every time",
+      "proveWith": null,
+      "perQuote": 0.00691777,
+      "perMonth": 6.91777,
+      "inputTokens": 45075,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.2,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 30341.0,
+        "cached": 0,
+        "pictures": 0.4,
+        "output": 260.8666666666667,
+        "calls": 1.2,
+        "extra": [],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      },
+      "run": "20261110-160109_fix7b-ocr-letterhead-and-footer",
+      "fullyRight": "9/15",
+      "crashes": "0/15",
+      "seconds": 20.1,
+      "perFullyRight": 0.011529616666666666
+    },
+    {
+      "id": "planned",
+      "name": "Planned: group list out, classifier picks the group",
+      "group": "path",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "now"
+      },
+      "ops": [
+        "dropGroupList",
+        "addCall",
+        "addCall"
+      ],
+      "result": "Same extraction. A run without the list scored the same (6/15 before pictures)",
+      "proveWith": "extraction eval on the final prompt, classifier eval",
+      "perQuote": 0.00289737,
+      "perMonth": 2.89737,
+      "inputTokens": 18239,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.2,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 2705.0,
+        "cached": 0,
+        "pictures": 0.4,
+        "output": 260.8666666666667,
+        "calls": 1.2,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "cache-now",
+      "name": "Stopgap until the classifier: group list first, so OpenAI caches it",
+      "group": "today",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "now"
+      },
+      "ops": [
+        "cacheGroupList"
+      ],
+      "result": "Same answers. Only saves when quotes arrive within minutes of each other",
+      "proveWith": "eval after the reorder, cached tokens logged",
+      "perQuote": 0.00484507,
+      "perMonth": 4.84507,
+      "inputTokens": 45075,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.2,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 30341.0,
+        "cached": 27636.0,
+        "pictures": 0.4,
+        "output": 260.8666666666667,
+        "calls": 1.2,
+        "extra": [],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "skip-pictures",
+      "name": "Planned, and no picture call when OCR found nothing new",
+      "group": "option",
+      "status": "rejected",
+      "evidence": "estimated",
+      "from": {
+        "scenario": "planned"
+      },
+      "ops": [
+        "skipPictures"
+      ],
+      "result": "Rejected by Adrian, 10 Nov: keep the picture call. Priced only as a comparison",
+      "proveWith": "Not planned",
+      "perQuote": 0.0005935583333333333,
+      "perMonth": 0.5935583333333333,
+      "inputTokens": 3054,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.0,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 2254.1666666666665,
+        "cached": 0,
+        "pictures": 0,
+        "output": 217.38888888888889,
+        "calls": 1.0,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "pictures-41-mini",
+      "name": "Planned, picture call on gpt-4.1-mini, pictures only",
+      "group": "option",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "planned"
+      },
+      "ops": [
+        "picturesTo"
+      ],
+      "result": "Same trigger. A page costs about 10x fewer tokens on this model",
+      "proveWith": "eval with the picture model swapped",
+      "perQuote": 0.0011895583333333334,
+      "perMonth": 1.1895583333333335,
+      "inputTokens": 4504,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.0,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 2254.1666666666665,
+        "cached": 0,
+        "pictures": 0,
+        "output": 217.38888888888889,
+        "calls": 1.0,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          },
+          {
+            "model": "gpt-4.1-mini-2025-04-14",
+            "input": 300,
+            "output": 50,
+            "pages": 2,
+            "fires": 0.2,
+            "label": "picture call"
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "picture-first-mini",
+      "name": "Planned, every page as a picture on every upload",
+      "group": "option",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "planned"
+      },
+      "ops": [
+        "picturesEveryPage"
+      ],
+      "result": "Reads layout and pictures every time. Untested on our quotes",
+      "proveWith": "full eval with pictures on",
+      "perQuote": 0.010539008333333334,
+      "perMonth": 10.539008333333333,
+      "inputTokens": 69357,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.9,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 2254.1666666666665,
+        "cached": 0,
+        "pictures": 1.8,
+        "output": 217.38888888888889,
+        "calls": 1.0,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "picture-first-41-mini",
+      "name": "Planned, every page as a picture, on gpt-4.1-mini",
+      "group": "option",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "planned"
+      },
+      "ops": [
+        "picturesEveryPage",
+        "model"
+      ],
+      "result": "Reads layout and pictures every time. Untested on our quotes",
+      "proveWith": "full eval on gpt-4.1-mini with pictures",
+      "perQuote": 0.0038764888888888887,
+      "perMonth": 3.876488888888889,
+      "inputTokens": 9309,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "pictureCalls": 0.9,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4.1-mini-2025-04-14",
+        "text": 2254.1666666666665,
+        "cached": 0,
+        "pictures": 1.8,
+        "output": 217.38888888888889,
+        "calls": 1.0,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "escalate-41",
+      "name": "Planned, plus gpt-4.1 again when the code checks fail",
+      "group": "option",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "planned"
+      },
+      "ops": [
+        "escalate"
+      ],
+      "result": "Second opinion on hard quotes. gpt-4.1 made the same mistakes on the old prompt",
+      "proveWith": "eval on the failing quotes with gpt-4.1",
+      "perQuote": 0.004563355185185185,
+      "perMonth": 4.563355185185185,
+      "inputTokens": 18840,
+      "model": "gpt-4o-mini-2024-07-18",
+      "pictureCalls": 0.2,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "text": 2705.0,
+        "cached": 0,
+        "pictures": 0.4,
+        "output": 260.8666666666667,
+        "calls": 1.2,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          },
+          {
+            "model": "gpt-4.1",
+            "input": 2254.166666666667,
+            "output": 217.3888888888889,
+            "fires": 0.26666666666666666,
+            "label": "second try when checks fail"
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "swap-41",
+      "name": "Planned, on gpt-4.1",
+      "group": "option",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "planned"
+      },
+      "ops": [
+        "model"
+      ],
+      "result": "Old prompt: same mistakes as gpt-4o-mini, 3x faster",
+      "proveWith": "eval on gpt-4.1 with the final prompt",
+      "perQuote": 0.008505933333333335,
+      "perMonth": 8.505933333333335,
+      "inputTokens": 3947,
+      "model": "gpt-4.1",
+      "pictureCalls": 0.2,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-4.1",
+        "text": 2705.0,
+        "cached": 0,
+        "pictures": 0.4,
+        "output": 260.8666666666667,
+        "calls": 1.2,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    },
+    {
+      "id": "swap-luna",
+      "name": "Planned, on gpt-5.6-luna",
+      "group": "option",
+      "status": null,
+      "evidence": "estimated",
+      "from": {
+        "scenario": "planned"
+      },
+      "ops": [
+        "model"
+      ],
+      "result": "Newer and cheaper per token. Never run on our quotes",
+      "proveWith": "full eval on gpt-5.6-luna",
+      "perQuote": 0.00118496,
+      "perMonth": 1.18496,
+      "inputTokens": 4535,
+      "model": "gpt-5.6-luna",
+      "pictureCalls": 0.2,
+      "readingSeconds": 7.0,
+      "bill": {
+        "model": "gpt-5.6-luna",
+        "text": 2705.0,
+        "cached": 0,
+        "pictures": 0.4,
+        "output": 260.8666666666667,
+        "calls": 1.2,
+        "extra": [
+          {
+            "model": "gpt-4o-mini-2024-07-18",
+            "input": 700,
+            "output": 30,
+            "label": "classifier, worst case: no rule hits",
+            "fires": 1.0
+          },
+          {
+            "model": "text-embedding-3-small",
+            "input": 100,
+            "output": 0,
+            "label": "search query",
+            "fires": 1.0
+          }
+        ],
+        "readingSeconds": 7.031333333333334,
+        "seconds": 20.134
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "constants": {
+    "groupListTokens": 23030,
+    "groupListMeasured": "2,000 commodity groups as the prompt lists them, o200k_base tokenizer, 2026-11-10",
+    "pagesPerPictureCall": 2,
+    "pagesPerPictureCallMeasured": "Hoffmann, the only quote that got the picture call, has 2 pages",
+    "pagesPerQuote": 1.8,
+    "pagesPerQuoteMeasured": "9 pages over the 5 Acme quotes",
+    "pagePixels": [1240, 1754],
+    "pagePixelsMeaning": "A4 at 150 dpi, what the picture call renders",
+    "quotesPerMonth": 1000
+  },
+  "runs": {
+    "before": "20261110-151527_baseline-checked-keys",
+    "fixes": "20261110-155125_after-fixes-1-5",
+    "noGroupList": "20261110-155125_diag-without-group-list",
+    "now": "20261110-160109_fix7b-ocr-letterhead-and-footer"
+  },
+  "scenarios": [
+    {
+      "id": "before", "group": "path", "name": "Before the fixes",
+      "evidence": "measured", "from": {"run": "before"},
+      "result": "6 in 15 uploads crash. None fully right"
+    },
+    {
+      "id": "fixes", "group": "path", "name": "Fixes 1 to 4 and totals in code",
+      "evidence": "measured", "from": {"run": "fixes"},
+      "result": "No crashes. 6 in 15 fully right"
+    },
+    {
+      "id": "now", "group": "path", "name": "Now: plus text in pictures",
+      "evidence": "measured", "from": {"run": "now"},
+      "result": "9 in 15 fully right. VAT ID 15/15. Hoffmann gets a picture call every time"
+    },
+    {
+      "id": "planned", "group": "path", "name": "Planned: group list out, classifier picks the group",
+      "evidence": "estimated", "from": {"scenario": "now"},
+      "ops": [
+        {"op": "dropGroupList"},
+        {"op": "addCall", "call": {"model": "gpt-4o-mini-2024-07-18", "input": 700, "output": 30, "label": "classifier, worst case: no rule hits"}},
+        {"op": "addCall", "call": {"model": "text-embedding-3-small", "input": 100, "output": 0, "label": "search query"}}
+      ],
+      "result": "Same extraction. A run without the list scored the same (6/15 before pictures)",
+      "proveWith": "extraction eval on the final prompt, classifier eval"
+    },
+    {
+      "id": "cache-now", "group": "today", "name": "Stopgap until the classifier: group list first, so OpenAI caches it",
+      "evidence": "estimated", "from": {"scenario": "now"},
+      "ops": [{"op": "cacheGroupList"}],
+      "result": "Same answers. Only saves when quotes arrive within minutes of each other",
+      "proveWith": "eval after the reorder, cached tokens logged"
+    },
+    {
+      "id": "skip-pictures", "group": "option", "status": "rejected", "name": "Planned, and no picture call when OCR found nothing new",
+      "evidence": "estimated", "from": {"scenario": "planned"},
+      "ops": [{"op": "skipPictures"}],
+      "result": "Rejected by Adrian, 10 Nov: keep the picture call. Priced only as a comparison",
+      "proveWith": "Not planned"
+    },
+    {
+      "id": "pictures-41-mini", "group": "option", "name": "Planned, picture call on gpt-4.1-mini, pictures only",
+      "evidence": "estimated", "from": {"scenario": "planned"},
+      "ops": [{"op": "picturesTo", "model": "gpt-4.1-mini-2025-04-14", "input": 300, "output": 50}],
+      "result": "Same trigger. A page costs about 10x fewer tokens on this model",
+      "proveWith": "eval with the picture model swapped"
+    },
+    {
+      "id": "picture-first-mini", "group": "option", "name": "Planned, every page as a picture on every upload",
+      "evidence": "estimated", "from": {"scenario": "planned"},
+      "ops": [{"op": "picturesEveryPage"}],
+      "result": "Reads layout and pictures every time. Untested on our quotes",
+      "proveWith": "full eval with pictures on"
+    },
+    {
+      "id": "picture-first-41-mini", "group": "option", "name": "Planned, every page as a picture, on gpt-4.1-mini",
+      "evidence": "estimated", "from": {"scenario": "planned"},
+      "ops": [{"op": "picturesEveryPage"}, {"op": "model", "to": "gpt-4.1-mini-2025-04-14"}],
+      "result": "Reads layout and pictures every time. Untested on our quotes",
+      "proveWith": "full eval on gpt-4.1-mini with pictures"
+    },
+    {
+      "id": "escalate-41", "group": "option", "name": "Planned, plus gpt-4.1 again when the code checks fail",
+      "evidence": "estimated", "from": {"scenario": "planned"},
+      "ops": [{"op": "escalate", "model": "gpt-4.1", "fires": {"run": "now", "metric": "checksFail"}}],
+      "result": "Second opinion on hard quotes. gpt-4.1 made the same mistakes on the old prompt",
+      "proveWith": "eval on the failing quotes with gpt-4.1"
+    },
+    {
+      "id": "swap-41", "group": "option", "name": "Planned, on gpt-4.1",
+      "evidence": "estimated", "from": {"scenario": "planned"},
+      "ops": [{"op": "model", "to": "gpt-4.1"}],
+      "result": "Old prompt: same mistakes as gpt-4o-mini, 3x faster",
+      "proveWith": "eval on gpt-4.1 with the final prompt"
+    },
+    {
+      "id": "swap-luna", "group": "option", "name": "Planned, on gpt-5.6-luna",
+      "evidence": "estimated", "from": {"scenario": "planned"},
+      "ops": [{"op": "model", "to": "gpt-5.6-luna"}],
+      "result": "Newer and cheaper per token. Never run on our quotes",
+      "proveWith": "full eval on gpt-5.6-luna"
+    }
+  ]
+}
