@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/base';
+import { Alert, Button } from '@/components/base';
+import { grossFits } from '@/lib/totals';
 import type * as api from '@/lib/api';
 
 export interface Alternative {
@@ -144,5 +145,35 @@ export function LineCheck({ line }: { line: LineValues }) {
     <p className="mt-2 text-sm text-amber-700">
       Quantity × price isn&apos;t this line&apos;s total. Check this line.
     </p>
+  );
+}
+
+export function TotalsCheck({
+  totalCost,
+  printedTotal,
+  printedVat,
+  printedGross,
+}: {
+  totalCost: number;
+  printedTotal: number | null;
+  printedVat: number | null;
+  printedGross: number | null;
+}) {
+  if (printedGross !== null) {
+    if (grossFits(totalCost, printedVat, printedGross)) return null;
+    return (
+      <Alert variant="warning" className="mt-4">
+        The lines add up to €{totalCost.toFixed(2)} before VAT. That doesn&apos;t fit the
+        quote&apos;s total of €{printedGross.toFixed(2)} with VAT. Check the lines before you
+        submit.
+      </Alert>
+    );
+  }
+  if (printedTotal === null || Math.abs(totalCost - printedTotal) < 0.005) return null;
+  return (
+    <Alert variant="warning" className="mt-4">
+      The lines add up to €{totalCost.toFixed(2)}, the quote says €{printedTotal.toFixed(2)}.
+      Check the lines before you submit.
+    </Alert>
   );
 }

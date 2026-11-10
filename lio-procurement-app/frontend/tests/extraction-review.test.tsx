@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AlternativesBox,
   LineCheck,
+  TotalsCheck,
   lineAddsUp,
   PRICE_FROM_TOTAL,
   NOT_IN_QUOTE,
@@ -159,5 +160,31 @@ describe('a line where quantity times price is not the line total', () => {
 
     rerender(<LineCheck line={{ ...desk, totalPrice: 600 }} />);
     expect(screen.queryByText(LINE_OFF)).not.toBeInTheDocument();
+  });
+});
+
+describe('totals check under the total', () => {
+  it('says nothing when the quote printed no total', () => {
+    const { container } = render(
+      <TotalsCheck totalCost={17000} printedTotal={null} printedVat={null} printedGross={null} />,
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('warns when the lines do not add up to the printed net total', () => {
+    render(<TotalsCheck totalCost={17000} printedTotal={17230} printedVat={null} printedGross={null} />);
+    expect(screen.getByText(/The lines add up to €17000.00, the quote says €17230.00/)).toBeInTheDocument();
+  });
+
+  it('warns when the lines do not fit the total with VAT', () => {
+    render(<TotalsCheck totalCost={17000} printedTotal={17000} printedVat={3230} printedGross={20330} />);
+    expect(screen.getByText(/That doesn't fit the\s+quote's total of €20330.00 with VAT/)).toBeInTheDocument();
+  });
+
+  it('trusts the gross total over a net read in pieces', () => {
+    const { container } = render(
+      <TotalsCheck totalCost={17000} printedTotal={15000} printedVat={2850} printedGross={20230} />,
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 });
