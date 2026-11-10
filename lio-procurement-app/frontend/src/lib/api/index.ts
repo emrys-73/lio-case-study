@@ -71,6 +71,7 @@ export interface CreateRequestInput {
   totalCost: number;
   department: string;
   orderLines: OrderLineInput[];
+  extraction?: ExtractionResponse;
 }
 
 export interface UpdateRequestInput {

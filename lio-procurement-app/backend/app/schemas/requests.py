@@ -29,6 +29,7 @@ class RequestCreate(BaseModel):
     total_cost: float = Field(alias="totalCost")
     department: str | None = None
     order_lines: list[OrderLineIn] = Field(alias="orderLines", min_length=1)
+    extraction: dict | None = None
 
 
 class RequestUpdate(BaseModel):

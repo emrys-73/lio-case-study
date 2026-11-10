@@ -24,7 +24,7 @@ from app.schemas.requests import (
     RequestUpdate,
     StatusUpdate,
 )
-from app.services.totals import add_up
+from app.services.totals import add_up, same_amount
 
 router = APIRouter(prefix="/requests", tags=["requests"])
 
@@ -125,12 +125,19 @@ def _order_lines_signature(lines) -> list[tuple]:
     ]
 
 
-def _server_totals(payload: RequestCreate | RequestUpdate) -> dict:
+def _printed_total(extraction: dict | None) -> float | None:
+    totals = (extraction or {}).get("totals") or {}
+    printed = totals.get("printed")
+    return float(printed) if isinstance(printed, (int, float)) else None
+
+
+def _server_totals(payload: RequestCreate | RequestUpdate, printed: float | None = None) -> dict:
+    computed = add_up(payload.order_lines)
     return {
-        "computed": add_up(payload.order_lines),
+        "computed": computed,
         "submitted": payload.total_cost,
-        "printed": None,
-        "match": None,
+        "printed": printed,
+        "match": None if printed is None else same_amount(computed, printed),
     }
 
 
@@ -193,7 +200,7 @@ def create_request(
 ) -> RequestOut:
     _validate_commodity_group(db, payload.commodity_group_id)
     _enforce_required_fields(db, membership.organization_id, payload)
-    totals = _server_totals(payload)
+    totals = _server_totals(payload, _printed_total(payload.extraction))
 
     # Vendor fields are already cleaned up during extraction, so we can persist
     # them directly here.
@@ -223,9 +230,10 @@ def create_request(
     ]
     db.add(request)
     db.flush()
-    _log_activity(
-        db, request.id, membership.user_id, "created", "Request created", {"totals": totals}
-    )
+    created = {"source": "pdf" if payload.extraction else "manual", "totals": totals}
+    if payload.extraction:
+        created["extraction"] = payload.extraction
+    _log_activity(db, request.id, membership.user_id, "created", "Request created", created)
     db.commit()
 
     request = _get_org_request(db, request.id, membership.organization_id)

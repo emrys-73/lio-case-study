@@ -48,6 +48,7 @@ export default function NewRequestPage() {
   const [warning, setWarning] = useState('');
   const [extracting, setExtracting] = useState(false);
   const [notFound, setNotFound] = useState<string[]>([]);
+  const [extraction, setExtraction] = useState<api.ExtractionResponse | undefined>();
   const [printedTotal, setPrintedTotal] = useState<number | null>(null);
   const totalsDiffer = printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
   const [printedVat, setPrintedVat] = useState<number | null>(null);
@@ -82,6 +83,7 @@ export default function NewRequestPage() {
     setError('');
     setSuccess('');
     setWarning('');
+    setExtraction(undefined);
     setExtracting(true);
 
     try {
@@ -96,6 +98,7 @@ export default function NewRequestPage() {
       }
 
       const extracted = extractionResult.data;
+      setExtraction(extractionResult);
 
       // Step 3: Auto-fill form (including commodity group from extraction)
       setTitle(extracted.title || '');
@@ -201,6 +204,7 @@ export default function NewRequestPage() {
         totalCost,
         department,
         orderLines,
+        extraction,
       });
 
       // Attach the original PDF (if one was uploaded) so it shows on the detail page.

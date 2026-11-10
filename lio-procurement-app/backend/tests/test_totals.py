@@ -191,3 +191,38 @@ def test_edit_ignores_the_total_the_client_sent(client, db_session):
         "computed": 1438.0, "submitted": 99.0, "printed": None, "match": None,
     }
 
+
+SNAPSHOT = {
+    "success": True,
+    "data": {"vendorName": "Gärtner Gregg", "vatId": "DE 198 570 491", "orderLines": GREGG_LINES,
+             "totalCost": 1758.0},
+    "totals": {"computed": 1758.0, "printed": 1758.0, "match": True},
+}
+
+
+def test_create_from_a_pdf_stores_what_the_extraction_returned(client, db_session):
+    payload = dict(_create("Moss wall", 1758.0), extraction=SNAPSHOT)
+    r = client.post("/requests", json=payload, headers=_token(client))
+    assert r.status_code == 201, r.text
+    [created] = _activity(db_session, r.json()["id"], "created")
+    assert created.detail["source"] == "pdf"
+    assert created.detail["extraction"] == SNAPSHOT
+    assert created.detail["totals"] == {
+        "computed": 1758.0, "submitted": 1758.0, "printed": 1758.0, "match": True,
+    }
+
+
+def test_lines_changed_after_extraction_no_longer_match_the_quote(client, db_session):
+    payload = dict(_create("Moss wall", 1438.0), extraction=SNAPSHOT)
+    payload["orderLines"] = GREGG_LINES[:1]
+    r = client.post("/requests", json=payload, headers=_token(client))
+    [created] = _activity(db_session, r.json()["id"], "created")
+    assert created.detail["totals"]["match"] is False
+    assert created.detail["totals"]["printed"] == 1758.0
+
+
+def test_typed_request_has_no_snapshot(client, db_session):
+    r = client.post("/requests", json=_create("Moss wall", 1758.0), headers=_token(client))
+    [created] = _activity(db_session, r.json()["id"], "created")
+    assert created.detail["source"] == "manual"
+    assert "extraction" not in created.detail

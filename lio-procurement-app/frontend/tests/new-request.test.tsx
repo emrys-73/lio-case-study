@@ -133,4 +133,29 @@ describe('new request from a PDF quote', () => {
       await screen.findByText(/The lines plus VAT come to €20230.00, the quote's gross is €20330.00/),
     ).toBeInTheDocument();
   });
+
+  it('sends what the extraction returned along with the new request', async () => {
+    const complete = {
+      ...hoffmann,
+      data: {
+        ...hoffmann.data,
+        orderLines: [
+          { positionDescription: 'Schleifmaschine HN-GS 450', unitPrice: 15000, amount: 1, unit: 'pieces', totalPrice: 15000 },
+          { positionDescription: 'Lieferung und Montage', unitPrice: 2000, amount: 1, unit: 'lump sum', totalPrice: 2000 },
+        ],
+      },
+    };
+    vi.mocked(api.extraction.extract).mockResolvedValue(complete as never);
+    vi.mocked(api.requests.create).mockResolvedValue({ id: 'r1' } as never);
+    const { container } = renderPage();
+    await uploadQuote(container);
+    await screen.findByDisplayValue('Hoffmann Nürnberg GmbH');
+
+    await userEvent.type(screen.getByLabelText('Requestor Name *'), 'Rene');
+    await userEvent.click(screen.getByRole('button', { name: 'Create Request' }));
+
+    expect(api.requests.create).toHaveBeenCalledWith(
+      expect.objectContaining({ extraction: complete, vendorName: 'Hoffmann Nürnberg GmbH' }),
+    );
+  });
 });
