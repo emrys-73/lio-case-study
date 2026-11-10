@@ -12,12 +12,20 @@ ApprovalStatus = Literal["pending", "approved", "rejected"]
 # Inputs (camelCase — matches what the frontend forms already send)
 # ---------------------------------------------------------------------------
 
+class CatalogChoiceIn(BaseModel):
+    status: Literal["switched", "ignored", "no_match", "picked"]
+    article_number: str | None = None
+    offer_price: float | None = None
+    catalog_price: float | None = None
+
+
 class OrderLineIn(BaseModel):
     position_description: str = Field(alias="positionDescription")
     unit_price: float = Field(alias="unitPrice")
     amount: float
     unit: str
     total_price: float = Field(alias="totalPrice")
+    catalog: CatalogChoiceIn | None = None
 
 
 class RequestCreate(BaseModel):
@@ -29,6 +37,7 @@ class RequestCreate(BaseModel):
     total_cost: float = Field(alias="totalCost")
     department: str | None = None
     order_lines: list[OrderLineIn] = Field(alias="orderLines", min_length=1)
+    extraction: dict | None = None
 
 
 class RequestUpdate(BaseModel):
@@ -88,6 +97,24 @@ class RequestActivityOut(BaseModel):
     created_at: datetime
 
 
+CommoditySource = Literal["rule", "model", "person", "override", "none"]
+
+
+class CommodityOut(BaseModel):
+    group_id: int | None
+    group_name: str | None
+    source: CommoditySource
+    rule_id: str | None
+    rule_position: int | None
+    matched_keyword: str | None
+    matched_line: str | None
+    reason: str | None
+    locked: bool
+    can_override: bool
+    corrected: bool = False
+    corrected_from_group_id: int | None = None
+
+
 class RequestOut(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
@@ -114,3 +141,4 @@ class RequestOut(BaseModel):
     commodity_groups: CommodityGroupOut | None = Field(
         default=None, validation_alias="commodity_group"
     )
+    commodity: CommodityOut | None = None

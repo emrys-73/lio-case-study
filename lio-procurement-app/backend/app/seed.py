@@ -8,6 +8,7 @@ with:
 """
 import logging
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -26,6 +27,9 @@ from app.models import (
     Supplier,
     User,
 )
+from app.schemas.organizations import CommodityRule
+from app.services.keywords import words
+from app.services.organization_settings import new_rule_id
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +167,77 @@ def seed_organizations_and_accounts(db: Session) -> tuple[int, int]:
     return orgs_created, users_created
 
 
+ACME_CABLE_TIE_RULE = {
+    "keywords": ["cable tie", "kabelbinder"],
+    "commodity_group_id": 11,
+    "reason": "Acme books cable ties under Electrical Engineering",
+}
+
+ACME_TONER_RULE = {
+    "keywords": ["tonerkartusche", "toner cartridge", "toner"],
+    "commodity_group_id": 29,
+    "reason": "Acme books printer toner under IT Hardware",
+}
+
+ACME_SOFTWARE_RULE = {
+    "keywords": [
+        "software subscription",
+        "subscription",
+        "softwareabo",
+        "abo",
+        "abonnement",
+        "saas",
+        "softwarelizenz",
+        "software lizenz",
+        "software licence",
+        "software license",
+    ],
+    "commodity_group_id": 15,
+    "max_amount": 500,
+    "reason": (
+        "Acme books small software subscriptions under Office Supplies, which is not in the "
+        "taxonomy, so Office Equipment until we confirm with Acme; limit to confirm with Acme"
+    ),
+}
+
+ACME_RULES = [ACME_CABLE_TIE_RULE, ACME_TONER_RULE, ACME_SOFTWARE_RULE]
+
+ACME_APPROVAL_LIMIT = 2000.0
+
+
+def seed_commodity_rules(db: Session, org: Organization) -> int:
+    settings = org.settings or {}
+    existing = settings.get("commodity_rules")
+    existing = existing if isinstance(existing, list) else []
+    taken = {
+        " ".join(words(keyword))
+        for rule in existing
+        if isinstance(rule, dict)
+        for keyword in rule.get("keywords") or []
+        if isinstance(keyword, str)
+    }
+    now = datetime.now(timezone.utc)
+    new = [
+        CommodityRule(id=new_rule_id(), updated_by="seed", updated_at=now, **rule)
+        for rule in ACME_RULES
+        if not taken & {" ".join(words(keyword)) for keyword in rule["keywords"]}
+    ]
+    if new:
+        org.settings = {
+            **settings,
+            "commodity_rules": existing + [rule.model_dump(mode="json") for rule in new],
+        }
+    return len(new)
+
+
+def seed_approval_limit(db: Session, org: Organization) -> int:
+    settings = org.settings or {}
+    if "approval_limit" in settings:
+        return 0
+    org.settings = {**settings, "approval_limit": ACME_APPROVAL_LIMIT}
+    return 1
+
+
 def seed(db: Session) -> dict[str, int]:
     """Seed everything. Returns counts of newly created rows per kind.
 
@@ -182,6 +257,9 @@ def seed(db: Session) -> dict[str, int]:
         "organizations": orgs_created,
         "users": users_created,
     }
+    db.flush()
+    counts["commodity_rules"] = seed_commodity_rules(db, dev_org) if dev_org else 0
+    counts["approval_limit"] = seed_approval_limit(db, dev_org) if dev_org else 0
     db.commit()
     return counts
 

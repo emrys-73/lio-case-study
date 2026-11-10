@@ -68,6 +68,7 @@ npm run dev
 
 ```bash
 cd backend && python -m pytest      # API tests (in-memory SQLite)
+docker compose exec -e OPENAI_API_KEY= backend python -m pytest   # same, in the container, on the code on disk
 cd frontend && npx tsc --noEmit && npm run build
 ```
 

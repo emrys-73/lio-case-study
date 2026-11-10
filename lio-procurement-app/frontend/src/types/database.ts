@@ -6,6 +6,7 @@ export type Profile = {
   id: string;
   email: string;
   full_name: string | null;
+  department?: string | null;
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
@@ -81,9 +82,40 @@ export type OrderLine = {
 // Helper Types for Joined Queries
 // ============================================================================
 
+export type CommoditySource = 'rule' | 'model' | 'person' | 'override' | 'none';
+
+export type Commodity = {
+  group_id: number | null;
+  group_name: string | null;
+  source: CommoditySource;
+  rule_id: string | null;
+  rule_position: number | null;
+  matched_keyword: string | null;
+  matched_line: string | null;
+  reason: string | null;
+  locked: boolean;
+  can_override: boolean;
+  corrected: boolean;
+  corrected_from_group_id: number | null;
+};
+
+export type CategorisedLine = {
+  line_id: string;
+  group_id: number | null;
+  source: 'rule' | 'none';
+  rule_id: string | null;
+  matched_keyword: string | null;
+};
+
+export type Categorisation = {
+  lines: CategorisedLine[];
+  commodity: Commodity;
+};
+
 export type ProcurementRequestWithDetails = ProcurementRequest & {
   order_lines: OrderLine[];
   commodity_groups: CommodityGroup | null;
+  commodity?: Commodity | null;
 };
 
 export type OrganizationWithRole = Organization & {

@@ -1,0 +1,20 @@
+{
+  "id": "hoffmann",
+  "pdf": "Angebot_Hoffmann_Nuernberg_ACME_Schleifmaschine.pdf",
+  "status": "checked against the PDF by Adrian, 2026-11-10",
+  "notes": [
+    "No VAT ID in the quote. The right answer is empty.",
+    "The PDF itself has no umlauts (Nurnberg). Both spellings count.",
+    "Line 2 is a lump sum (Pauschale).",
+    "Only quote addressed to ACME Corp, Einkauf / Technik."
+  ],
+  "vendorName": ["Hoffmann Nürnberg GmbH", "Hoffmann Nurnberg GmbH", "Hoffmann Nürnberg GmbH Qualitätswerkzeuge"],
+  "vatId": null,
+  "customer": "ACME Corp",
+  "totals": {"positionsNet": 15000.00, "net": 17000.00, "gross": 20230.00},
+  "lines": [
+    {"description": "Schleifmaschine HN-GS 450", "unitPrice": [15000.00], "amount": 1, "unit": "piece", "totalPrice": 15000.00, "kind": "item"},
+    {"description": "Lieferung und Montage", "unitPrice": [2000.00], "amount": 1, "unit": "lump_sum", "totalPrice": 2000.00, "kind": "charge"}
+  ],
+  "excluded": []
+}

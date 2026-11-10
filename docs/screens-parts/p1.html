@@ -1,0 +1,415 @@
+<style>
+#p1 .p1-badge { width: auto; min-width: 24px; padding: 0 7px; border-radius: 999px; }
+#p1 .p1-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+#p1 .p1-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#p1 .p1-field label { font-size: 12px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+#p1 .p1-field input, #p1 .p1-price { width: 100%; border: 1px solid #d6d9de; border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; color: var(--ink); background: #fff; outline: none; min-width: 0; }
+#p1 .p1-field input:focus, #p1 .p1-price:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+#p1 .p1-field.p1-need input, #p1 .inp.p1-need { border-color: #e2b469; background: var(--warn-soft); }
+#p1 .p1-field input[readonly] { background: #f8f9fa; color: var(--muted); }
+#p1 .p1-alts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }
+#p1 .p1-err { font-size: 13px; color: var(--warn); }
+#p1 .p1-check { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2b469; background: var(--warn-soft); color: var(--ink); }
+#p1 .p1-check.p1-ok { border-color: #c7e1e5; background: #fff; }
+#p1 .p1-price { width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
+#p1 .p1-done { padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 13px; }
+#p1 pre { margin: 10px 0 0; padding: 12px 14px; background: var(--panel); border-radius: 8px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+</style>
+<section class="prob" id="p1">
+  <div class="prob-head"><span class="kicker">PROBLEM 1</span><h2 class="prob-title">PDF Extraction</h2><p class="sub">Quotes come out wrong, empty, or crash</p></div>
+<div class="open now"><h3>Build now</h3><ul><li>1.1 Alternatives kept out of the lines and total, one line "N alternatives in this offer, not included".</li><li>1.2 The flag under the total when the lines don't add up to the quote. A mismatch never auto-approves.</li><li>1.3 Empty fields marked in place. They never block submit; only the org's required fields do.</li><li>Later: picking an alternative, and the one-tap fixes for a mismatch.</li></ul></div>
+
+  <h2 id="p1-alt"><span class="badge p1-badge">1.1</span>Alternatives</h2>
+  <div class="open" style="margin:0 0 16px"><h3 style="color:var(--accent);margin-bottom:6px">Now: not included, one line</h3><ul><li>Alternatives stay out of the lines and the total. Under the lines: <b>"2 alternatives in this offer, not included"</b>.</li><li>Picking an alternative is not in the brief. The options below are a design for later, not built.</li></ul></div>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Swap in place</h3><span class="pick is-later">Later</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="pline">
+            <div class="top2"><div class="d">1.1 Moosbild 70:30 mit Schriftzug<small>1 piece</small></div><span class="num">€1,438.00</span></div>
+            <div class="row"><span class="muted" style="font-size:12px">Or</span><span class="chip out">1.1a Ballenmoos <span class="inner">€1,926.00</span></span><span class="chip out">1.1b Waldmoos <span class="inner">€1,685.00</span></span></div>
+          </div>
+          <div class="line"><div class="d">Transport, Verpackung und Versand</div><span class="num">€320.00</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Separate card</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+          <div class="line"><div class="d">Transport, Verpackung und Versand</div><span class="num">€320.00</span></div>
+        </div>
+        <div class="ui">
+          <div class="ui-title">Alternatives in the offer <span class="chip off">Not in total</span></div>
+          <div class="line"><div class="d">1.1a Ballenmoos</div><span class="num">€1,926.00</span><span class="btn ghost">+ Add</span></div>
+          <div class="line"><div class="d">1.1b Waldmoos</div><span class="num">€1,685.00</span><span class="btn ghost">+ Add</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Ask on upload</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">This offer has options for 1.1</div>
+          <div class="line"><div class="d">1.1 Moosbild, as quoted</div><span class="num">€1,438.00</span><span class="chip cat">Chosen</span></div>
+          <div class="line"><div class="d">1.1a Ballenmoos</div><span class="num">€1,926.00</span></div>
+          <div class="line"><div class="d">1.1b Waldmoos</div><span class="num">€1,685.00</span></div>
+          <div class="row"><span class="spacer"></span><span class="btn teal">Continue</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">If built later: the alternative sits next to the line it replaces, so one tap swaps it and the total can never count both.</p>
+
+  <h2 id="p1-total"><span class="badge p1-badge">1.2</span>Total mismatch</h2>
+  <div class="opts">
+    <div class="opt">
+      <div class="opt-head"><span class="letter">A</span><h3>Banner on top</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="sumbar" style="background:var(--warn-soft);border-color:#e2b469"><span class="grow">The lines add up to €1,438.00, the quote says €1,758.00. Check the lines before you submit.</span></div>
+        <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+        <div class="total"><span>Total Cost</span><b>€1,438.00</b></div>
+      </div></div>
+    </div>
+
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">B</span><h3>Check at the total</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+        <div class="total"><span>Total Cost</span><b>€1,438.00</b></div>
+        <div class="p1-check" style="padding:9px 11px">
+          <div class="row"><span class="chip warn">€320.00 short</span><span style="font-size:12px">Quote says €1,758.00 net</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Block submit</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+        <div class="total"><span>Total Cost</span><b>€1,438.00</b></div>
+        <div class="row"><span class="muted" style="font-size:12px">Fix the total to submit</span><span class="spacer"></span><span class="btn" style="opacity:.4">Create Request</span></div>
+      </div></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">Why: the gap shows right where the total is and updates as the lines change, so a missed line is caught before submit. A request that still differs never auto-approves.</p>
+  <p class="muted" style="font-size:13px;margin:4px 0 0">Later: one-tap fixes (add the missing line, or confirm the lines with a reason).</p>
+
+  <h2 id="p1-empty"><span class="badge p1-badge">1.3</span>Empty fields</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Mark in place</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Vendor Information</div>
+          <div class="muted" style="font-size:12px">Vendor Name</div>
+          <div class="inp">Gärtner Gregg</div>
+          <div class="row" style="font-size:12px"><span class="muted">VAT ID</span><span class="chip warn">Not found in the PDF</span></div>
+          <div class="inp p1-need"><span class="ph">DE123456789</span></div>
+        </div>
+        <div class="row"><span class="muted" style="font-size:12px">1 field empty</span><span class="spacer"></span><span class="btn">Create Request</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>List at the top</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="sumbar" style="background:var(--warn-soft);border-color:#e2b469"><span class="grow">Could not extract: VAT ID, Title. Please fill in these fields manually.</span></div>
+        <div class="ui">
+          <div class="ui-title">Vendor Information</div>
+          <div class="inp">Gärtner Gregg</div>
+          <div class="inp"><span class="ph">DE123456789</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Fill one by one</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">2 things the quote did not say <span class="muted" style="font-weight:400">1 of 2</span></div>
+          <div class="muted" style="font-size:12px">VAT ID of Gärtner Gregg</div>
+          <div class="inp focus"><span class="caret"></span></div>
+          <div class="row"><span class="btn ghost">Skip</span><span class="spacer"></span><span class="btn teal">Next</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">Why: the flag sits on the field itself and clears as you type. Empty fields never block Create Request, because a real quote can lack one (Hoffmann has no VAT ID). Only the fields in the organisation's <code>required_fields</code> setting block submit, as they do today.</p>
+
+  <h2 id="p1-try"><span class="badge">▶</span>Try it</h2>
+  <div class="proto">
+    <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Articles</span></div>
+    <div class="in">
+      <div class="sumbar"><span class="grow"><b>AngebotA0492_23.Pdf</b> read. Check the marked fields.</span><button class="btn ghost" type="button" id="p1-reset">Start over</button></div>
+
+      <div class="ui">
+        <div class="ui-title">Request Details</div>
+        <div class="p1-grid">
+          <div class="p1-field"><label for="p1-f-requestor">Requestor Name</label><input id="p1-f-requestor" type="text" value="Anna Weber" readonly></div>
+          <div class="p1-field"><label for="p1-f-dept">Department <span class="chip off">From your profile</span></label><input id="p1-f-dept" type="text" value="Facilities" readonly></div>
+        </div>
+        <div class="p1-field" data-p1-f="title"><label for="p1-f-title">Title / Short Description <span class="chip off">Required</span> <span class="chip warn" data-p1-flag="title">Not found in the PDF</span></label><input id="p1-f-title" type="text" placeholder="Moss picture for reception" autocomplete="off"></div>
+      </div>
+
+      <div class="ui">
+        <div class="ui-title">Vendor Information</div>
+        <div class="p1-grid">
+          <div class="p1-field" data-p1-f="vendor"><label for="p1-f-vendor">Vendor Name <span class="chip warn" data-p1-flag="vendor">Not found in the PDF</span></label><input id="p1-f-vendor" type="text" placeholder="Vendor" autocomplete="off"></div>
+          <div class="p1-field" data-p1-f="vat"><label for="p1-f-vat">VAT ID <span class="chip warn" data-p1-flag="vat">Not found in the PDF</span></label><input id="p1-f-vat" type="text" placeholder="DE123456789" autocomplete="off"></div>
+        </div>
+      </div>
+
+      <div class="ui">
+        <div class="ui-title">Order Lines <span class="muted" style="font-weight:400;font-size:12px">from the offer</span></div>
+        <div id="p1-lines" class="tiers"></div>
+        <div class="row"><button class="btn ghost" type="button" id="p1-add">+ Add line</button></div>
+        <div class="p1-alts" id="p1-alts"></div>
+      </div>
+
+      <div class="total"><span>Total Cost</span><b id="p1-sum">€0.00</b></div>
+      <div id="p1-check"></div>
+
+      <div class="row"><span class="muted" id="p1-left" style="font-size:13px"></span><span class="p1-err" id="p1-err"></span><span class="spacer"></span><button class="btn" type="button" id="p1-submit" style="padding:7px 16px;font-size:13px">Create Request</button></div>
+      <div id="p1-done"></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">Mock data from the Gärtner Gregg quote. Title is in this organisation's <code>required_fields</code>.</p>
+  <p class="muted" style="font-size:13px;margin:4px 0 0">The data is staged to show every flag at once: the shipping line and the VAT ID are missing, and no title was found.</p>
+
+  <div class="open">
+    <h3 style="color:var(--accent);margin-bottom:6px">Contract</h3>
+    <ul>
+      <li>Extraction reply. Every field may be null, it never errors on a missing value.</li>
+      <li>Totals are added up by the backend in code, never by the model. Alternatives are never in <code>linesNet</code>.</li>
+      <li><code>department</code> comes from the user profile, not from this reply.</li>
+    </ul>
+<pre>{
+  "title": string | null,
+  "vendorName": string | null,
+  "vatId": string | null,
+  "missingFields": ("title" | "vendorName" | "vatId")[],
+  "currency": "EUR",
+  "orderLines": [{
+    "position": string | null,
+    "description": string,
+    "amount": number,
+    "unit": string | null,
+    "unitPrice": number,
+    "totalPrice": number
+  }],
+  "alternatives": [{
+    "position": string,
+    "replaces": string | null,
+    "description": string,
+    "amount": number,
+    "unit": string | null,
+    "unitPrice": number,
+    "totalPrice": number
+  }],
+  "totals": {
+    "printedNet": number | null,
+    "linesNet": number,
+    "differs": boolean
+  }
+}</pre>
+    <ul style="margin-top:12px">
+      <li><code>alternatives</code> come back on their own, only to show "not included". They are never sent back.</li>
+      <li>On Create Request, the frontend adds to today's request body: <code>totalCheck: { printedNet: number | null, linesNet: number }</code>.</li>
+      <li><code>missingFields</code> never block submit. Only the organisation's <code>required_fields</code> do.</li>
+      <li>Backend rule: if <code>printedNet</code> and <code>linesNet</code> differ, the request never auto-approves.</li>
+      <li class="muted">Later: <code>pickedAlternatives</code>, <code>totalCheck</code> acknowledged + reason.</li>
+    </ul>
+  </div>
+</section>
+<script>(function(){
+  var root = document.getElementById("p1");
+  if (!root) return;
+  var PRINTED = 1758.00;
+  var ALTS = [
+    { pos: "1.1a", desc: "Nur Ballenmoos", price: 1926.00 },
+    { pos: "1.1b", desc: "Flächig Waldmoos", price: 1685.00 }
+  ];
+  var REQUIRED = ["title"];
+  var LABELS = { title: "Title", vendor: "Vendor Name", vat: "VAT ID" };
+  var state;
+
+  function fresh() {
+    return {
+      fields: { title: "", vendor: "Gärtner Gregg", vat: "" },
+      lines: [
+        { id: 1, pos: "1.1", desc: "Moosbild 70:30 mit Schriftzug askLio", amount: 1, unit: "piece", price: 1438.00 }
+      ],
+      nextId: 2,
+      err: "",
+      done: false
+    };
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function money(n) {
+    var neg = n < 0;
+    var parts = Math.abs(n).toFixed(2).split(".");
+    var whole = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return (neg ? "-" : "") + "€" + whole + "." + parts[1];
+  }
+  function lineTotal(l) {
+    return l.added ? l.price : l.price * l.amount;
+  }
+  function linesNet() {
+    var t = 0;
+    for (var i = 0; i < state.lines.length; i++) t += lineTotal(state.lines[i]);
+    return Math.round(t * 100) / 100;
+  }
+  function diff() {
+    return Math.round((PRINTED - linesNet()) * 100) / 100;
+  }
+  function differs() {
+    return Math.abs(diff()) >= 0.005;
+  }
+  function empties() {
+    var n = 0;
+    for (var k in state.fields) if (!state.fields[k].trim()) n++;
+    return n;
+  }
+  function requiredEmpty() {
+    var out = [];
+    for (var i = 0; i < REQUIRED.length; i++) if (!state.fields[REQUIRED[i]].trim()) out.push(LABELS[REQUIRED[i]]);
+    return out;
+  }
+
+  function renderLines() {
+    var box = document.getElementById("p1-lines");
+    var h = "";
+    for (var i = 0; i < state.lines.length; i++) {
+      var l = state.lines[i];
+      var price = '<input class="p1-price" type="number" step="0.01" inputmode="decimal" aria-label="Line total" data-p1-price="' + l.id + '" value="' + (l.added ? l.price : l.price * l.amount).toFixed(2) + '">';
+      var rm = '<button class="x" type="button" data-p1-rm="' + l.id + '" aria-label="Remove line">×</button>';
+      if (l.added) {
+        h += '<div class="pline"><div class="top2"><div class="p1-field" style="flex:1;min-width:160px"><label for="p1-ld-' + l.id + '">Description</label>' +
+          '<input id="p1-ld-' + l.id + '" type="text" data-p1-desc="' + l.id + '" value="' + esc(l.desc) + '" placeholder="Transport, Verpackung und Versand" autocomplete="off"></div>' +
+          price + rm + '</div></div>';
+        continue;
+      }
+      h += '<div class="pline"><div class="top2"><div class="d">' + esc(l.pos + " " + l.desc) + '<small>' + esc(l.amount + " " + (l.unit || "")) + '</small></div>' +
+        price + rm + '</div></div>';
+    }
+    if (!state.lines.length) h = '<div class="empty">No order lines yet.</div>';
+    box.innerHTML = h;
+    document.getElementById("p1-alts").innerHTML = esc(ALTS.length + " alternatives in this offer, not included");
+  }
+
+  function renderCheck() {
+    var box = document.getElementById("p1-check");
+    var d = diff();
+    if (!differs()) {
+      box.innerHTML = '<div class="p1-check p1-ok"><div class="row"><span class="chip cat">Matches the quote</span><span class="muted" style="font-size:13px">' + esc(money(PRINTED)) + ' net, as printed</span></div></div>';
+      return;
+    }
+    box.innerHTML = '<div class="p1-check"><div class="row"><span class="chip warn">' + esc(money(Math.abs(d)) + (d > 0 ? " short" : " over")) + '</span>' +
+      '<span style="font-size:13px">Quote says ' + esc(money(PRINTED)) + ' net, lines add up to ' + esc(money(linesNet())) + '</span></div></div>';
+  }
+
+  function renderFields() {
+    for (var k in LABELS) {
+      var wrap = root.querySelector('[data-p1-f="' + k + '"]');
+      var flag = root.querySelector('[data-p1-flag="' + k + '"]');
+      var need = !state.fields[k].trim();
+      wrap.className = "p1-field" + (need ? " p1-need" : "");
+      flag.style.display = need ? "" : "none";
+    }
+  }
+
+  function renderFoot() {
+    document.getElementById("p1-sum").textContent = money(linesNet());
+    var n = empties();
+    document.getElementById("p1-left").textContent = n ? n + (n === 1 ? " field empty" : " fields empty") : "All fields filled";
+    document.getElementById("p1-err").textContent = state.err;
+    var b = document.getElementById("p1-submit");
+    if (!state.lines.length) b.setAttribute("disabled", ""); else b.removeAttribute("disabled");
+    var done = document.getElementById("p1-done");
+    if (!state.done) { done.innerHTML = ""; return; }
+    var gaps = [];
+    for (var k in LABELS) if (!state.fields[k].trim()) gaps.push(LABELS[k]);
+    done.innerHTML = '<div class="p1-done"><b>Request created.</b> Total ' + esc(money(linesNet())) + ' net. ' +
+      (differs() ? "Total differs from the quote, so it never auto-approves." : "Matches the quote, normal approval rules apply.") +
+      (gaps.length ? " Left empty: " + esc(gaps.join(", ")) + "." : "") + '</div>';
+  }
+
+  function renderAll() {
+    renderLines();
+    renderCheck();
+    renderFields();
+    renderFoot();
+  }
+
+  function find(id) {
+    for (var i = 0; i < state.lines.length; i++) if (state.lines[i].id === id) return state.lines[i];
+    return null;
+  }
+
+  function reset() {
+    state = fresh();
+    document.getElementById("p1-f-title").value = state.fields.title;
+    document.getElementById("p1-f-vendor").value = state.fields.vendor;
+    document.getElementById("p1-f-vat").value = state.fields.vat;
+    renderAll();
+  }
+
+  root.addEventListener("input", function (e) {
+    var t = e.target;
+    state.done = false;
+    state.err = "";
+    if (t.id === "p1-f-title") state.fields.title = t.value;
+    else if (t.id === "p1-f-vendor") state.fields.vendor = t.value;
+    else if (t.id === "p1-f-vat") state.fields.vat = t.value;
+    else if (t.getAttribute("data-p1-desc")) {
+      var l = find(+t.getAttribute("data-p1-desc"));
+      if (l) l.desc = t.value;
+    } else if (t.getAttribute("data-p1-price")) {
+      var p = find(+t.getAttribute("data-p1-price"));
+      if (p) {
+        var v = parseFloat(t.value);
+        v = isNaN(v) ? 0 : v;
+        p.price = p.added ? v : v / (p.amount || 1);
+        renderCheck();
+      }
+    } else return;
+    renderFields();
+    renderFoot();
+  });
+
+  root.addEventListener("click", function (e) {
+    var t = e.target.closest ? e.target.closest("button") : null;
+    if (!t || !root.contains(t)) return;
+    if (t.id === "p1-reset") { reset(); return; }
+    state.done = false;
+    state.err = "";
+    if (t.getAttribute("data-p1-rm")) {
+      var id = +t.getAttribute("data-p1-rm");
+      state.lines = state.lines.filter(function (x) { return x.id !== id; });
+      renderAll();
+    } else if (t.id === "p1-add") {
+      var nl = { id: state.nextId++, added: true, desc: "", price: 0 };
+      state.lines.push(nl);
+      renderAll();
+      var inp = document.getElementById("p1-ld-" + nl.id);
+      if (inp) inp.focus();
+    } else if (t.id === "p1-submit") {
+      var req = requiredEmpty();
+      if (req.length) state.err = req.join(", ") + (req.length === 1 ? " is required." : " are required.");
+      else state.done = true;
+      renderFoot();
+    }
+  });
+
+  reset();
+})();</script>

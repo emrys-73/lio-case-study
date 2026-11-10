@@ -1,0 +1,157 @@
+{
+  "meta": {
+    "label": "fix1-schema-accepts-empty",
+    "model": "gpt-4o-mini-2024-07-18",
+    "textSource": "pypdf",
+    "runsPerCase": 3,
+    "startedAt": "2026-11-10T15:20:27+00:00"
+  },
+  "overall": {
+    "runs": 15,
+    "crashes": 0,
+    "crashesWhereModelReplyWasUsable": 0,
+    "fullyCorrect": 0,
+    "vendorName": 12,
+    "vatId": 12,
+    "totalCostNet": 0,
+    "totalKinds": {
+      "gross": 12,
+      "other": 3
+    },
+    "itemsFound": 24,
+    "itemsExpected": 24,
+    "chargesFound": 6,
+    "lineFieldsRight": 87,
+    "lineFieldsChecked": 87,
+    "alternativesCounted": 9,
+    "extraLines": 9,
+    "linesSumToTotal": 0,
+    "avgSeconds": 6.0,
+    "promptTokens": 371256,
+    "completionTokens": 3669,
+    "chargesExpected": 15
+  },
+  "perCase": {
+    "apple-mba": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "gross",
+        "gross"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        1,
+        1,
+        1
+      ],
+      "departments": [
+        "Lio Technologies GmbH"
+      ]
+    },
+    "dream-in-green": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "gross",
+        "gross"
+      ],
+      "alternativesCounted": [
+        1,
+        1,
+        1
+      ],
+      "missingCharges": [
+        1,
+        1,
+        1
+      ],
+      "departments": [
+        "Lio Technologies GmbH"
+      ]
+    },
+    "gaertner-gregg": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "gross",
+        "gross"
+      ],
+      "alternativesCounted": [
+        2,
+        2,
+        2
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "Lio Technologies GmbH"
+      ]
+    },
+    "hoffmann": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "other",
+        "other",
+        "gross"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "ACME Corp",
+        "Einkauf / Technik"
+      ]
+    },
+    "stylegreen": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "other",
+        "gross"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        1,
+        1,
+        1
+      ],
+      "departments": [
+        "styleGREEN"
+      ]
+    }
+  }
+}

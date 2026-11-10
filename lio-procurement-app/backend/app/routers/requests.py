@@ -24,6 +24,10 @@ from app.schemas.requests import (
     RequestUpdate,
     StatusUpdate,
 )
+from app.services.approval import approval_on_save
+from app.services.categorisation import commodity_block, rule_for_lines
+from app.services.organization_settings import load_settings
+from app.services.totals import add_up, same_amount
 
 router = APIRouter(prefix="/requests", tags=["requests"])
 
@@ -83,7 +87,7 @@ def _enforce_required_fields(
 ) -> None:
     """Enforce the org's configurable required fields (see OrganizationSettings)."""
     org = db.get(Organization, organization_id)
-    required = (org.settings or {}).get("required_fields", []) if org else []
+    required = load_settings(org).required_fields
     missing = [field for field in required if not getattr(payload, field, None)]
     if missing:
         raise HTTPException(
@@ -111,6 +115,14 @@ def _log_activity(
     )
 
 
+def _catalog_choices(payload: RequestCreate | RequestUpdate) -> list[dict]:
+    return [
+        {"line": index + 1, **line.catalog.model_dump()}
+        for index, line in enumerate(payload.order_lines)
+        if line.catalog is not None
+    ]
+
+
 def _order_lines_signature(lines) -> list[tuple]:
     return [
         (
@@ -122,6 +134,171 @@ def _order_lines_signature(lines) -> list[tuple]:
         )
         for line in lines
     ]
+
+
+def _printed_total(extraction: dict | None) -> float | None:
+    totals = (extraction or {}).get("totals") or {}
+    printed = totals.get("printed")
+    return float(printed) if isinstance(printed, (int, float)) else None
+
+
+def _server_totals(payload: RequestCreate | RequestUpdate, printed: float | None = None) -> dict:
+    computed = add_up(payload.order_lines)
+    return {
+        "computed": computed,
+        "submitted": payload.total_cost,
+        "printed": printed,
+        "match": None if printed is None else same_amount(computed, printed),
+        "linesOff": [
+            number
+            for number, line in enumerate(payload.order_lines, start=1)
+            if not same_amount(line.unit_price * line.amount, line.total_price)
+        ],
+    }
+
+
+def _suggested_group(extraction: dict | None) -> int | None:
+    data = (extraction or {}).get("data")
+    value = data.get("commodityGroupId") if isinstance(data, dict) else None
+    return value if isinstance(value, int) else None
+
+
+def _standing_override(
+    db: Session, request_id: uuid.UUID, rule_id: str, group_id: int
+) -> bool:
+    last = db.scalar(
+        select(RequestActivity)
+        .where(
+            RequestActivity.request_id == request_id,
+            RequestActivity.action == "group_overridden",
+        )
+        .order_by(RequestActivity.created_at.desc())
+        .limit(1)
+    )
+    detail = (last.detail or {}) if last else {}
+    return detail.get("rule_id") == rule_id and detail.get("to") == group_id
+
+
+def _apply_company_rules(
+    db: Session,
+    membership: OrganizationMember,
+    payload: RequestCreate | RequestUpdate,
+    suggested_id: int | None = None,
+    stored: ProcurementRequest | None = None,
+):
+    submitted = payload.commodity_group_id
+    group = {
+        "id": submitted,
+        "source": "person",
+        "submitted_id": submitted,
+        "suggested_id": suggested_id,
+    }
+    hit = rule_for_lines(db, membership.organization_id, payload.order_lines)
+    if hit is None:
+        if suggested_id is not None and suggested_id == submitted:
+            group["source"] = "model"
+        return payload, group, None, hit
+
+    rule_group = hit.rule.commodity_group_id
+    group.update(rule_id=hit.rule.id, line=hit.line, flagged=hit.flagged)
+    if hit.flagged:
+        group["hits"] = hit.hits
+    if submitted == rule_group:
+        group["source"] = "rule"
+        return payload, group, None, hit
+    if (
+        stored is not None
+        and stored.commodity_group_id == submitted
+        and _standing_override(db, stored.id, hit.rule.id, submitted)
+    ):
+        return payload, group, None, hit
+    if membership.role in ("buyer", "admin"):
+        override = {
+            "rule_id": hit.rule.id,
+            "from": rule_group,
+            "to": submitted,
+            "by_role": membership.role,
+        }
+        return payload, group, override, hit
+    group.update(id=rule_group, source="rule")
+    return payload.model_copy(update={"commodity_group_id": rule_group}), group, None, hit
+
+
+def _saved_commodity(db: Session, membership: OrganizationMember, group: dict, hit):
+    source = group["source"]
+    if hit is not None and group["id"] != hit.rule.commodity_group_id:
+        source = "override"
+    corrected_from = group["submitted_id"] if group["id"] != group["submitted_id"] else None
+    return commodity_block(db, membership.role, group["id"], source, hit, corrected_from)
+
+
+def _log_correction(
+    db: Session, request_id: uuid.UUID, actor_id: uuid.UUID, commodity
+) -> None:
+    if not commodity.corrected:
+        return
+    _log_activity(
+        db,
+        request_id,
+        actor_id,
+        "commodity_correction",
+        f"Commodity group set to {commodity.group_id} by company rule {commodity.rule_id}",
+        {
+            "from_group_id": commodity.corrected_from_group_id,
+            "to_group_id": commodity.group_id,
+            "rule_id": commodity.rule_id,
+        },
+    )
+
+
+def _stored_source(db: Session, request: ProcurementRequest) -> str:
+    rows = db.scalars(
+        select(RequestActivity)
+        .where(
+            RequestActivity.request_id == request.id,
+            RequestActivity.action.in_(("created", "updated")),
+        )
+        .order_by(RequestActivity.created_at.desc())
+    )
+    for row in rows:
+        group = (row.detail or {}).get("group")
+        if isinstance(group, dict):
+            if group.get("id") == request.commodity_group_id and group.get("source") == "model":
+                return "model"
+            return "person"
+    return "person"
+
+
+def _stored_commodity(db: Session, membership: OrganizationMember, request: ProcurementRequest):
+    if request.commodity_group_id is None:
+        return commodity_block(db, membership.role, None, "none", None)
+    lines = sorted(request.order_lines, key=lambda line: line.line_order)
+    hit = rule_for_lines(db, membership.organization_id, lines)
+    group_id = request.commodity_group_id
+    if hit is None:
+        source = _stored_source(db, request)
+    elif group_id == hit.rule.commodity_group_id:
+        source = "rule"
+    elif _standing_override(db, request.id, hit.rule.id, group_id):
+        source = "override"
+    else:
+        source = "person"
+    return commodity_block(db, membership.role, group_id, source, hit)
+
+
+def _log_override(
+    db: Session, request_id: uuid.UUID, actor_id: uuid.UUID, override: dict | None
+) -> None:
+    if override is None:
+        return
+    _log_activity(
+        db,
+        request_id,
+        actor_id,
+        "group_overridden",
+        f"Kept commodity group {override['to']} over company rule {override['rule_id']}",
+        override,
+    )
 
 
 def _changed_fields(request: ProcurementRequest, payload: RequestUpdate) -> list[str]:
@@ -170,8 +347,9 @@ def get_request(
     membership: OrganizationMember = Depends(get_current_membership),
     db: Session = Depends(get_db),
 ) -> RequestOut:
-    return RequestOut.model_validate(
-        _get_org_request(db, request_id, membership.organization_id)
+    request = _get_org_request(db, request_id, membership.organization_id)
+    return RequestOut.model_validate(request).model_copy(
+        update={"commodity": _stored_commodity(db, membership, request)}
     )
 
 
@@ -183,6 +361,13 @@ def create_request(
 ) -> RequestOut:
     _validate_commodity_group(db, payload.commodity_group_id)
     _enforce_required_fields(db, membership.organization_id, payload)
+    totals = _server_totals(payload, _printed_total(payload.extraction))
+    payload, group, override, hit = _apply_company_rules(
+        db, membership, payload, suggested_id=_suggested_group(payload.extraction)
+    )
+    commodity = _saved_commodity(db, membership, group, hit)
+    limit = load_settings(db.get(Organization, membership.organization_id)).approval_limit
+    approval = approval_on_save("pending", False, None, totals["computed"], limit, totals["match"])
 
     # Vendor fields are already cleaned up during extraction, so we can persist
     # them directly here.
@@ -193,11 +378,13 @@ def create_request(
         vendor_name=payload.vendor_name,
         vat_id=payload.vat_id,
         commodity_group_id=payload.commodity_group_id,
-        total_cost=payload.total_cost,
+        total_cost=totals["computed"],
         department=payload.department,
         organization_id=membership.organization_id,
         created_by=membership.user_id,
         status="open",
+        approval_status=approval.status,
+        approved_at=datetime.now(timezone.utc) if approval.status == "approved" else None,
     )
     request.order_lines = [
         OrderLine(
@@ -212,11 +399,24 @@ def create_request(
     ]
     db.add(request)
     db.flush()
-    _log_activity(db, request.id, membership.user_id, "created", "Request created")
+    created = {
+        "source": "pdf" if payload.extraction else "manual",
+        "totals": totals,
+        "group": group,
+    }
+    if payload.extraction:
+        created["extraction"] = payload.extraction
+    if catalog := _catalog_choices(payload):
+        created["catalog"] = catalog
+    _log_activity(db, request.id, membership.user_id, "created", "Request created", created)
+    for event in approval.events:
+        _log_activity(db, request.id, membership.user_id, event.action, event.summary, event.detail)
+    _log_override(db, request.id, membership.user_id, override)
+    _log_correction(db, request.id, membership.user_id, commodity)
     db.commit()
 
     request = _get_org_request(db, request.id, membership.organization_id)
-    return RequestOut.model_validate(request)
+    return RequestOut.model_validate(request).model_copy(update={"commodity": commodity})
 
 
 @router.put("/{request_id}", response_model=RequestOut)
@@ -229,6 +429,19 @@ def update_request(
     request = _get_org_request(db, request_id, membership.organization_id)
     _validate_commodity_group(db, payload.commodity_group_id)
     _enforce_required_fields(db, membership.organization_id, payload)
+    totals = _server_totals(payload)
+    payload = payload.model_copy(update={"total_cost": totals["computed"]})
+    payload, group, override, hit = _apply_company_rules(db, membership, payload, stored=request)
+    commodity = _saved_commodity(db, membership, group, hit)
+    limit = load_settings(db.get(Organization, membership.organization_id)).approval_limit
+    approval = approval_on_save(
+        request.approval_status,
+        request.approved_by is not None,
+        request.total_cost,
+        totals["computed"],
+        limit,
+        totals["match"],
+    )
 
     changed = _changed_fields(request, payload)
 
@@ -239,6 +452,10 @@ def update_request(
     request.commodity_group_id = payload.commodity_group_id
     request.total_cost = payload.total_cost
     request.department = payload.department
+    if approval.events:
+        request.approval_status = approval.status
+        request.approved_by = None
+        request.approved_at = datetime.now(timezone.utc) if approval.status == "approved" else None
 
     # Replace order lines (same semantics as the original delete-and-insert).
     request.order_lines = [
@@ -261,12 +478,17 @@ def update_request(
             membership.user_id,
             "updated",
             f"Updated {', '.join(labels)}",
-            {"changed_fields": changed},
+            {"changed_fields": changed, "totals": totals, "group": group}
+            | ({"catalog": catalog} if (catalog := _catalog_choices(payload)) else {}),
         )
+    for event in approval.events:
+        _log_activity(db, request.id, membership.user_id, event.action, event.summary, event.detail)
+    _log_override(db, request.id, membership.user_id, override)
+    _log_correction(db, request.id, membership.user_id, commodity)
     db.commit()
 
     request = _get_org_request(db, request_id, membership.organization_id)
-    return RequestOut.model_validate(request)
+    return RequestOut.model_validate(request).model_copy(update={"commodity": commodity})
 
 
 @router.patch("/{request_id}/status", response_model=RequestOut)

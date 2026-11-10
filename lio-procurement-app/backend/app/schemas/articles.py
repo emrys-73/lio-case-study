@@ -27,3 +27,20 @@ class ArticlePage(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class CatalogArticle(BaseModel):
+    article_number: str
+    description: str
+    supplier_name: str | None
+    unit: str
+    unit_price: float
+    currency: str
+
+
+class SuggestOut(BaseModel):
+    match: CatalogArticle | None
+
+
+class SearchOut(BaseModel):
+    items: list[CatalogArticle]

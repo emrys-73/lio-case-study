@@ -1,0 +1,23 @@
+{
+  "id": "dream-in-green",
+  "pdf": "AN-4120-Kdnr-14918.pdf",
+  "status": "checked against the PDF by Adrian, 2026-11-10",
+  "notes": [
+    "Positions 1 and 4 are headings with no price.",
+    "Position 5 is marked (Alt.): an alternative, not a purchase.",
+    "Position 2 has a 20% discount: 894.08 list, 715.26 after discount.",
+    "Shipping 215.00 sits in the totals block, not the table."
+  ],
+  "vendorName": ["Dream in Green GmbH"],
+  "vatId": "DE325240530",
+  "customer": "Lio Technologies GmbH",
+  "totals": {"positionsNet": 1337.26, "net": 1552.26, "gross": 1847.19},
+  "lines": [
+    {"description": "Moosbild Mix-Moos 160x80 cm", "unitPrice": [715.26, 894.08], "amount": 1, "unit": "piece", "totalPrice": 715.26, "kind": "item"},
+    {"description": "Logointegration asklio horizontal", "unitPrice": [622.00], "amount": 1, "unit": "piece", "totalPrice": 622.00, "kind": "item"},
+    {"description": "Versandkosten", "unitPrice": [215.00], "amount": 1, "unit": null, "totalPrice": 215.00, "kind": "charge"}
+  ],
+  "excluded": [
+    {"description": "Logointegration asklio vertikal (Alt.)", "totalPrice": 430.00, "reason": "alternative"}
+  ]
+}

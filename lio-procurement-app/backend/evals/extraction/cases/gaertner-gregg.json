@@ -1,0 +1,22 @@
+{
+  "id": "gaertner-gregg",
+  "pdf": "AngebotA0492_23.Pdf",
+  "status": "checked against the PDF by Adrian, 2026-11-10",
+  "notes": [
+    "Position 1 is a heading. 1.1a and 1.1b are alternatives (E.P. only, no total).",
+    "VAT ID is printed with spaces: DE 198 570 491.",
+    "File extension is .Pdf, which the browser upload check may reject."
+  ],
+  "vendorName": ["Gärtner Gregg"],
+  "vatId": "DE198570491",
+  "customer": "Lio Technologies GmbH",
+  "totals": {"positionsNet": 1438.00, "net": 1758.00, "gross": 2092.02},
+  "lines": [
+    {"description": "Moosbild 70:30 mit Schriftzug askLio", "unitPrice": [1438.00], "amount": 1, "unit": "piece", "totalPrice": 1438.00, "kind": "item"},
+    {"description": "Transport, Verpackung und Versand", "unitPrice": [320.00], "amount": 1, "unit": null, "totalPrice": 320.00, "kind": "charge"}
+  ],
+  "excluded": [
+    {"description": "Alternative 1.1a, nur Ballenmoos", "totalPrice": 1926.00, "reason": "alternative"},
+    {"description": "Alternative 1.1b, flaechig Waldmoos", "totalPrice": 1685.00, "reason": "alternative"}
+  ]
+}

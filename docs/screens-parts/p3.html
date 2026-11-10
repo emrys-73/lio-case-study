@@ -1,0 +1,710 @@
+<section class="prob" id="p3">
+<style>
+.p3-ic { width: 13px; height: 13px; flex: none; color: var(--muted); }
+.p3-lock { background: #f8f9fa; }
+.p3-lock .spacer { min-width: 4px; }
+.p3-in { border: 1px solid #d6d9de; border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 14px; color: var(--ink); background: #fff; min-width: 0; outline: none; }
+.p3-in:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+select.p3-in { cursor: pointer; }
+.p3-desc { flex: 1 1 160px; }
+.p3-qty { width: 64px; }
+.p3-price { width: 92px; }
+.p3-err { border: 1px solid #f0d9b0; background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 9px 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.p3-err b { color: var(--warn); }
+.p3-tab { background: none; border: 0; color: #fff; font: inherit; cursor: pointer; padding: 2px 10px; border-radius: 999px; }
+.p3-tab[hidden] { display: none; }
+.p3-n { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.p3-form { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--accent); border-radius: 10px; background: #fff; }
+.p3-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ink); }
+.p3-test { display: flex; gap: 8px; flex-wrap: wrap; }
+.p3-test .p3-in:first-child { flex: 1 1 180px; }
+.p3-test .p3-in:last-child { width: 130px; }
+.p3-small { font-size: 12px; }
+.p3-sw { width: 30px; height: 18px; border-radius: 999px; background: #d6d9de; display: inline-flex; align-items: center; padding: 2px; flex: none; }
+.p3-sw i { width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+.p3-sw.on { background: var(--accent); justify-content: flex-end; }
+.p3-tbl { display: grid; grid-template-columns: 14px 1.3fr 1fr 44px; gap: 6px; align-items: center; font-size: 11px; }
+.p3-tbl .h { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 9px; }
+#p3 .chip { white-space: normal; }
+.p3-cap { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.p3-staff { border-top: 1px dashed #d6d9de; padding-top: 6px; }
+.p3-note { font-size: 12px; color: var(--muted); }
+</style>
+
+<div class="prob-head"><span class="kicker">PROBLEM 3</span><h2 class="prob-title">Commodity Groups</h2><p class="sub">Acme's categories don't match its books</p></div>
+<div class="open now"><h3>Build now</h3><ul><li>3.1 The group is set automatically. Requesters see no rules; buyers and admins see which rule set it.</li><li>3.3 When a save sends another group, the server corrects it quietly and logs the change.</li><li>Rules are saved through the settings API for now, no screen.</li><li>Later: 3.2 override, 3.4 model not sure, 3.5 several rules flag, 3.6 rules screen. The prototype still shows them to buyers and admins.</li></ul></div>
+
+<h2 id="p3-auto"><span class="badge">3.1</span>Group set automatically</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Locked field, rule for staff only</h3><span class="pick">Pick</span></div>
+    <span class="p3-cap">Requester</span>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip cat">Set automatically</span></div>
+        <div class="inp p3-lock"><svg class="p3-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Electrical Engineering</div>
+        <span class="muted" style="font-size:11px">Set by Acme for this item. Not right? Ask a buyer.</span>
+      </div>
+    </div></div>
+    <span class="p3-cap">Buyer and admin</span>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip cat">Set automatically</span></div>
+        <div class="inp p3-lock"><svg class="p3-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Electrical Engineering</div>
+        <span class="muted p3-staff" style="font-size:11px">Acme rule 1, "kabelbinder" in "Kabelbinder 200 mm". Booked under Electrical Engineering in Acme's ledger.</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Plain value, rule in the log</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="num">€480.00</span></div>
+      <div class="sumbar"><span class="grow">Commodity Group: <b>Electrical Engineering</b></span><span class="muted" style="font-size:11px">Set automatically</span></div>
+    </div></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer, Activity</span></div><div class="in">
+      <div class="line"><div class="d">Group set to Electrical Engineering<small>Acme rule 1, "kabelbinder"</small></div></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Hidden from requesters</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="num">€480.00</span></div>
+      <div class="total"><span>Total Cost</span><b>€480.00</b></div>
+    </div></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer, Approvals</span></div><div class="in">
+      <div class="line"><div class="d">Cable ties, Lena Vogt<small>€480.00</small></div><span class="chip cat">Electrical Engineering</span><span class="chip off">Rule 1</span></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">Why: the field stays where people expect it and the lock with "Set automatically" says it is decided, with no new idea to learn; buyers and admins, who own the rules, get one small line under the field saying which rule and why.</p>
+
+<h2 id="p3-override" data-later><span class="badge">3.2</span>Override by buyer or admin</h2>
+<div class="opts">
+  <div class="opt">
+    <div class="opt-head"><span class="letter">A</span><h3>Change in place</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">Changing</span></div>
+        <div class="inp focus">IT Hardware<span class="spacer"></span><span class="muted">▾</span></div>
+        <span class="muted" style="font-size:11px">Rule 1 says Electrical Engineering. Why change it?</span>
+        <div class="row"><span class="chip out">Other budget</span><span class="chip out">Rule is wrong here</span><span class="chip out">Acme asked</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Unlock switch</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="row" style="font-weight:400;font-size:11px;gap:6px">Override rule <span class="p3-sw on"><i></i></span></span></div>
+        <div class="inp">IT Hardware<span class="spacer"></span><span class="muted">▾</span></div>
+        <div class="inp"><span class="ph">Reason (logged)</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">C</span><h3>Change button, dialog</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui" style="box-shadow:0 10px 26px rgba(17,19,23,.14)">
+        <div class="ui-title">Change the group <span class="muted">×</span></div>
+        <span class="muted" style="font-size:11px">Acme rule 1 puts "Kabelbinder 200 mm" in Electrical Engineering. Your change, name and reason are logged.</span>
+        <div class="inp">IT Hardware<span class="spacer"></span><span class="muted">▾</span></div>
+        <div class="inp">Cable ties for the server racks, IT budget</div>
+        <div class="row"><span class="spacer"></span><span class="btn ghost">Cancel</span><span class="btn teal">Change group</span></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: an override should be rare and on purpose; a dialog makes the reason part of the action and never leaves a half-unlocked field behind.</p>
+
+<h2 id="p3-corrected"><span class="badge">3.3</span>When a save disagrees</h2>
+<p class="muted" style="font-size:13px;margin:0 0 10px">An agent or an old tab sends Fasteners and Fixings. The server saves Electrical Engineering, returns <code>corrected: true</code> and logs the change. No error.</p>
+<div class="opts">
+  <div class="opt">
+    <div class="opt-head"><span class="letter">A</span><h3>Nothing, just the right group</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="sumbar"><span class="grow"><b>Saved.</b></span></div>
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="chip cat">Electrical Engineering</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">B</span><h3>Quiet note for everyone</h3><span class="pick">Pick</span></div>
+    <span class="p3-cap">Requester</span>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="sumbar"><span class="grow"><b>Saved.</b></span></div>
+      <span class="p3-note">Commodity group set automatically to Electrical Engineering.</span>
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="chip cat">Electrical Engineering</span></div>
+    </div></div>
+    <span class="p3-cap">Buyer and admin</span>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="sumbar"><span class="grow"><b>Saved.</b></span></div>
+      <span class="p3-note">Commodity group set automatically to Electrical Engineering.</span>
+      <span class="p3-note p3-staff">Sent Fasteners and Fixings, corrected by Acme rule 1. Logged.</span>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Note for buyers and admins only</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer, Activity</span></div><div class="in">
+      <div class="line"><div class="d">Group corrected to Electrical Engineering<small>Sent Fasteners and Fixings, Acme rule 1</small></div><span class="chip warn">Corrected</span></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">Why: whoever sent the other group learns it did not stick, in one calm line with no rule words and nothing to fix; buyers and admins also see which rule, and the activity log keeps the from and to. Saying nothing would leave an old-tab user thinking their group was saved.</p>
+
+<h2 id="p3-unsure" data-later><span class="badge">3.4</span>Model not sure</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Three choices</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">Pick one</span></div>
+        <span class="muted" style="font-size:11px">Not sure which fits "USB-C Adapter".</span>
+        <div class="row"><span class="chip out">IT Accessories</span><span class="chip out">Electrical Components</span><span class="chip out">Office Supplies</span></div>
+        <div class="inp"><span class="ph">Other group</span><span class="spacer"></span><span class="muted">▾</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Best guess, check it</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">Check</span></div>
+        <div class="inp">IT Accessories<span class="spacer"></span><span class="muted">▾</span></div>
+        <span class="muted" style="font-size:11px">Suggested. Change it if it's wrong.</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Percent list</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in tiers">
+      <div class="tier"><span class="num">55%</span><div class="row"><span class="chip cat">IT Accessories</span></div></div>
+      <div class="tier"><span class="num">30%</span><div class="row"><span class="chip cat">Electrical Components</span></div></div>
+      <div class="tier"><span class="num">8%</span><div class="row"><span class="chip cat">Office Supplies</span></div></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: same as prices, sure or nothing; a prefilled guess gets saved unread, and percentages ask people to judge the model instead of the item.</p>
+
+<h2 id="p3-mixed" data-later><span class="badge">3.5</span>Lines hit different rules</h2>
+<div class="opts">
+  <div class="opt">
+    <div class="opt-head"><span class="letter">A</span><h3>Flag on the field</h3></div>
+    <span class="p3-cap">Buyer and admin view</span>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">2 rules</span></div>
+        <div class="inp p3-lock">Electrical Engineering</div>
+        <span class="muted" style="font-size:11px">Biggest line decides.</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">B</span><h3>One bar, chips per line</h3><span class="pick is-later">Later</span></div>
+    <span class="p3-cap">Buyer and admin view</span>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="p3-err"><span><b>2 Acme rules hit.</b> One group per request, so the biggest line decides: Electrical Engineering.</span></div>
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>€480.00</small></div><span class="chip cat">Rule 1, used</span></div>
+      <div class="line"><div class="d">Toner schwarz XL<small>€186.00</small></div><span class="chip off">Rule 2, IT Hardware, not used</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Offer a split</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="sumbar"><span class="grow">These lines belong in <b>2 groups</b>.</span><span class="btn teal">Split into 2 requests</span></div>
+      <div class="line"><div class="d">Kabelbinder 200 mm</div><span class="chip cat">Electrical Engineering</span></div>
+      <div class="line"><div class="d">Toner schwarz XL</div><span class="chip cat">IT Hardware</span></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: it says what happened and which line lost, in the same place as the lines; splitting would change approvals and goes beyond the agreed one group per request.</p>
+
+<h2 id="p3-admin" data-later><span class="badge">3.6</span>Rules screen for admins</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Ordered cards, test on top</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Rules</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Rules <span class="btn teal">+ Add rule</span></div>
+        <div class="inp">Tonerkartusche<span class="spacer"></span><span class="muted">€186</span></div>
+        <span class="chip cat" style="align-self:flex-start">Rule 2 fits: IT Hardware</span>
+        <div class="pline"><div class="top2"><span class="p3-n">1</span><div class="d">kabelbinder, cable tie</div><span class="chip cat">Electrical Engineering</span></div></div>
+        <div class="pline"><div class="top2"><span class="p3-n">2</span><div class="d">toner, druckerpatrone</div><span class="chip cat">IT Hardware</span></div><div class="row"><span class="spacer"></span><span class="btn ghost">↑</span><span class="btn ghost">↓</span><span class="btn ghost">Edit</span></div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Table with drag</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Rules</span></div><div class="in">
+      <div class="ui">
+        <div class="p3-tbl">
+          <span></span><span class="h">Keywords</span><span class="h">Group</span><span class="h">Max</span>
+          <span class="muted">⋮</span><span>kabelbinder, cable tie</span><span>Electrical Eng.</span><span class="muted">none</span>
+          <span class="muted">⋮</span><span>toner, druckerpatrone</span><span>IT Hardware</span><span class="muted">none</span>
+          <span class="muted">⋮</span><span>abo, subscription</span><span>Office Supplies</span><span>€500</span>
+        </div>
+      </div>
+      <div class="ui"><span class="muted" style="font-size:11px">Test panel opens on the right</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Sentence builder</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Rules</span></div><div class="in">
+      <div class="ui" style="font-size:12px">
+        <div class="row">If a line says <span class="chip out">kabelbinder</span><span class="chip out">cable tie</span></div>
+        <div class="row">put it in <span class="chip cat">Electrical Engineering</span></div>
+        <div class="row">up to <span class="chip out">any amount</span></div>
+        <div class="row">because <span class="chip out">ledger code 4710</span></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: order decides when two rules fit, so numbered cards with up and down show it and work on a phone; the test box answers "what happens to this line" before anyone saves.</p>
+
+<h2 id="p3-try"><span class="badge">▶</span>Try it</h2>
+<div class="row" style="margin:0 0 10px;font-size:13px;color:var(--muted)">
+  <span>View as</span>
+  <div class="reasons" id="p3-roles"><button type="button" data-role="requester" class="on">Requester</button><button type="button" data-role="buyer">Buyer</button><button type="button" data-role="admin">Admin</button></div>
+</div>
+<div class="proto">
+  <div class="bar"><span>Lio</span><span class="dim">Requests</span><button class="p3-tab on" type="button" data-view="form">New Request</button><span class="dim">Approvals</span><button class="p3-tab" type="button" data-view="rules" id="p3-rtab" hidden>Rules</button></div>
+  <div class="in" id="p3-form-view">
+    <div class="ui">
+      <div class="ui-title">Order Lines <button class="btn ghost" type="button" id="p3-addline">+ Add line</button></div>
+      <div id="p3-flag"></div>
+      <div id="p3-lines" class="tiers"></div>
+    </div>
+    <div class="ui" id="p3-gp"></div>
+    <div class="total"><span>Total Cost</span><b id="p3-total">€0.00</b></div>
+    <div class="row"><button class="more" type="button" id="p3-force" hidden>Send another group, like an agent or an old tab</button><span class="spacer"></span><button class="btn" type="button" id="p3-save" style="padding:7px 16px;font-size:13px">Save request</button></div>
+    <div id="p3-out"></div>
+  </div>
+  <div class="in" id="p3-rules-view" hidden>
+    <div class="ui">
+      <div class="ui-title">Commodity Rules <button class="btn teal" type="button" id="p3-radd">+ Add rule</button></div>
+      <span class="muted p3-small">Checked top to bottom on every line, on every save. The first rule that fits wins. Lines no rule fits go to the model.</span>
+      <div class="p3-test"><input class="p3-in" id="p3-tq" type="text" placeholder="Test a line, e.g. Tonerkartusche" aria-label="Test a line" autocomplete="off"><input class="p3-in" id="p3-ta" type="text" inputmode="decimal" placeholder="Line total €" aria-label="Line total in euro"></div>
+      <div id="p3-tres"></div>
+      <div id="p3-rlist" class="tiers"></div>
+    </div>
+  </div>
+</div>
+<div class="row" style="margin-top:10px;font-size:13px;color:var(--muted)">
+  <span>Add</span>
+  <button class="chip out" type="button" data-p3try="0">Kabelbinder 200 mm</button>
+  <button class="chip out" type="button" data-p3try="1">Toner schwarz XL</button>
+  <button class="chip out" type="button" data-p3try="2">Adobe Acrobat Abo</button>
+  <button class="chip out" type="button" data-p3try="3">USB-C Adapter</button>
+  <button class="chip out" type="button" data-p3try="4">Laptop 14 Zoll</button>
+  <button class="chip off" type="button" id="p3-reset">Start over</button>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">As Requester the group is just set automatically. Tap "Send another group" to see a save corrected quietly. Switch to Buyer or Admin to see which rule set it: add Toner to see two rules hit, raise the Abo quantity past €500 and the model takes over, clear the lines and add USB-C Adapter for a low-confidence pick. Buyer can override, Admin can edit rules.</p>
+<dialog class="modal" id="p3-dlg" aria-labelledby="p3-dlg-title"></dialog>
+
+<div class="open">
+  <h3 style="color:var(--accent);margin-bottom:6px">Contract</h3>
+  <ul>
+    <li><b>Rule</b>: <code>{ id: string (server-set), keywords: string[] (non-blank, EN or DE), commodity_group_id: int, reason: string (default ""), max_amount: decimal string | null (EUR, line total, inclusive), updated_by: { id: uuid, name: string }, updated_at: datetime }</code>.</li>
+    <li><b>Rules list</b>: <code>GET /organizations/me/settings</code> returns <code>commodity_rules: Rule[]</code> in match order. <code>PATCH /organizations/me/settings</code> with <code>{ commodity_rules: [...] }</code> (admin only, merges other keys) replaces the list; array order is the new order; the server sets <code>id</code> for new rules and <code>updated_by/updated_at</code> for changed ones. Errors: 422 <code>{ detail: [{ loc, msg }] }</code> for blank keywords or unknown group; 403 for non-admins.</li>
+    <li><b>Live categorise</b>: <code>POST /categorise</code> with <code>{ lines: [{ id: uuid, description: string, quantity: number, unit_price: decimal string }], rules?: Rule[] }</code> (<code>rules</code> only from admins, to test an unsaved list) returns <code>Categorisation</code>. No save. The form calls it debounced on line edits; the rules test box calls it with one line.</li>
+    <li><b>Per line</b>: <code>{ line_id: uuid, line_total: decimal string, group_id: int | null, source: "rule" | "model" | "none", rule_id: string | null, matched_keyword: string | null, rule_used: bool, skipped_rules: [{ rule_id, why: "over_max_amount" }], confidence: number | null (0 to 1, model only), suggestions: [{ group_id: int, name: string, confidence: number }] (top 3, model only) }</code>.</li>
+    <li><b>Request level</b> (in <code>Categorisation</code> and on request detail as <code>commodity</code>): <code>{ group_id: int | null, source: "rule" | "model" | "person" | "override", rule_id: string | null, decided_by_line: uuid | null, locked: bool, needs_person: bool, can_override: bool (from role), conflict: { rule_ids: string[], winner_rule_id: string, winner_line: uuid } | null, override: { from_group_id: int, to_group_id: int, reason: string, by: { id, name, role }, at: datetime } | null }</code>. <code>needs_person</code> when the top confidence is under the threshold (server constant, proposed 0.7). Rule fields are returned to every role; the UI shows them only to buyers and admins and tells requesters "Set automatically".</li>
+    <li><b>Save payload</b> (create and edit) adds: <code>commodity_group_id: int</code>, <code>commodity_source: "rule" | "model" | "person"</code>, <code>commodity_override: { group_id: int, reason: string } | null</code> (buyers and admins, later). On every create and edit the server re-runs the rules; when a rule fits, it saves the rule's group whatever the client sent.</li>
+    <li><b>Save response</b>: the request with <code>commodity: { group_id: int, source: "rule" | "model" | "person", rule_id: string | null, corrected: bool }</code> (<code>source: "override"</code> once 3.2 ships). <code>rule_id</code> is filled for every role; <code>corrected</code> is true when the server changed the group the client sent.</li>
+    <li><b>No rule error</b>: a group that disagrees with a rule is corrected, never rejected, for requesters and agents alike; an override sent by a requester is ignored the same way. Remaining errors, shape <code>{ detail: { code, message } }</code>: <code>group_required</code> (422, model not sure and nobody picked) and, with 3.2, <code>override_reason_required</code> (422).</li>
+    <li><b>Activity</b>: on create or edit, <code>RequestActivity.detail.categorisation = { lines: per-line objects above, request: request-level object above }</code>. When the server corrected the group it also logs <code>RequestActivity.detail.commodity_correction = { from_group_id: int, to_group_id: int, rule_id: string }</code>. Feeds the problem 4 flags <code>group_rule_overridden</code> and <code>group_low_confidence</code>.</li>
+    <li><b>Groups</b>: the existing <code>GET /commodity-groups</code> list <code>{ id: int, name: string, category: string }</code> for the "Other group" picker and the rules form.</li>
+  </ul>
+</div>
+
+<script>(function(){
+  var GROUPS = [
+    [11, "Electrical Engineering"], [29, "IT Hardware"], [40, "Office Supplies"], [204, "Toner Cartridges"],
+    [118, "Fasteners and Fixings"], [31, "Software Licenses"], [52, "Office Furniture"], [61, "Electrical Components"],
+    [73, "IT Accessories"], [88, "Personal Protective Equipment"], [95, "Facility Services"]
+  ];
+  var MODEL = [
+    [["kabelbinder", "cable tie"], [[118, .88], [61, .07], [11, .03]]],
+    [["toner", "druckerpatrone", "cartridge"], [[204, .93], [29, .04], [40, .02]]],
+    [["abo", "subscription", "lizenz", "license", "software", "adobe", "saas"], [[31, .91], [40, .05], [73, .02]]],
+    [["laptop", "notebook", "monitor", "bildschirm"], [[29, .94], [73, .04], [52, .01]]],
+    [["stuhl", "chair", "tisch", "desk"], [[52, .9], [40, .06], [95, .02]]],
+    [["handschuh", "glove"], [[88, .89], [95, .06], [40, .03]]],
+    [["papier", "paper", "ordner", "stift", "pen"], [[40, .92], [204, .04], [52, .02]]],
+    [["adapter", "usb", "steckdose", "kabel", "cable"], [[73, .55], [61, .3], [40, .08]]]
+  ];
+  var FALLBACK = [[40, .34], [95, .28], [73, .17]];
+  var SURE = 0.7;
+  var TRY = [["Kabelbinder 200 mm", 40, 12], ["Toner schwarz XL", 1, 186], ["Adobe Acrobat Abo", 12, 19.99], ["USB-C Adapter", 3, 24.9], ["Laptop 14 Zoll", 1, 1130]];
+  var ROLES = { requester: "Requester", buyer: "Buyer", admin: "Admin" };
+  var NAMES = { requester: "Lena Vogt", buyer: "Tom Berger", admin: "Jana Weber" };
+  var LOCK = '<svg class="p3-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  var role, view, rules, lines, nextLine, nextRule, ovr, pick, picking, saved, fix, editing, formErr;
+
+  function staff() { return role !== "requester"; }
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function eur(n) { return "€" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function gname(id) { for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i][0] === id) return GROUPS[i][1]; return "Group " + id; }
+  function num(v) { var n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? 0 : n; }
+  function norm(s) {
+    return String(s).toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+      .normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function hit(text, kw) {
+    var t = norm(text), k = norm(kw);
+    if (!k || !t) return false;
+    if (k.indexOf(" ") >= 0) return (" " + t).indexOf(" " + k) >= 0;
+    return t.split(" ").some(function (w) { return w.indexOf(k) === 0 || (w.length > k.length && w.slice(-k.length) === k); });
+  }
+  function matchKw(rule, text) { for (var i = 0; i < rule.keywords.length; i++) if (hit(text, rule.keywords[i])) return rule.keywords[i]; return null; }
+  function ruleFor(text, total) {
+    var skipped = [];
+    for (var i = 0; i < rules.length; i++) {
+      var r = rules[i], kw = matchKw(r, text);
+      if (!kw) continue;
+      if (r.max !== null && total > r.max) { skipped.push(r); continue; }
+      return { rule: r, kw: kw, skipped: skipped };
+    }
+    return { rule: null, skipped: skipped };
+  }
+  function model(text) {
+    for (var i = 0; i < MODEL.length; i++) if (MODEL[i][0].some(function (k) { return hit(text, k); })) return MODEL[i][1];
+    return FALLBACK;
+  }
+  function rno(r) { return rules.indexOf(r) + 1; }
+
+  function catLine(l) {
+    var total = l.qty * l.price, rf = ruleFor(l.desc, total);
+    if (rf.rule) return { src: "rule", rule: rf.rule, kw: rf.kw, group: rf.rule.group, total: total };
+    if (!norm(l.desc)) return { src: "none", total: total };
+    var m = model(l.desc);
+    return { src: "model", group: m[0][0], conf: m[0][1], top: m, total: total, skipped: rf.skipped };
+  }
+  function decide() {
+    var cs = lines.map(catLine), ri = [], i;
+    cs.forEach(function (c, j) { if (c.src === "rule") ri.push(j); });
+    if (ri.length) {
+      var w = ri.reduce(function (a, b) { return cs[b].total > cs[a].total ? b : a; });
+      var gs = {}; ri.forEach(function (j) { gs[cs[j].group] = 1; });
+      var d = { cs: cs, src: "rule", line: w, rule: cs[w].rule, kw: cs[w].kw, group: cs[w].group, conflict: Object.keys(gs).length > 1 };
+      return d;
+    }
+    var mi = -1;
+    for (i = 0; i < cs.length; i++) if (cs[i].src === "model" && (mi < 0 || cs[i].total > cs[mi].total)) mi = i;
+    if (mi < 0) return { cs: cs, src: "none" };
+    return { cs: cs, src: "model", line: mi, group: cs[mi].group, conf: cs[mi].conf, top: cs[mi].top, sure: cs[mi].conf >= SURE };
+  }
+  function keyOf(d) { return norm(lines[d.line].desc); }
+  function finalGroup(d) {
+    if (d.src === "rule") return ovr ? { group: ovr.group, src: "override" } : { group: d.group, src: "rule" };
+    if (d.src === "model") {
+      if (pick) return { group: pick.group, src: "person" };
+      if (d.sure) return { group: d.group, src: "model" };
+      return { group: null, src: "person" };
+    }
+    return { group: null, src: "none" };
+  }
+
+  function lineHtml(l, i) {
+    return '<div class="pline"><div class="top2">' +
+      '<input class="p3-in p3-desc" type="text" data-f="desc" data-i="' + i + '" value="' + esc(l.desc) + '" placeholder="Description" aria-label="Description" autocomplete="off">' +
+      '<input class="p3-in p3-qty" type="text" inputmode="numeric" data-f="qty" data-i="' + i + '" value="' + l.qty + '" aria-label="Quantity">' +
+      '<input class="p3-in p3-price" type="text" inputmode="decimal" data-f="price" data-i="' + i + '" value="' + l.price.toFixed(2) + '" aria-label="Unit price in euro">' +
+      '<span class="num" data-tot="' + i + '"></span>' +
+      '<button class="x" type="button" data-del="' + i + '" aria-label="Remove">×</button></div>' +
+      '<div class="row" data-chip="' + i + '"></div></div>';
+  }
+  function buildLines() {
+    var box = document.getElementById("p3-lines");
+    box.innerHTML = lines.length ? lines.map(lineHtml).join("") : '<div class="empty">No lines yet</div>';
+    update();
+  }
+
+  function chipFor(d, c, i) {
+    if (c.src === "rule") {
+      if (!staff()) return d.src === "rule" && i === d.line && !ovr ? '<span class="chip cat">' + LOCK.replace('class="p3-ic"', 'class="p3-ic" style="color:var(--accent)"') + esc(gname(c.group)) + "</span>" : "";
+      var n = rno(c.rule);
+      if (d.src === "rule" && i !== d.line && c.group !== d.group) return '<span class="chip off">Rule ' + n + ", " + esc(gname(c.group)) + ", not used</span>";
+      return '<span class="chip cat">' + LOCK.replace('class="p3-ic"', 'class="p3-ic" style="color:var(--accent)"') + "Rule " + n + ", " + esc(gname(c.group)) + (d.conflict && i === d.line ? ", used" : "") + "</span>";
+    }
+    if (c.src === "model") {
+      var s = c.conf >= SURE ? '<span class="chip off">Model, ' + esc(gname(c.group)) + "</span>" : '<span class="chip warn">Model not sure</span>';
+      if (staff() && c.skipped && c.skipped.length) s += '<span class="muted p3-small">Rule ' + rno(c.skipped[0]) + " skipped, over " + eur(c.skipped[0].max) + "</span>";
+      return s;
+    }
+    return "";
+  }
+
+  function groupHtml(d) {
+    var f = finalGroup(d), h = '<div class="ui-title">Commodity Group';
+    var staff = role !== "requester";
+    if (d.src === "none") return h + '</div><div class="inp"><span class="ph">Add a line to get a group</span></div>';
+    if (d.src === "rule") {
+      var n = rno(d.rule), lineDesc = lines[d.line].desc;
+      if (ovr) {
+        h += staff ? ' <span class="chip warn">Override</span></div>' : ' <span class="chip off">Set by a buyer</span></div>';
+        h += '<div class="inp p3-lock">' + LOCK + esc(gname(ovr.group)) + '<span class="spacer"></span>' + (staff ? '<button class="btn ghost" type="button" data-act="undo-ovr">Undo override</button>' : "") + "</div>";
+        h += staff ? '<span class="muted p3-small">Changed from ' + esc(gname(d.group)) + " by " + esc(ovr.by) + ". Reason: " + esc(ovr.reason) + ". Logged.</span>" : '<span class="muted p3-small">Changed by ' + esc(ovr.by) + ".</span>";
+        return h;
+      }
+      h += ' <span class="chip cat">Set automatically</span></div>';
+      h += '<div class="inp p3-lock">' + LOCK + esc(gname(d.group)) + '<span class="spacer"></span>' + (staff ? '<button class="btn ghost" type="button" data-act="ovr">Change</button>' : "") + "</div>";
+      h += staff ? '<span class="muted p3-small p3-staff">Acme rule ' + n + ', "' + esc(d.kw) + '" in "' + esc(lineDesc) + '".' + (d.rule.reason ? " " + esc(d.rule.reason) + "." : "") + "</span>" : '<span class="muted p3-small">Set by Acme for this item. Not right? Ask a buyer.</span>';
+      return h;
+    }
+    var desc = lines[d.line].desc;
+    if (d.sure && !picking && !pick) {
+      h += ' <span class="chip off">Suggested</span></div>';
+      h += '<div class="inp">' + esc(gname(d.group)) + '<span class="spacer"></span><button class="more" type="button" data-act="picking">Change</button></div>';
+      h += '<span class="muted p3-small">From "' + esc(desc) + '".</span>';
+      return h;
+    }
+    h += f.group ? ' <span class="chip off">Picked by you</span></div>' : ' <span class="chip warn">Pick one</span></div>';
+    if (f.group) h += '<div class="inp">' + esc(gname(f.group)) + "</div>";
+    h += '<span class="muted p3-small">' + (d.sure ? 'Pick a group for "' : 'Not sure which fits "') + esc(desc) + '".</span>';
+    h += '<div class="reasons">' + d.top.map(function (t) { return '<button type="button" data-pick="' + t[0] + '"' + (f.group === t[0] ? ' class="on"' : "") + ">" + esc(gname(t[0])) + "</button>"; }).join("") + "</div>";
+    h += '<select class="p3-in" id="p3-other" aria-label="Other group"><option value="">Other group</option>' + GROUPS.map(function (g) { return '<option value="' + g[0] + '"' + (f.group === g[0] && !d.top.some(function (t) { return t[0] === g[0]; }) ? " selected" : "") + ">" + esc(g[1]) + "</option>"; }).join("") + "</select>";
+    if (formErr) h += '<div class="p3-err"><span><b>Not saved.</b> ' + esc(formErr) + "</span></div>";
+    return h;
+  }
+
+  function outHtml() {
+    if (!saved) return "";
+    var h = '<div class="sumbar"><span class="grow"><b>Saved.</b> ' + saved + '</span><button class="btn ghost" type="button" data-act="again">Keep editing</button></div>';
+    if (fix) {
+      h += '<div class="p3-note" style="margin-top:6px">Commodity group set automatically to ' + esc(gname(fix.group)) + ".</div>";
+      if (staff()) h += '<div class="p3-note p3-staff" style="margin-top:6px">Sent ' + esc(gname(fix.sent)) + ", corrected by Acme rule " + rno(fix.rule) + ". Logged.</div>";
+    }
+    return h;
+  }
+
+  function update() {
+    var d = decide();
+    if (ovr && (d.src !== "rule" || d.rule.id !== ovr.rule)) ovr = null;
+    if (pick && (d.src !== "model" || pick.key !== keyOf(d))) pick = null;
+    if (d.src !== "model") picking = false;
+    lines.forEach(function (l, i) {
+      var c = document.querySelector('#p3-lines [data-chip="' + i + '"]'), t = document.querySelector('#p3-lines [data-tot="' + i + '"]');
+      if (c) c.innerHTML = chipFor(d, d.cs[i], i);
+      if (t) t.textContent = eur(l.qty * l.price);
+    });
+    var flag = document.getElementById("p3-flag");
+    if (staff() && d.src === "rule" && d.conflict) {
+      var nr = {}; d.cs.forEach(function (c) { if (c.src === "rule") nr[c.rule.id] = 1; });
+      flag.innerHTML = '<div class="p3-err"><span><b>' + Object.keys(nr).length + ' Acme rules hit.</b> One group per request, so the biggest line decides: "' + esc(lines[d.line].desc) + '", ' + eur(d.cs[d.line].total) + ", " + esc(gname(d.group)) + ". Flagged for the buyer.</span></div>";
+    } else flag.innerHTML = "";
+    document.getElementById("p3-gp").innerHTML = groupHtml(d);
+    document.getElementById("p3-total").textContent = eur(lines.reduce(function (s, l) { return s + l.qty * l.price; }, 0));
+    document.getElementById("p3-force").hidden = !(d.src === "rule" && !ovr && !saved);
+    document.getElementById("p3-out").innerHTML = outHtml();
+    if (view === "rules") testLine();
+  }
+  function touch() { saved = null; fix = null; formErr = null; }
+
+  function save() {
+    var d = decide(), f = finalGroup(d);
+    formErr = null; fix = null;
+    if (d.src === "none") { saved = null; document.getElementById("p3-out").innerHTML = '<div class="p3-err"><span><b>Not saved.</b> Add a line first.</span></div>'; return; }
+    if (!f.group) { formErr = "Pick a group, the model was not sure."; saved = null; update(); return; }
+    var msg = "Group " + esc(gname(f.group)) + ", ";
+    if (f.src === "rule") msg += staff() ? "set by Acme rule " + rno(d.rule) + "." : "set automatically.";
+    else if (f.src === "override" && !staff()) msg += "set by " + esc(ovr.by) + ".";
+    else if (f.src === "override") msg += "override by " + esc(ovr.by) + ' from rule ' + rno(d.rule) + ', reason "' + esc(ovr.reason) + '". Logged.';
+    else if (f.src === "model") msg += "suggested by the model.";
+    else msg += "picked by " + esc(NAMES[role]) + ". Logged with the top 3 suggestions.";
+    if (staff() && d.src === "rule" && d.conflict) msg += " Flagged: lines hit different rules.";
+    saved = msg; update();
+  }
+  function force() {
+    var d = decide(); if (d.src !== "rule" || ovr) return;
+    var m = model(lines[d.line].desc), alt = m[0][0] === d.group ? m[1][0] : m[0][0];
+    save();
+    fix = { group: d.group, sent: alt, rule: d.rule };
+    update();
+  }
+
+  function renderDlg() {
+    var d = decide(); if (d.src !== "rule") return;
+    var h = '<div class="m-head"><h3 id="p3-dlg-title">Change the group</h3><button class="x" type="button" data-act="close" aria-label="Close">×</button></div>';
+    h += '<p class="m-text">Acme rule ' + rno(d.rule) + ' puts "' + esc(lines[d.line].desc) + '" in ' + esc(gname(d.group)) + ". Your change, name and reason are logged on the request.</p>";
+    h += '<div class="m-body"><select class="p3-in" id="p3-dg" aria-label="New group"><option value="">Choose a group</option>' + GROUPS.filter(function (g) { return g[0] !== d.group; }).map(function (g) { return '<option value="' + g[0] + '">' + esc(g[1]) + "</option>"; }).join("") + "</select>";
+    h += '<div class="reasons"><button type="button" data-q="Used for another budget">Used for another budget</button><button type="button" data-q="Rule is wrong for this item">Rule is wrong for this item</button><button type="button" data-q="Acme finance asked for it">Acme finance asked for it</button></div>';
+    h += '<input class="p3-in" id="p3-dr" type="text" placeholder="Reason, required" aria-label="Reason" autocomplete="off"></div>';
+    h += '<div class="m-foot"><button class="btn ghost" type="button" data-act="close">Cancel</button><button class="btn teal" type="button" data-act="apply" disabled>Change group</button></div>';
+    dlg.innerHTML = h;
+  }
+  function dlgReady() {
+    var g = document.getElementById("p3-dg"), r = document.getElementById("p3-dr"), b = dlg.querySelector('[data-act="apply"]');
+    if (b) b.disabled = !(g.value && r.value.trim());
+  }
+
+  function ruleCard(r, i) {
+    if (editing === r.id) return formHtml(r);
+    var h = '<div class="pline"><div class="top2"><span class="p3-n">' + (i + 1) + '</span><div class="d"><div class="row">' + r.keywords.map(function (k) { return '<span class="chip out">' + esc(k) + "</span>"; }).join("") + "</div></div></div>";
+    h += '<div class="row"><span class="muted">→</span><span class="chip cat">' + esc(gname(r.group)) + "</span>" + (r.max !== null ? '<span class="chip off">Up to ' + eur(r.max) + " per line</span>" : "") + "</div>";
+    if (r.reason) h += '<span class="muted p3-small">' + esc(r.reason) + "</span>";
+    h += '<div class="row"><span class="muted p3-small">' + esc(r.by) + ", " + esc(r.at) + '</span><span class="spacer"></span>';
+    h += '<button class="btn ghost" type="button" data-up="' + i + '" aria-label="Move up"' + (i === 0 ? " disabled" : "") + ">↑</button>";
+    h += '<button class="btn ghost" type="button" data-down="' + i + '" aria-label="Move down"' + (i === rules.length - 1 ? " disabled" : "") + ">↓</button>";
+    h += '<button class="btn ghost" type="button" data-edit="' + esc(r.id) + '">Edit</button><button class="btn ghost" type="button" data-rdel="' + i + '">Delete</button></div></div>';
+    return h;
+  }
+  function formHtml(r) {
+    var h = '<div class="p3-form" data-form="' + esc(r ? r.id : "new") + '"><b style="font-size:13px">' + (r ? "Edit rule " + rno(r) : "New rule, added at the bottom") + "</b>";
+    h += '<label>Keywords, comma separated, EN or DE<input class="p3-in" data-k="kw" type="text" value="' + esc(r ? r.keywords.join(", ") : "") + '" autocomplete="off"></label>';
+    h += '<label>Group<select class="p3-in" data-k="group"><option value="">Choose a group</option>' + GROUPS.map(function (g) { return '<option value="' + g[0] + '"' + (r && r.group === g[0] ? " selected" : "") + ">" + esc(g[1]) + "</option>"; }).join("") + "</select></label>";
+    h += '<label>Reason, shown to buyers and admins<input class="p3-in" data-k="reason" type="text" value="' + esc(r ? r.reason : "") + '" autocomplete="off"></label>';
+    h += '<label>Only up to this line total in €, optional<input class="p3-in" data-k="max" type="text" inputmode="decimal" value="' + (r && r.max !== null ? r.max : "") + '"></label>';
+    h += '<div class="row"><span class="muted p3-small" data-k="err"></span><span class="spacer"></span><button class="btn ghost" type="button" data-act="rcancel">Cancel</button><button class="btn teal" type="button" data-act="rsave">Save rule</button></div></div>';
+    return h;
+  }
+  function renderRules() {
+    var h = editing === "new" ? formHtml(null) : "";
+    h += rules.length ? rules.map(ruleCard).join("") : '<div class="empty">No rules. Every line goes to the model.</div>';
+    document.getElementById("p3-rlist").innerHTML = h;
+    testLine();
+  }
+  function saveRule(form) {
+    var get = function (k) { return form.querySelector('[data-k="' + k + '"]'); };
+    var kws = get("kw").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    var g = parseInt(get("group").value, 10), mx = get("max").value.trim();
+    var err = !kws.length ? "Add at least one keyword." : !g ? "Choose a group." : mx && !(num(mx) > 0) ? "Max must be a number above 0." : "";
+    if (err) { get("err").textContent = err; get("err").style.color = "var(--warn)"; return; }
+    var id = form.dataset.form, r;
+    if (id === "new") { r = { id: "r" + (nextRule++) }; rules.push(r); }
+    else r = rules.filter(function (x) { return x.id === id; })[0];
+    r.keywords = kws; r.group = g; r.reason = get("reason").value.trim(); r.max = mx ? num(mx) : null;
+    r.by = NAMES[role]; r.at = "just now";
+    editing = null; touch(); renderRules(); update();
+  }
+  function testLine() {
+    var q = document.getElementById("p3-tq").value, a = document.getElementById("p3-ta").value, out = document.getElementById("p3-tres");
+    if (!norm(q)) { out.innerHTML = '<span class="muted p3-small">Type a line to see which rule fits.</span>'; return; }
+    var total = a.trim() ? num(a) : 0, rf = ruleFor(q, total), h = "";
+    rf.skipped.forEach(function (r) { h += '<span class="chip off">Rule ' + rno(r) + " skipped, over " + eur(r.max) + "</span>"; });
+    if (rf.rule) h += '<span class="chip cat">Rule ' + rno(rf.rule) + ' fits, "' + esc(rf.kw) + '": ' + esc(gname(rf.rule.group)) + ", locked</span>";
+    else {
+      var m = model(q);
+      h += m[0][1] >= SURE ? '<span class="chip off">No rule fits. Model picks ' + esc(gname(m[0][0])) + "</span>" : '<span class="chip warn">No rule fits. Model not sure, a person picks</span>';
+    }
+    out.innerHTML = '<div class="row">' + h + "</div>";
+  }
+
+  function setRole(r) {
+    role = r;
+    document.querySelectorAll("#p3-roles button").forEach(function (b) { b.classList.toggle("on", b.dataset.role === r); });
+    document.getElementById("p3-rtab").hidden = r !== "admin";
+    if (r !== "admin" && view === "rules") setView("form");
+    saved = null; fix = null; formErr = null;
+    update();
+  }
+  function setView(v) {
+    view = v;
+    document.querySelectorAll("#p3 .p3-tab").forEach(function (b) { b.classList.toggle("on", b.dataset.view === v); });
+    document.getElementById("p3-form-view").hidden = v !== "form";
+    document.getElementById("p3-rules-view").hidden = v !== "rules";
+    if (v === "rules") renderRules(); else buildLines();
+  }
+  function reset() {
+    rules = [
+      { id: "r1", keywords: ["kabelbinder", "cable tie"], group: 11, reason: "Booked under Electrical Engineering in Acme's ledger", max: null, by: "Jana Weber", at: "9 Nov" },
+      { id: "r2", keywords: ["toner", "druckerpatrone", "printer cartridge"], group: 29, reason: "Printer supplies come out of the IT budget", max: null, by: "Jana Weber", at: "9 Nov" },
+      { id: "r3", keywords: ["abo", "abonnement", "subscription", "saas"], group: 40, reason: "Small software is office spend at Acme", max: 500, by: "Jana Weber", at: "9 Nov" }
+    ];
+    nextRule = 4; nextLine = 0; lines = []; ovr = null; pick = null; picking = false; editing = null;
+    touch();
+    addLine(0);
+  }
+  function addLine(t) { var x = TRY[t]; lines.push({ id: nextLine++, desc: x[0], qty: x[1], price: x[2] }); }
+
+  var dlg = document.getElementById("p3-dlg");
+
+  document.getElementById("p3-roles").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) setRole(b.dataset.role); });
+  document.querySelectorAll("#p3 .p3-tab").forEach(function (b) { b.addEventListener("click", function () { setView(b.dataset.view); }); });
+
+  var lb = document.getElementById("p3-lines");
+  lb.addEventListener("input", function (e) {
+    var t = e.target, i = t.dataset.i; if (i === undefined) return;
+    var l = lines[+i], f = t.dataset.f;
+    if (f === "desc") l.desc = t.value; else if (f === "qty") l.qty = Math.max(0, Math.round(num(t.value))); else l.price = Math.max(0, num(t.value));
+    touch(); update();
+  });
+  lb.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-del]"); if (!b) return;
+    lines.splice(+b.dataset.del, 1); touch(); buildLines();
+  });
+  document.getElementById("p3-addline").addEventListener("click", function () {
+    lines.push({ id: nextLine++, desc: "", qty: 1, price: 0 }); touch(); buildLines();
+    var ins = lb.querySelectorAll(".p3-desc"); if (ins.length) ins[ins.length - 1].focus();
+  });
+
+  var gp = document.getElementById("p3-gp");
+  gp.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var d = decide(), a = b.dataset.act;
+    if (b.dataset.pick) { pick = { key: keyOf(d), group: +b.dataset.pick }; formErr = null; saved = null; }
+    else if (a === "ovr") { renderDlg(); dlg.showModal(); return; }
+    else if (a === "undo-ovr") { ovr = null; saved = null; }
+    else if (a === "picking") picking = true;
+    else return;
+    update();
+  });
+  gp.addEventListener("change", function (e) {
+    if (e.target.id !== "p3-other" || !e.target.value) return;
+    var d = decide(); pick = { key: keyOf(d), group: +e.target.value }; formErr = null; saved = null; update();
+  });
+
+  dlg.addEventListener("input", dlgReady);
+  dlg.addEventListener("change", dlgReady);
+  dlg.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.q) { document.getElementById("p3-dr").value = b.dataset.q; dlg.querySelectorAll("[data-q]").forEach(function (x) { x.classList.toggle("on", x === b); }); dlgReady(); return; }
+    if (b.dataset.act === "close") { dlg.close(); return; }
+    if (b.dataset.act === "apply" && !b.disabled) {
+      var d = decide();
+      ovr = { rule: d.rule.id, group: +document.getElementById("p3-dg").value, reason: document.getElementById("p3-dr").value.trim(), by: NAMES[role] + ", " + ROLES[role] };
+      touch(); dlg.close(); update();
+    }
+  });
+
+  document.getElementById("p3-save").addEventListener("click", save);
+  document.getElementById("p3-force").addEventListener("click", force);
+  document.getElementById("p3-out").addEventListener("click", function (e) { if (e.target.closest('[data-act="again"]')) { saved = null; update(); } });
+  document.querySelectorAll("#p3 [data-p3try]").forEach(function (b) {
+    b.addEventListener("click", function () { addLine(+b.dataset.p3try); touch(); if (view !== "form") setView("form"); else buildLines(); });
+  });
+  document.getElementById("p3-reset").addEventListener("click", function () { reset(); setView("form"); });
+
+  document.getElementById("p3-radd").addEventListener("click", function () { editing = "new"; renderRules(); var f = document.querySelector('#p3-rlist [data-k="kw"]'); if (f) f.focus(); });
+  document.getElementById("p3-tq").addEventListener("input", testLine);
+  document.getElementById("p3-ta").addEventListener("input", testLine);
+  document.getElementById("p3-rlist").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b || b.disabled) return;
+    var d = b.dataset, t;
+    if (d.up) { t = rules[+d.up]; rules[+d.up] = rules[+d.up - 1]; rules[+d.up - 1] = t; touch(); }
+    else if (d.down) { t = rules[+d.down]; rules[+d.down] = rules[+d.down + 1]; rules[+d.down + 1] = t; touch(); }
+    else if (d.edit) editing = d.edit;
+    else if (d.rdel) { rules.splice(+d.rdel, 1); touch(); }
+    else if (d.act === "rcancel") editing = null;
+    else if (d.act === "rsave") { saveRule(b.closest(".p3-form")); return; }
+    else return;
+    renderRules(); update();
+  });
+
+  role = "requester"; view = "form";
+  reset();
+  setView("form");
+})();</script>
+</section>

@@ -6,7 +6,8 @@ import Link from 'next/link';
 import * as api from '@/lib/api';
 import { Button, Input, Alert } from '@/components/base';
 import { useCommodityGroups } from '@/lib/hooks/useCommodityGroups';
-import type { ProcurementRequestWithDetails } from '@/types/database';
+import type { Commodity, ProcurementRequestWithDetails } from '@/types/database';
+import { AutoSetChip, AutoSetHelper, CorrectedNote, LockedGroupField, isStaff, ruleLine } from '@/components/CommodityAuto';
 
 const STATUS_BADGE: Record<string, string> = {
   open: 'bg-green-100 text-green-800',
@@ -30,6 +31,8 @@ export default function RequestDetailPage() {
   const [request, setRequest] = useState<ProcurementRequestWithDetails | null>(null);
   const [activity, setActivity] = useState<api.RequestActivity[]>([]);
   const [role, setRole] = useState<api.MemberRole | null>(null);
+  const [orgName, setOrgName] = useState<string | null>(null);
+  const [savedCommodity, setSavedCommodity] = useState<Commodity | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -52,6 +55,7 @@ export default function RequestDetailPage() {
       ]);
       setRequest(req);
       setRole(org.role);
+      setOrgName(org.name ?? null);
       setActivity(acts);
       const url = await api.requests.documentUrl(id).catch(() => null);
       setPdfUrl(url);
@@ -83,7 +87,7 @@ export default function RequestDetailPage() {
   };
 
   const changeStatus = async (status: 'open' | 'in_progress' | 'closed') => {
-    setBusy(true); setError(''); setSuccess('');
+    setBusy(true); setError(''); setSuccess(''); setSavedCommodity(null);
     try {
       await api.requests.updateStatus(id, status);
       setSuccess('Status updated.');
@@ -95,7 +99,7 @@ export default function RequestDetailPage() {
   };
 
   const decide = async (decision: 'approved' | 'rejected') => {
-    setBusy(true); setError(''); setSuccess('');
+    setBusy(true); setError(''); setSuccess(''); setSavedCommodity(null);
     try {
       await api.requests.decideApproval(id, decision);
       setSuccess(`Request ${decision}.`);
@@ -134,9 +138,9 @@ export default function RequestDetailPage() {
 
   const saveEdit = async () => {
     if (!request) return;
-    setBusy(true); setError(''); setSuccess('');
+    setBusy(true); setError(''); setSuccess(''); setSavedCommodity(null);
     try {
-      await api.requests.update(id, {
+      const updated = await api.requests.update(id, {
         requestorName: form.requestorName,
         title: form.title,
         vendorName: form.vendorName,
@@ -153,6 +157,7 @@ export default function RequestDetailPage() {
         })),
       });
       setEditing(false);
+      setSavedCommodity(updated?.commodity ?? null);
       setSuccess('Request updated.');
       await refresh();
     } catch (err) {
@@ -182,6 +187,10 @@ export default function RequestDetailPage() {
     );
   }
 
+  const commodity = request.commodity?.locked ? request.commodity : null;
+  const staff = isStaff(role, request.commodity);
+  const groupName = (gid: number | null | undefined, fallback?: string | null) =>
+    fallback || commodityGroups?.find((g) => g.id === gid)?.name || (gid ? `Group ${gid}` : '');
   const canApprove = (role === 'buyer' || role === 'admin') && request.approval_status === 'pending';
 
   return (
@@ -219,6 +228,19 @@ export default function RequestDetailPage() {
 
       {error && <Alert variant="error" className="mb-6">{error}</Alert>}
       {success && <Alert variant="success" className="mb-6">{success}</Alert>}
+      {success && (
+        <CorrectedNote
+          commodity={savedCommodity}
+          staff={staff}
+          orgName={orgName}
+          groupName={groupName(savedCommodity?.group_id, savedCommodity?.group_name)}
+          fromName={
+            savedCommodity?.corrected_from_group_id
+              ? groupName(savedCommodity.corrected_from_group_id)
+              : null
+          }
+        />
+      )}
 
       {/* Status control */}
       <div className="lio-card p-4 mb-6 flex flex-wrap items-center gap-3">
@@ -249,12 +271,20 @@ export default function RequestDetailPage() {
               <Field label="Department" value={request.department || '—'} />
               <Field label="Vendor" value={request.vendor_name} />
               <Field label="VAT ID" value={request.vat_id || '—'} />
-              <Field
-                label="Commodity Group"
-                value={request.commodity_groups
-                  ? `${request.commodity_groups.category} · ${request.commodity_groups.name}`
-                  : '—'}
-              />
+              <div>
+                <dt className="text-ink/45 font-medium flex items-center gap-2">
+                  Commodity Group
+                  {commodity && <AutoSetChip />}
+                </dt>
+                <dd className="text-ink mt-0.5">
+                  {request.commodity_groups
+                    ? `${request.commodity_groups.category}, ${request.commodity_groups.name}`
+                    : '—'}
+                </dd>
+                {commodity && staff && (
+                  <dd className="mt-1 text-xs text-ink/55">{ruleLine(commodity, orgName)}</dd>
+                )}
+              </div>
               <Field label="Total Cost" value={euro(request.total_cost)} />
             </dl>
           </div>
@@ -342,17 +372,27 @@ export default function RequestDetailPage() {
                   onChange={(e) => setForm({ ...form, vatId: e.target.value })} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ink/70 mb-1.5">Commodity Group *</label>
-                <select
-                  value={form.commodityGroupId || ''}
-                  onChange={(e) => setForm({ ...form, commodityGroupId: Number(e.target.value) })}
-                  className="w-full h-11 px-3.5 border border-line rounded-xl text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-accent-deep/60"
-                >
-                  <option value="">Select a commodity group</option>
-                  {commodityGroups?.map((g) => (
-                    <option key={g.id} value={g.id}>{g.id} - {g.category} - {g.name}</option>
-                  ))}
-                </select>
+                <label className="flex items-center gap-2 text-sm font-medium text-ink/70 mb-1.5">
+                  Commodity Group *
+                  {commodity && <AutoSetChip />}
+                </label>
+                {commodity ? (
+                  <>
+                    <LockedGroupField name={groupName(commodity.group_id, commodity.group_name)} />
+                    <AutoSetHelper commodity={commodity} staff={staff} orgName={orgName} />
+                  </>
+                ) : (
+                  <select
+                    value={form.commodityGroupId || ''}
+                    onChange={(e) => setForm({ ...form, commodityGroupId: Number(e.target.value) })}
+                    className="w-full h-11 px-3.5 border border-line rounded-xl text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-accent-deep/60"
+                  >
+                    <option value="">Select a commodity group</option>
+                    {commodityGroups?.map((g) => (
+                      <option key={g.id} value={g.id}>{g.id} - {g.category} - {g.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <Input label="Total Cost (€) *" type="number" step="0.01" value={form.totalCost}
                 onChange={(e) => setForm({ ...form, totalCost: parseFloat(e.target.value) || 0 })} />

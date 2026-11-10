@@ -2,6 +2,7 @@
 
 import { apiFetch, apiFetchObjectUrl, clearToken, setToken } from './client';
 import type {
+  Categorisation,
   CommodityGroup,
   OrganizationInvite,
   OrganizationMemberWithProfile,
@@ -54,12 +55,22 @@ export interface MembersResponse {
   invites: OrganizationInvite[];
 }
 
+export type CatalogStatus = 'switched' | 'ignored' | 'no_match' | 'picked';
+
+export interface OrderLineCatalog {
+  status: CatalogStatus;
+  article_number: string | null;
+  offer_price: number | null;
+  catalog_price: number | null;
+}
+
 export interface OrderLineInput {
   positionDescription: string;
   unitPrice: number;
   amount: number;
   unit: string;
   totalPrice: number;
+  catalog?: OrderLineCatalog;
 }
 
 export interface CreateRequestInput {
@@ -71,6 +82,7 @@ export interface CreateRequestInput {
   totalCost: number;
   department: string;
   orderLines: OrderLineInput[];
+  extraction?: ExtractionResponse;
 }
 
 export interface UpdateRequestInput {
@@ -84,13 +96,28 @@ export interface UpdateRequestInput {
   orderLines: OrderLineInput[];
 }
 
+export interface CategoriseLineInput {
+  id: string;
+  description: string;
+  quantity: number;
+  unit_price: string;
+}
+
+export interface ExtractedOrderLine {
+  positionDescription: string | null;
+  unitPrice: number | null;
+  amount: number | null;
+  unit: string | null;
+  totalPrice: number | null;
+}
+
 export interface ExtractedVendorData {
-  title: string;
-  vendorName: string;
-  vatId: string;
-  department: string;
-  orderLines: OrderLineInput[];
-  totalCost: number;
+  title: string | null;
+  vendorName: string | null;
+  vatId: string | null;
+  department: string | null;
+  orderLines: ExtractedOrderLine[];
+  totalCost: number | null;
   commodityGroupId: number | null;
   commodityGroupName: string | null;
 }
@@ -100,6 +127,21 @@ export interface ExtractionResponse {
   data?: ExtractedVendorData;
   error?: string;
   missingFields?: string[];
+  totals?: ExtractionTotals;
+  reading?: {
+    ocrLines: string[];
+    pagesWithoutText: number[];
+    pageImagesSent: boolean;
+  };
+}
+
+export interface ExtractionTotals {
+  computed: number;
+  printed: number | null;
+  match: boolean | null;
+  vat?: number | null;
+  gross?: number | null;
+  grossMatch?: boolean | null;
 }
 
 export interface Supplier {
@@ -125,6 +167,34 @@ export interface Article {
   unit: string;
   quantity: string;
   created_at: string;
+}
+
+export interface CatalogArticle {
+  article_number: string;
+  description: string;
+  supplier_name: string;
+  unit: string;
+  unit_price: number;
+  currency: string;
+}
+
+export interface CatalogSuggestion {
+  match: CatalogArticle | null;
+}
+
+export interface CatalogSearchResult {
+  items: CatalogArticle[];
+}
+
+function toCatalogArticle(raw: CatalogArticle): CatalogArticle {
+  return {
+    article_number: String(raw.article_number),
+    description: String(raw.description ?? ''),
+    supplier_name: String(raw.supplier_name ?? ''),
+    unit: String(raw.unit ?? ''),
+    unit_price: Number(raw.unit_price),
+    currency: String(raw.currency ?? 'EUR'),
+  };
 }
 
 export interface ArticlePage {
@@ -273,6 +343,10 @@ export const commodityGroups = {
   list(): Promise<CommodityGroup[]> {
     return apiFetch('/commodity-groups');
   },
+
+  categorise(lines: CategoriseLineInput[]): Promise<Categorisation> {
+    return apiFetch('/categorise', { body: { lines } });
+  },
 };
 
 // ============================================================================
@@ -315,6 +389,19 @@ export const articles = {
   count(): Promise<{ count: number }> {
     return apiFetch('/articles/count');
   },
+
+  async suggest(q: string, vendor?: string): Promise<CatalogSuggestion> {
+    const qs = new URLSearchParams({ q });
+    if (vendor?.trim()) qs.set('vendor', vendor.trim());
+    const result = await apiFetch<CatalogSuggestion>(`/articles/suggest?${qs.toString()}`);
+    return { match: result?.match ? toCatalogArticle(result.match) : null };
+  },
+
+  async search(q: string, limit = 5): Promise<CatalogSearchResult> {
+    const qs = new URLSearchParams({ q, limit: String(limit) });
+    const result = await apiFetch<CatalogSearchResult>(`/articles/search?${qs.toString()}`);
+    return { items: (result?.items ?? []).map(toCatalogArticle) };
+  },
 };
 
 // ============================================================================
@@ -332,5 +419,10 @@ export const pdf = {
 export const extraction = {
   extract(text: string): Promise<ExtractionResponse> {
     return apiFetch('/extraction', { body: { text } });
+  },
+  fromPdf(file: File): Promise<ExtractionResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiFetch('/extraction/pdf', { formData });
   },
 };

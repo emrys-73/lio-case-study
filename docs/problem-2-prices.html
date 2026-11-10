@@ -1,0 +1,134 @@
+<title>Lio Negotiated Prices</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Style: copied from playbook.html (brief PDF look). */
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --body: #1f2328;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #f5f6f8;
+  --accent: #136f7d;
+  --dark: #111317;
+  --sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 820px; margin: 0 auto; padding: 40px max(16px, env(safe-area-inset-right, 0px)) 96px max(16px, env(safe-area-inset-left, 0px)); }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid var(--accent); }
+.logo { display: flex; align-items: center; gap: 6px; font-size: 20px; color: var(--ink); letter-spacing: -.01em; }
+.logo svg { height: 26px; width: auto; display: block; }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+
+h1 { font-size: clamp(34px, 6vw, 44px); line-height: 1.1; font-weight: 700; color: var(--ink); margin: 36px 0 4px; letter-spacing: -.02em; }
+.sub { font-size: 21px; color: var(--muted); font-weight: 300; margin: 0; }
+h2 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 48px 0 14px; }
+h3 { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0; }
+p { margin: 0 0 12px; }
+b { color: var(--ink); }
+
+ul { margin: 0; padding-left: 22px; list-style: none; }
+li { position: relative; margin: 6px 0; }
+li::before { content: ""; position: absolute; left: -15px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+
+code { font-family: var(--mono); font-size: .84em; background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 3px; }
+.panel { background: var(--panel); border-radius: 6px; padding: 18px 22px; margin: 12px 0; }
+.note { color: var(--faint); }
+a { color: var(--accent); font-weight: 700; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.card { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 14px 0; }
+.card.bonus { border-left-color: var(--dark); }
+.card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.badge { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.bonus .badge { background: var(--dark); }
+.quote { border-left: 3px solid var(--line); padding-left: 14px; color: #4b5563; font-style: italic; margin: 0 0 12px; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin: 0 0 4px; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th { background: var(--dark); color: #fff; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 12px 16px; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n { width: 40px; font-weight: 700; color: var(--accent); }
+td.t { width: 70px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+th.t { text-align: right; }
+tfoot td { color: var(--muted); border-bottom: 0; }
+
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 32px; }
+.cols > div { min-width: 0; }
+.cols h3 { margin-top: 10px; }
+
+footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--faint); }
+
+@media (max-width: 600px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .card, .panel { padding: 16px; }
+  th, td { padding: 10px; }
+}
+pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.55; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; margin: 12px 0; overflow-x: auto; white-space: pre; color: var(--body); }
+pre mark { background: #fde68a; color: var(--ink); padding: 0 2px; border-radius: 2px; }
+.status { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.status.no { color: #b42318; }
+.status.wait { color: var(--accent); }
+.nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 18px 0 0; font-size: 14px; }
+.nav .here { color: var(--ink); font-weight: 700; }
+</style>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="logo"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">PROBLEM 2</span>
+  </div>
+
+  <h1>Negotiated Prices</h1>
+  <p class="sub">Suggest Acme's catalog articles when a request is made</p>
+  <div class="nav"><a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5">All problems ↗</a><a href="https://claude.ai/artifact/2WE1vvNYGuj9t99Z37f6w5">Playbook ↗</a><a href="https://claude.ai/artifact/2wyQCsPwmHWkDDEDTkAdz4">App Map ↗</a><a href="https://claude.ai/artifact/UtevwtC6sm7Xkag6ZXdJ2x">Problem 1 ↗</a><span class="here">Problem 2</span><a href="https://claude.ai/artifact/9dEtpWB8BWE3T43SttFqjN">Screens ↗</a><a href="https://claude.ai/artifact/GREGtJRcVsswTD8zhvEWgK">Problem 3 ↗</a><a href="https://claude.ai/artifact/JuwhuY7yNAAWq8Bw7jP6kq">Bonus ↗</a></div>
+
+  <h2>Acme said</h2>
+  <p class="quote">"When someone creates a request, I want the system to suggest the matching articles we already have on catalog, so we actually use those agreements."</p>
+
+  <h2>Do we have tests?</h2>
+  <p><span class="status no">Not for this</span></p>
+  <ul>
+    <li>One test checks the article list is per company, paged and searchable.</li>
+    <li>Nothing matches a request to an article. The feature doesn't exist.</li>
+  </ul>
+
+  <h2>What exists today</h2>
+  <ul>
+    <li><b>Article</b> table, per company: number, supplier, description, negotiated <code>unit_price</code>, unit, pack quantity.</li>
+    <li>1,920 articles in the seed file.</li>
+    <li><code>GET /articles?search=</code>: plain text match on description or number.</li>
+    <li>An Articles screen to browse them.</li>
+    <li><b>Missing:</b> any link between an order line and an article.</li>
+  </ul>
+  <pre>{'article_number': 'LIN-00862', 'supplier_name': 'Lindqvist Supply B.V.',
+ 'description': 'Toner cartridge black, high-yield',
+ 'unit_price': 186.0, 'unit': 'piece', 'quantity': 10.0}</pre>
+
+  <h2>Tests to write first</h2>
+  <p><span class="status wait">Needs your OK</span></p>
+  <ul>
+    <li>A line "Toner schwarz" suggests the Lindqvist black toner.</li>
+    <li>Only Acme's articles come back. Never another company's.</li>
+    <li>No good match returns nothing, not a random article.</li>
+    <li>The suggestion shows the negotiated price and the supplier.</li>
+    <li>German and English wording both match.</li>
+    <li>The picked article lands in the activity log, with its number and price.</li>
+  </ul>
+
+  <h2>Decisions before any code</h2>
+  <ul>
+    <li><b>How to match:</b> the same search that shortlists commodity groups. Word match, embeddings or both, picked by an eval: <a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5#search">Shared search ↗</a>.</li>
+    <li><b>When:</b> after PDF extraction, while typing a line, or both?</li>
+    <li><b>Nudge or block:</b> show a hint, or require a reason to go off-catalog?</li>
+    <li><b>Store the link (decided 10 Nov):</b> the picked article is logged in the activity log JSON. No schema change. A column on the order line is for later.</li>
+  </ul>
+
+  <footer><span>Problem 2 of 4. Tests first, then build.</span><span>Lio FDE case study</span></footer>
+</main>

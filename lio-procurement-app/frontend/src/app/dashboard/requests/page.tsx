@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import * as api from '@/lib/api';
 import { Alert } from '@/components/base';
+import { AutoApprovedChip } from '@/components/AutoApprovedChip';
 import type { ProcurementRequestWithDetails } from '@/types/database';
 import { useCommodityGroups } from '@/lib/hooks/useCommodityGroups';
 
@@ -167,13 +168,16 @@ export default function RequestsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          APPROVAL_BADGE[request.approval_status]
-                        }`}
-                      >
-                        {titleCase(request.approval_status)}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            APPROVAL_BADGE[request.approval_status]
+                          }`}
+                        >
+                          {titleCase(request.approval_status)}
+                        </span>
+                        <AutoApprovedChip request={request} />
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-ink">
                       €{(request.total_cost || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })}

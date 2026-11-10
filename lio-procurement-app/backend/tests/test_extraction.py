@@ -1,0 +1,179 @@
+import json
+
+from app.schemas.extraction import ExtractedVendorData, OrderLineData
+from app.services.extraction import REPLY_SCHEMA, find_missing_fields, parse_reply, request_params
+
+HOFFMANN_REPLY = {
+    "title": "Industrial Grinding Machine Purchase",
+    "vendorName": "Hoffmann Nurnberg GmbH Qualitatswerkzeuge",
+    "vatId": None,
+    "department": "Einkauf / Technik",
+    "orderLines": [
+        {"positionDescription": "Schleifmaschine HN-GS 450", "unitPrice": 15000.0,
+         "amount": 1, "unit": "pieces", "totalPrice": 15000.0},
+        {"positionDescription": "Lieferung und Montage", "unitPrice": 2000.0,
+         "amount": 1, "unit": "lump sum", "totalPrice": 2000.0},
+    ],
+    "totalCost": 17000.0,
+    "commodityGroupId": 45,
+    "commodityGroupName": "Production Machinery",
+}
+
+
+def test_null_vat_id_is_kept_not_a_crash():
+    data = parse_reply(json.dumps(HOFFMANN_REPLY))
+    assert data.vat_id is None
+    assert data.vendor_name == "Hoffmann Nurnberg GmbH Qualitatswerkzeuge"
+    assert len(data.order_lines) == 2
+
+
+def test_null_vat_id_is_listed_as_missing():
+    data = parse_reply(json.dumps(HOFFMANN_REPLY))
+    assert find_missing_fields(data) == ["VAT ID"]
+
+
+def test_every_field_can_be_null():
+    reply = {k: None for k in HOFFMANN_REPLY}
+    data = parse_reply(json.dumps(reply))
+    assert data.order_lines == []
+    assert find_missing_fields(data) == [
+        "Title/Short Description", "Vendor Name", "VAT ID", "Department",
+        "Order Lines", "Total Cost", "Commodity Group",
+    ]
+
+
+def test_fields_left_out_are_missing_not_a_crash():
+    data = parse_reply(json.dumps({"vendorName": "styleGREEN"}))
+    assert data.vendor_name == "styleGREEN"
+    assert "VAT ID" in find_missing_fields(data)
+
+
+def test_line_with_null_values_is_kept():
+    reply = dict(HOFFMANN_REPLY, orderLines=[
+        {"positionDescription": "Versandkosten", "unitPrice": None,
+         "amount": None, "unit": None, "totalPrice": 113.85},
+    ])
+    line = parse_reply(json.dumps(reply)).order_lines[0]
+    assert line.total_price == 113.85
+    assert line.unit_price is None and line.amount is None and line.unit is None
+
+
+def test_blank_strings_still_count_as_missing():
+    reply = dict(HOFFMANN_REPLY, vatId="  ", department="")
+    assert find_missing_fields(parse_reply(json.dumps(reply))) == ["VAT ID", "Department"]
+
+
+def test_reply_in_code_fences_still_parses():
+    data = parse_reply("```json\n" + json.dumps(HOFFMANN_REPLY) + "\n```")
+    assert data.total_cost == 17000.0
+
+
+def _objects(schema):
+    if schema.get("type") == "object" or "object" in schema.get("type", []):
+        yield schema
+    for value in schema.get("properties", {}).values():
+        yield from _objects(value)
+    if "items" in schema:
+        yield from _objects(schema["items"])
+
+
+def test_reply_schema_follows_openai_strict_rules():
+    for obj in _objects(REPLY_SCHEMA):
+        assert obj["additionalProperties"] is False
+        assert sorted(obj["required"]) == sorted(obj["properties"])
+
+
+def test_reply_schema_and_parser_use_the_same_names():
+    top = set(REPLY_SCHEMA["properties"])
+    line = set(REPLY_SCHEMA["properties"]["orderLines"]["items"]["properties"])
+    assert top <= {f.alias or n for n, f in ExtractedVendorData.model_fields.items()}
+    assert line <= {f.alias or n for n, f in OrderLineData.model_fields.items()}
+
+
+def test_model_call_asks_for_the_strict_schema():
+    params = request_params("Angebot", "1 | IT | Software")
+    fmt = params["response_format"]
+    assert fmt["type"] == "json_schema"
+    assert fmt["json_schema"]["strict"] is True
+    assert fmt["json_schema"]["schema"] == REPLY_SCHEMA
+    assert params["temperature"] == 0
+
+
+def test_each_line_says_if_it_is_an_item_or_a_charge():
+    kind = REPLY_SCHEMA["properties"]["orderLines"]["items"]["properties"]["kind"]
+    assert kind == {"type": "string", "enum": ["item", "charge"]}
+    reply = dict(HOFFMANN_REPLY, orderLines=[
+        dict(HOFFMANN_REPLY["orderLines"][0], kind="item"),
+        dict(HOFFMANN_REPLY["orderLines"][1], kind="charge"),
+    ])
+    assert [line.kind for line in parse_reply(json.dumps(reply)).order_lines] == ["item", "charge"]
+
+
+def test_alternatives_have_their_own_list_and_stay_out_of_the_lines():
+    assert "alternatives" in REPLY_SCHEMA["properties"]
+    reply = dict(HOFFMANN_REPLY, alternatives=[
+        {"positionDescription": "Alternative 1.1a, nur Ballenmoos", "totalPrice": 1926.0},
+    ])
+    data = parse_reply(json.dumps(reply))
+    assert [a.total_price for a in data.alternatives] == [1926.0]
+    assert len(data.order_lines) == 2
+
+
+def test_alternatives_can_be_null():
+    assert parse_reply(json.dumps(dict(HOFFMANN_REPLY, alternatives=None))).alternatives == []
+
+
+def test_prompt_states_what_right_means():
+    prompt = request_params("Angebot", "1 | IT | Software")["messages"][1]["content"]
+    for rule in ("net total before VAT", "Charges are order lines", "Alternatives",
+                 "not order lines"):
+        assert rule in prompt
+
+
+def _prompt(**kwargs):
+    return request_params("Angebot", "1 | IT | Software", **kwargs)["messages"][1]["content"]
+
+
+def test_prompt_names_the_buyer():
+    prompt = _prompt(buyer_name="ACME Corp")
+    assert "The buyer is ACME Corp." in prompt
+    assert "Never the buyer" in prompt
+
+
+def test_prompt_without_a_buyer_still_says_who_the_vendor_is():
+    prompt = _prompt()
+    assert "The buyer is" not in prompt
+    assert "the company that sent the quote" in prompt
+
+
+def test_extraction_route_passes_the_company_name(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.routers import extraction as route
+
+    seen = {}
+
+    def fake_extract(pdf_text, db, buyer_name=None):
+        seen["buyer_name"] = buyer_name
+        return route.ExtractionResponse(success=False, error="stopped before the model")
+
+    monkeypatch.setattr(route, "extract_vendor_data", fake_extract)
+    client = TestClient(app)
+    token = client.post(
+        "/auth/signin", json={"email": "buyer@acme.com", "password": "demo1234"}
+    ).json()["access_token"]
+    client.post("/extraction", json={"text": "Angebot"},
+                headers={"Authorization": f"Bearer {token}"})
+    assert seen["buyer_name"] == "Acme Corp"
+
+
+def test_vat_and_gross_have_their_own_fields():
+    for name in ("vatAmount", "grossTotal"):
+        assert REPLY_SCHEMA["properties"][name] == {"type": ["number", "null"]}
+    data = parse_reply(json.dumps(dict(HOFFMANN_REPLY, vatAmount=3230.0, grossTotal=20230.0)))
+    assert (data.vat_amount, data.gross_total) == (3230.0, 20230.0)
+
+
+def test_prompt_says_vat_goes_in_its_own_field():
+    assert "VAT is not an order line" in request_params("Angebot", "1 | IT | Software")["messages"][1]["content"]

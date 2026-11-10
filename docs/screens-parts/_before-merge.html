@@ -1,0 +1,743 @@
+<title>Negotiated Prices Screens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Style: copied from playbook.html (brief PDF look). Mockups echo the live app: dark nav, grey ground, white cards, teal total. */
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --body: #1f2328;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #f5f6f8;
+  --accent: #136f7d;
+  --accent-soft: #e7f2f4;
+  --dark: #111317;
+  --app: #f3f4f6;
+  --warn: #9a5b00;
+  --warn-soft: #fdf3e2;
+  --sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid var(--accent); }
+.logo { display: flex; align-items: center; gap: 6px; font-size: 20px; color: var(--ink); letter-spacing: -.01em; }
+.logo svg { height: 26px; width: auto; display: block; }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+h1 { font-size: clamp(34px, 6vw, 44px); line-height: 1.1; font-weight: 700; color: var(--ink); margin: 36px 0 4px; letter-spacing: -.02em; text-wrap: balance; }
+.sub { font-size: 21px; color: var(--muted); font-weight: 300; margin: 0; }
+h2 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 56px 0 14px; display: flex; align-items: center; gap: 10px; }
+h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin: 0; }
+a { color: var(--accent); font-weight: 700; text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul { margin: 0; padding-left: 22px; list-style: none; }
+li { position: relative; margin: 6px 0; }
+li::before { content: ""; position: absolute; left: -15px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+b { color: var(--ink); }
+.nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 18px 0 0; font-size: 14px; }
+.nav .here { color: var(--ink); font-weight: 700; }
+.badge { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 0; }
+.flow a { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px 4px 4px; font-size: 13px; color: var(--ink); }
+.flow a .badge { width: 22px; height: 22px; font-size: 11px; }
+
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; }
+.opt { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.opt-head { display: flex; align-items: center; gap: 8px; }
+.letter { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--ink); font-size: 11px; font-weight: 700; display: grid; place-items: center; color: var(--ink); }
+.pick { margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 9px; }
+.opt.chosen .letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.screen { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--app); font-size: 13px; line-height: 1.4; color: var(--body); }
+.screen .bar { background: var(--dark); height: 26px; display: flex; align-items: center; gap: 6px; padding: 0 12px; color: #fff; font-size: 12px; }
+.screen .bar span { opacity: .5; margin-left: auto; font-size: 11px; }
+.screen .in { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.ui { background: #fff; border: 1px solid #e6e8eb; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.ui-title { font-weight: 700; color: var(--ink); font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.inp { border: 1px solid #d6d9de; border-radius: 8px; padding: 7px 10px; background: #fff; color: var(--ink); display: flex; align-items: center; gap: 8px; min-width: 0; }
+.inp.focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.inp .ph { color: var(--faint); }
+.caret { width: 1px; height: 14px; background: var(--ink); }
+.drop { border: 1px solid #e1e4e8; border-radius: 8px; background: #fff; box-shadow: 0 6px 18px rgba(17,19,23,.08); overflow: hidden; }
+.drow { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-top: 1px solid #f0f1f3; min-width: 0; }
+.drow:first-child { border-top: 0; }
+.drow.hl { background: var(--accent-soft); }
+.drow .d { flex: 1; min-width: 0; }
+.drow .d div:first-child { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drow .s { color: var(--muted); font-size: 11px; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); font-weight: 700; }
+.num small { font-weight: 400; color: var(--muted); }
+.drow.free { color: var(--muted); }
+.line { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #f8f9fa; border-radius: 8px; min-width: 0; flex-wrap: wrap; }
+.line .d { flex: 1; min-width: 120px; color: var(--ink); }
+.line .d small { display: block; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+.chip.cat { background: var(--accent-soft); color: var(--accent); }
+.chip.off { background: #f1f2f4; color: var(--muted); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.out { border-color: #d6d9de; color: var(--ink); background: #fff; }
+.chip .inner { background: #fff; border-radius: 999px; padding: 0 7px; color: var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; background: var(--dark); color: #fff; border: 1px solid var(--dark); white-space: nowrap; cursor: pointer; font-family: inherit; }
+.btn.ghost { background: #fff; color: var(--ink); border-color: #d6d9de; }
+.btn.teal { background: var(--accent); border-color: var(--accent); }
+.strike { text-decoration: line-through; color: var(--faint); font-weight: 400; }
+.sumbar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; background: var(--accent-soft); border: 1px solid #c7e1e5; color: var(--ink); flex-wrap: wrap; }
+.sumbar .grow { flex: 1; min-width: 0; }
+.total { display: flex; justify-content: space-between; align-items: center; background: var(--accent-soft); border: 1px solid #c7e1e5; border-radius: 10px; padding: 10px 12px; color: var(--ink); }
+.total b { color: var(--accent); font-size: 17px; }
+.muted { color: var(--muted); }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.spacer { flex: 1; }
+.tiers { display: grid; gap: 8px; }
+.tier { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: center; }
+.tier .t { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.meter { display: inline-flex; gap: 2px; }
+.meter i { width: 5px; height: 10px; border-radius: 2px; background: #d6d9de; }
+.meter i.on { background: var(--accent); }
+
+.later { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+.open { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 16px 20px; margin-top: 14px; }
+
+/* prototype */
+.proto { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--app); font-size: 14px; line-height: 1.45; }
+.proto .bar { background: var(--dark); color: #fff; height: 34px; display: flex; align-items: center; gap: 18px; padding: 0 16px; font-size: 13px; }
+.proto .bar .on { background: #2a2d33; border-radius: 999px; padding: 2px 10px; }
+.proto .bar .dim { opacity: .55; }
+.proto .in { padding: 18px; display: flex; flex-direction: column; gap: 14px; max-width: 720px; margin: 0 auto; }
+.proto .ui { padding: 16px; gap: 10px; }
+.proto .ui-title { font-size: 15px; }
+.search { position: relative; }
+.search input { width: 100%; border: 1px solid #d6d9de; border-radius: 10px; padding: 10px 12px 10px 34px; font: inherit; color: var(--ink); background: #fff; outline: none; }
+.search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--faint); }
+.search .drop { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 5; max-height: 330px; overflow-y: auto; }
+.search .drow { cursor: pointer; padding: 9px 12px; }
+.search .drow:hover, .search .drow.hl { background: var(--accent-soft); }
+.more { font-size: 11px; color: var(--accent); font-weight: 700; background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; }
+.qty { display: inline-flex; align-items: center; border: 1px solid #d6d9de; border-radius: 999px; background: #fff; }
+.qty button { border: 0; background: none; width: 24px; height: 24px; cursor: pointer; color: var(--ink); font-size: 14px; }
+.qty span { min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; font-size: 13px; }
+.pline { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: #f8f9fa; border-radius: 10px; }
+.pline .top2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pline .d { flex: 1; min-width: 140px; color: var(--ink); }
+.pline .d small { display: block; color: var(--muted); font-size: 12px; }
+.reasons { display: flex; gap: 6px; flex-wrap: wrap; }
+.reasons button { border: 1px solid #d6d9de; background: #fff; border-radius: 999px; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; color: var(--ink); }
+.reasons button:hover { border-color: var(--ink); }
+.x { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; }
+.x:hover { color: var(--ink); }
+.empty { color: var(--faint); text-align: center; padding: 14px 0; font-size: 13px; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drop[hidden] { display: none; }
+.alt { margin-top: 72px; padding-top: 8px; border-top: 2px solid var(--accent); }
+.alt .tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; margin-top: 16px; }
+.alt h2 { margin-top: 10px; }
+.alt > ul { margin-bottom: 18px; }
+#s-lines .chip, .modal .chip { white-space: normal; }
+.modal { border: 0; border-radius: 14px; padding: 0; width: min(540px, calc(100vw - 32px)); max-height: calc(100vh - 48px); color: var(--body); font-family: var(--sans); font-size: 14px; line-height: 1.45; box-shadow: 0 20px 50px rgba(17,19,23,.25); }
+.modal::backdrop { background: rgba(17,19,23,.45); }
+.m-head { display: flex; align-items: flex-start; gap: 10px; padding: 18px 20px 4px; }
+.m-head h3 { font-size: 17px; flex: 1; }
+.m-text { padding: 0 20px; color: var(--muted); margin: 0 0 12px; }
+.m-body { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
+.m-ask { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 8px; }
+.m-ask b { font-size: 13px; }
+.m-foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding: 16px 20px 18px; margin-top: 16px; border-top: 1px solid var(--line); }
+.m-foot .btn { padding: 7px 14px; font-size: 13px; }
+.reasons button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--faint); }
+@media (max-width: 600px) {
+  .proto .in { padding: 12px; }
+  .proto .bar .dim { display: none; }
+}
+</style>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="logo"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">PROBLEM 2 SCREENS</span>
+  </div>
+
+  <h1>Negotiated Prices Screens</h1>
+  <p class="sub">One step at a time, pick a screen</p>
+  <div class="nav"><a href="https://claude.ai/artifact/2WE1vvNYGuj9t99Z37f6w5">Playbook ↗</a><a href="https://claude.ai/artifact/2wyQCsPwmHWkDDEDTkAdz4">App Map ↗</a><a href="https://claude.ai/artifact/Md6pmuSKugrVPTqJ8VfJxC">Problem 2 ↗</a><span class="here">Screens</span></div>
+
+  <div class="flow">
+    <a href="#try"><span class="badge">▶</span>Try it</a>
+    <a href="#add"><span class="badge">1</span>Add a line</a>
+    <a href="#match"><span class="badge">2</span>Show the match</a>
+    <a href="#sure"><span class="badge">3</span>How sure</a>
+    <a href="#pdf"><span class="badge">4</span>After a PDF</a>
+    <a href="#keep"><span class="badge">5</span>Keep own price</a>
+    <a href="#approve"><span class="badge">6</span>Approver</a>
+    <a href="#later"><span class="badge">7</span>Later</a>
+    <a href="#strict"><span class="badge">S</span>Strict proposal</a>
+  </div>
+
+  <!-- PROTOTYPE -->
+  <h2 id="try"><span class="badge">▶</span>Try it</h2>
+  <div class="proto">
+    <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Articles</span></div>
+    <div class="in">
+      <div class="ui">
+        <div class="ui-title">Order Lines <button class="btn ghost" id="pdf-btn" type="button">Upload offer.pdf</button></div>
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" type="text" placeholder="Add item" autocomplete="off" aria-label="Add item">
+          <div class="drop" id="drop" hidden></div>
+        </div>
+        <div id="sum"></div>
+        <div id="lines" class="tiers"></div>
+      </div>
+      <div class="total"><span>Total Cost</span><b id="total">€0.00</b></div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:10px;font-size:13px;color:var(--muted)">
+    <span>Try</span>
+    <button class="chip out" type="button" data-try="toner schwarz">toner schwarz</button>
+    <button class="chip out" type="button" data-try="monitor 1440p">monitor 1440p</button>
+    <button class="chip out" type="button" data-try="handschuhe nitril">handschuhe nitril</button>
+    <button class="chip out" type="button" data-try="kabelbinder">kabelbinder</button>
+  </div>
+
+  <!-- STEP 1 -->
+  <h2 id="add"><span class="badge">1</span>Add a line</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Search first</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="inp focus">toner sch<span class="caret"></span></div>
+          <div class="drop">
+            <div class="drow hl"><div class="d"><div>Toner cartridge black, high-yield</div><div class="s">Lindqvist Supply</div></div><span class="num">€186.00</span></div>
+            <div class="drow"><div class="d"><div>Toner cartridge cyan</div><div class="s">Lindqvist Supply</div></div><span class="num">€177.00</span></div>
+            <div class="drow free"><div class="d"><div>+ “toner sch”</div></div></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Type, then suggest</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines <span class="btn ghost">+ Add Line</span></div>
+          <div class="inp">Toner schwarz XL</div>
+          <div class="row"><div class="inp" style="flex:1">4</div><div class="inp" style="flex:1">€60.00</div></div>
+          <div class="row"><span class="chip cat">Catalog <span class="inner">€186.00</span></span><span class="btn teal">Use</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Autocomplete in line</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines <span class="btn ghost">+ Add Line</span></div>
+          <div class="inp focus">Toner sch<span class="caret"></span><span class="ph">warz, high-yield</span></div>
+          <div class="row"><div class="inp" style="flex:1"><span class="ph">Qty</span></div><div class="inp" style="flex:1"><span class="ph">Price</span></div></div>
+          <div class="muted" style="font-size:11px">Tab ⇥</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <h2 id="match"><span class="badge">2</span>Show the match</h2>
+  <div class="opts">
+    <div class="opt">
+      <div class="opt-head"><span class="letter">A</span><h3>One chip</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="num">€960.00</span></div>
+        <div class="row"><span class="chip cat">Catalog <span class="inner">€186.00</span></span><span class="more">+2</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">B</span><h3>Price swap</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line">
+          <div class="d">Toner schwarz XL<small>4 pcs</small></div>
+          <span class="num"><span class="strike">€240.00</span> €186.00</span>
+        </div>
+        <div class="row"><span class="muted" style="font-size:12px">Did you mean</span><span class="chip cat">Toner cartridge black, Lindqvist</span><span class="spacer"></span><span class="btn teal">Switch, −€216</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Auto switch</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line">
+          <div class="d">Toner cartridge black, high-yield<small>4 × €186.00</small></div>
+          <span class="chip cat">Catalog</span>
+        </div>
+        <div class="row"><span class="muted" style="font-size:12px">Was “Toner schwarz XL”, €240.00</span><span class="spacer"></span><span class="btn ghost">Undo</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <h2 id="sure"><span class="badge">3</span>How sure</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Sure or nothing</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in tiers">
+        <div class="tier"><span class="t">Sure</span><div class="row"><span class="num"><span class="strike">€240</span> €186</span><span class="btn teal">Switch</span></div></div>
+        <div class="tier"><span class="t">None</span><div class="row"><span class="muted">—</span></div></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Meter</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in tiers">
+        <div class="tier"><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i></span><div class="row"><span class="chip cat">€186.00</span><span class="btn teal">Switch</span></div></div>
+        <div class="tier"><span class="meter"><i class="on"></i><i class="on"></i><i></i></span><div class="row"><span class="chip cat">€8.56</span><span class="btn ghost">Switch</span></div></div>
+        <div class="tier"><span class="meter"><i class="on"></i><i></i><i></i></span><div class="row"><span class="chip cat">€13.95</span><span class="btn ghost">Switch</span></div></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Percent</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in tiers">
+        <div class="tier"><span class="num">94%</span><div class="row"><span class="chip cat">€186.00</span><span class="btn teal">Switch</span></div></div>
+        <div class="tier"><span class="num">61%</span><div class="row"><span class="chip cat">€8.56</span><span class="btn ghost">Switch</span></div></div>
+        <div class="tier"><span class="num">32%</span><div class="row"><span class="chip cat">€13.95</span><span class="btn ghost">Switch</span></div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <h2 id="pdf"><span class="badge">4</span>After a PDF</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>One bar</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="sumbar"><span class="grow"><b>2 of 3</b> in catalog</span><span class="btn teal">Switch all, −€244</span></div>
+        <div class="line"><div class="d">Toner schwarz XL</div><span class="chip cat">€186.00</span></div>
+        <div class="line"><div class="d">Kopierpapier A4 recycling</div><span class="chip cat">€8.56</span></div>
+        <div class="line"><div class="d">USB-C Kabel 2 m</div></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Side by side</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="row muted" style="font-size:11px"><span class="spacer"></span><span style="width:66px;text-align:right">Offer</span><span style="width:66px;text-align:right">Catalog</span></div>
+        <div class="line"><div class="d">Toner schwarz XL</div><span class="num" style="width:58px;text-align:right">€240</span><span class="chip cat" style="width:62px;justify-content:flex-end">€186</span></div>
+        <div class="line"><div class="d">Kopierpapier A4</div><span class="num" style="width:58px;text-align:right">€11.20</span><span class="chip cat" style="width:62px;justify-content:flex-end">€8.56</span></div>
+        <div class="line"><div class="d">USB-C Kabel 2 m</div><span class="num" style="width:58px;text-align:right">€9.90</span><span class="muted" style="width:62px;text-align:right">—</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Review step</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui" style="align-items:center;text-align:center;gap:6px">
+          <span class="muted" style="font-size:11px">1 / 2</span>
+          <b>Toner schwarz XL</b>
+          <span class="num"><span class="strike">€240.00</span> €186.00</span>
+          <span class="muted" style="font-size:11px">Toner cartridge black, high-yield</span>
+          <div class="row"><span class="btn ghost">Keep</span><span class="btn teal">Switch</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <h2 id="keep"><span class="badge">5</span>Keep own price</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Silent</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="num">€960.00</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Tag only</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="chip off">Off-catalog</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>One-tap reason</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="chip warn">+€216</span></div>
+        <div class="row"><span class="chip out">Urgent</span><span class="chip out">Other spec</span><span class="chip out">Out of stock</span><span class="chip out">Other</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <h2 id="approve"><span class="badge">6</span>Approver</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>One line flag</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="row"><b style="font-size:15px">Printer toner</b></div>
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="chip warn">+€216 vs catalog</span></div>
+          <div class="line"><div class="d">Copy paper A4 recycled<small>20 × €8.56</small></div></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Header only</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="row"><b style="font-size:15px">Printer toner</b><span class="chip warn">1 off-catalog</span></div>
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div></div>
+          <div class="line"><div class="d">Copy paper A4 recycled<small>20 × €8.56</small></div></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Approvals list</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="line"><div class="d">Printer toner<small>€1,131.20</small></div><span class="chip warn">+€216</span></div>
+          <div class="line"><div class="d">Monitors IT<small>€925.00</small></div><span class="chip cat">Catalog</span></div>
+          <div class="line"><div class="d">Lab gloves<small>€440.00</small></div><span class="chip cat">Catalog</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <h2 id="later"><span class="badge">7</span>Later</h2>
+  <div class="later">
+    <div class="opt">
+      <div class="opt-head"><h3>Catalog use</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <span class="muted" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700">Catalog use</span>
+          <div class="row"><b style="font-size:26px;color:var(--ink)">64%</b><span class="chip cat">+22 pts</span></div>
+          <span class="muted" style="font-size:12px">€4,180 saved this month</span>
+        </div>
+      </div></div>
+    </div>
+    <div class="opt">
+      <div class="opt-head"><h3>Better offer elsewhere</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">24-inch monitor 1440p IPS<small>Aurora Solutions</small></div><span class="num">€248.00</span></div>
+        <div class="row"><span class="chip cat">Vertex <span class="inner">€185.00</span></span><span class="btn ghost">Switch</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="open">
+    <h3 style="color:var(--accent);margin-bottom:6px">Open</h3>
+    <ul>
+      <li>Catalog item from another supplier: change vendor, or split the request?</li>
+      <li>Store <code>article_id</code> on the line? Needed for steps 6 and 7.</li>
+      <li>No catalogue match: no UI, the line goes through as is. Logged as "no match" in <code>RequestActivity.detail</code> for a later catalogue-gaps report.</li>
+      <li>Ask Acme: roughly how much spend is off-catalogue, and do they want to grow the catalogue from it?</li>
+    </ul>
+  </div>
+
+  <section class="alt">
+    <span class="tag">Second proposal, not planned</span>
+    <h2 id="strict"><span class="badge">S</span>Strict proposal</h2>
+    <ul>
+      <li>For if Acme makes catalogue use a rule, not a nudge. Not what we plan to build.</li>
+      <li>Same rules as above: sure match or nothing, "Did you mean", teal Switch, Undo, no match stays silent.</li>
+      <li>Adds one check at Submit: if any line still has a catalogue match, a pop-up lists them all at once.</li>
+      <li>Keeping your own price needs a one-tap reason. The approver sees it next to "+€216 vs catalog".</li>
+    </ul>
+    <div class="proto">
+      <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Articles</span></div>
+      <div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines <span class="muted" style="font-weight:400;font-size:12px">from offer.pdf</span></div>
+          <div id="s-lines" class="tiers"></div>
+        </div>
+        <div class="total"><span>Total Cost</span><b id="s-total">€0.00</b></div>
+        <div class="row"><span class="spacer"></span><button class="btn" type="button" id="s-submit" style="padding:7px 16px;font-size:13px">Submit request</button></div>
+        <div id="s-done"></div>
+      </div>
+    </div>
+    <dialog class="modal" id="s-dlg" aria-labelledby="s-dlg-title"></dialog>
+  </section>
+
+  <footer><span>Problem 2 screens. Pick one per step.</span><span>Lio FDE case study</span></footer>
+</main>
+
+<script>
+(function () {
+  var CATALOG = [
+    ["LIN-00862", "Toner cartridge black, high-yield", 186.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00863", "Toner cartridge cyan", 177.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00850", "Toner cartridge magenta", 131.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00856", "Toner cartridge yellow", 67.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00854", "Copy paper A4 recycled 80 g", 8.56, "pack", "Lindqvist Supply B.V."],
+    ["LIN-00851", "Copy paper A3 80 g, 500 sheets", 8.98, "pack", "Lindqvist Supply B.V."],
+    ["VER-00370", "24-inch monitor 1440p IPS", 185.00, "piece", "Vertex Solutions GmbH"],
+    ["AUR-00408", "24-inch monitor 1440p IPS", 248.00, "piece", "Aurora Solutions AG"],
+    ["RHE-00007", "24-inch monitor 1440p IPS", 325.00, "piece", "Rheinwerk Systems GmbH"],
+    ["LUM-00442", "24-inch monitor height-adjustable 1440p", 151.00, "piece", "Lumen Solutions SE"],
+    ["LUM-00435", "24-inch monitor 4K USB-C", 135.00, "piece", "Lumen Solutions SE"],
+    ["AUR-00402", "Business laptop 15\" Ryzen 7 / 16 GB / 512 GB", 1229.00, "piece", "Aurora Solutions AG"],
+    ["LUM-00440", "Business laptop 14\" i7 / 32 GB / 1 TB SSD", 1130.00, "piece", "Lumen Solutions SE"],
+    ["LIN-00833", "Safety gloves nitrile-coated", 13.95, "pack", "Lindqvist Technik Ltd"],
+    ["OST-00810", "Safety gloves nitrile-coated", 44.30, "pack", "Osterhaus Technik GmbH & Co. KG"],
+    ["LIN-00841", "Safety gloves cut-resistant level C", 39.34, "pack", "Lindqvist Technik Ltd"],
+    ["KRA-00660", "Lab consumables nitrile lab gloves", 88.00, "pack", "Kranz Labs AG"],
+    ["MER-00297", "Adhesive tape paper eco 50 mm", 14.77, "pack", "Meridian Packaging GmbH & Co. KG"],
+    ["MER-00303", "Void fill paper cushioning", 16.80, "pack", "Meridian Packaging GmbH & Co. KG"]
+  ].map(function (r) { return { no: r[0], desc: r[1], price: r[2], unit: r[3], sup: r[4] }; });
+
+  var SYN = { schwarz: "black", kopierpapier: "copy paper", papier: "paper", handschuhe: "gloves", handschuh: "gloves", nitril: "nitrile", bildschirm: "monitor", "klebeband": "adhesive tape", recycling: "recycled", gelb: "yellow", blau: "cyan", xl: "high-yield", "4k": "4k" };
+
+  function toks(s) {
+    var out = [];
+    s.toLowerCase().replace(/[^a-z0-9äöüß\-\s]/g, " ").split(/\s+/).forEach(function (w) {
+      if (!w) return;
+      (SYN[w] || w).split(" ").forEach(function (x) { out.push(x); });
+    });
+    return out;
+  }
+  function score(q, a) {
+    var qt = toks(q); if (!qt.length) return 0;
+    var at = toks(a.desc), hit = 0;
+    qt.forEach(function (t) { if (at.some(function (w) { return w === t || (t.length >= 3 && w.indexOf(t) === 0); })) hit++; });
+    return hit / qt.length;
+  }
+  function find(q) {
+    var res = CATALOG.map(function (a) { return { a: a, s: score(q, a) }; }).filter(function (r) { return r.s >= 0.5; });
+    res.sort(function (x, y) { return y.s - x.s || x.a.price - y.a.price; });
+    var groups = [], seen = {};
+    res.forEach(function (r) {
+      if (seen[r.a.desc]) { seen[r.a.desc].others.push(r.a); return; }
+      var g = { best: r.a, s: r.s, others: [] }; seen[r.a.desc] = g; groups.push(g);
+    });
+    return groups;
+  }
+  function tier(s, q) { return s >= 0.99 && toks(q).length >= 2 ? "sure" : s >= 0.5 ? "maybe" : "none"; }
+  function eur(n) { return "€" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function short(s) { return s.replace(/ (GmbH & Co\. KG|GmbH|B\.V\.|AG|SE|Ltd|S\.A\.)$/, ""); }
+
+  var lines = [], open = {}, active = 0;
+  var q = document.getElementById("q"), drop = document.getElementById("drop");
+
+  function renderDrop() {
+    var v = q.value.trim();
+    if (!v) { drop.hidden = true; return; }
+    var gs = find(v).slice(0, 5), html = "";
+    gs.forEach(function (g, i) {
+      html += '<div class="drow' + (i === active ? " hl" : "") + '" data-add="' + g.best.no + '"><div class="d"><div>' + esc(g.best.desc) + '</div><div class="s">' + esc(short(g.best.sup)) +
+        (g.others.length ? ' <button class="more" type="button" data-expand="' + g.best.no + '">+' + g.others.length + "</button>" : "") + '</div></div><span class="num">' + eur(g.best.price) + " <small>/ " + g.best.unit + "</small></span></div>";
+      if (open[g.best.no]) g.others.forEach(function (o) {
+        html += '<div class="drow" data-add="' + o.no + '" style="padding-left:24px"><div class="d"><div class="s">' + esc(short(o.sup)) + '</div></div><span class="num" style="font-weight:400">' + eur(o.price) + "</span></div>";
+      });
+    });
+    html += '<div class="drow free' + (active === gs.length ? " hl" : "") + '" data-free="1"><div class="d"><div>+ “' + esc(v) + '”</div></div></div>';
+    drop.innerHTML = html; drop.hidden = false; drop._n = gs.length; drop._gs = gs;
+  }
+
+  function addArticle(no) {
+    var a = CATALOG.filter(function (x) { return x.no === no; })[0];
+    lines.push({ desc: a.desc, qty: 1, price: a.price, art: a, sup: a.sup });
+    q.value = ""; active = 0; open = {}; renderDrop(); render();
+  }
+  function addFree(text, price, qty) {
+    var g = find(text)[0], m = g && tier(g.s, text) === "sure" ? { art: g.best, t: "sure" } : null;
+    lines.push({ desc: text, qty: qty || 1, price: price || 0, art: null, match: m, state: m ? "offer" : "none" });
+  }
+
+  function render() {
+    var box = document.getElementById("lines"), html = "";
+    if (!lines.length) html = '<div class="empty">No lines yet</div>';
+    lines.forEach(function (l, i) {
+      var right, below = "";
+      if (l.art) {
+        right = '<span class="chip cat">Catalog</span>';
+        if (l.orig) below = '<div class="row"><span class="chip off">Was ' + esc(l.orig.desc) + ' <span class="inner">' + eur(l.orig.price) + '</span></span><span class="spacer"></span><button class="btn ghost" type="button" data-undo="' + i + '">Undo</button></div>';
+      }
+      else if (l.match && l.match.t === "sure" && l.state === "offer") {
+        var save = (l.price - l.match.art.price) * l.qty;
+        right = '<span class="num">' + (l.price ? '<span class="strike">' + eur(l.price) + "</span> " : "") + eur(l.match.art.price) + "</span>";
+        below = '<div class="row"><span class="muted" style="font-size:12px">Did you mean</span><span class="chip cat">' + esc(l.match.art.desc) + ", " + esc(short(l.match.art.sup)) + '</span><span class="spacer"></span><button class="btn teal" type="button" data-switch="' + i + '">Switch' + (save > 0 ? ", −" + eur(save) : "") + "</button></div>";
+      } else right = '<span class="num">' + (l.price ? eur(l.price) : "") + "</span>";
+      var unitPrice = l.art ? l.art.price : l.price;
+      html += '<div class="pline"><div class="top2"><div class="d">' + esc(l.desc) + "<small>" + (unitPrice ? eur(unitPrice) + (l.art ? " / " + l.art.unit + ", " + esc(short(l.sup)) : "") : "&nbsp;") + "</small></div>" +
+        '<span class="qty"><button type="button" data-dec="' + i + '" aria-label="Less">−</button><span>' + l.qty + '</span><button type="button" data-inc="' + i + '" aria-label="More">+</button></span>' + right +
+        '<button class="x" type="button" data-del="' + i + '" aria-label="Remove">×</button></div>' + below + "</div>";
+    });
+    box.innerHTML = html;
+
+    var open2 = lines.filter(function (l) { return !l.art && l.match && l.match.t === "sure" && l.state === "offer"; });
+    var matched = lines.filter(function (l) { return l.art || (l.match && l.state !== "none"); }).length;
+    var sum = document.getElementById("sum");
+    if (open2.length > 1) {
+      var s = open2.reduce(function (t, l) { return t + Math.max(0, (l.price - l.match.art.price) * l.qty); }, 0);
+      sum.innerHTML = '<div class="sumbar"><span class="grow"><b>' + matched + " of " + lines.length + '</b> in catalog</span><button class="btn teal" type="button" id="all">Switch all, −' + eur(s) + "</button></div>";
+    } else sum.innerHTML = "";
+
+    var tot = lines.reduce(function (t, l) { return t + (l.art ? l.art.price : l.price) * l.qty; }, 0);
+    document.getElementById("total").textContent = eur(tot);
+  }
+
+  function sw(i) { var l = lines[i]; l.orig = { desc: l.desc, price: l.price, sup: l.sup, state: l.state }; l.art = l.match.art; l.sup = l.art.sup; l.desc = l.art.desc; l.state = "done"; }
+  function undo(i) { var l = lines[i], o = l.orig; l.art = null; l.desc = o.desc; l.price = o.price; l.sup = o.sup; l.state = o.state; l.orig = null; }
+
+  q.addEventListener("input", function () { active = 0; open = {}; renderDrop(); });
+  q.addEventListener("keydown", function (e) {
+    if (drop.hidden) return;
+    if (e.key === "ArrowDown") { active = Math.min(active + 1, drop._n); renderDrop(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { active = Math.max(active - 1, 0); renderDrop(); e.preventDefault(); }
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      if (active < drop._n) addArticle(drop._gs[active].best.no);
+      else { addFree(q.value.trim()); q.value = ""; renderDrop(); render(); }
+    } else if (e.key === "Escape") { drop.hidden = true; }
+  });
+  drop.addEventListener("mousedown", function (e) {
+    e.preventDefault();
+    var ex = e.target.closest("[data-expand]");
+    if (ex) { open[ex.dataset.expand] = !open[ex.dataset.expand]; renderDrop(); return; }
+    var r = e.target.closest(".drow"); if (!r) return;
+    if (r.dataset.add) addArticle(r.dataset.add);
+    else { addFree(q.value.trim()); q.value = ""; renderDrop(); render(); }
+  });
+  q.addEventListener("blur", function () { setTimeout(function () { drop.hidden = true; }, 120); });
+  q.addEventListener("focus", renderDrop);
+
+  document.getElementById("lines").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var d = b.dataset;
+    if (d.inc) lines[+d.inc].qty++;
+    else if (d.dec) lines[+d.dec].qty = Math.max(1, lines[+d.dec].qty - 1);
+    else if (d.del) lines.splice(+d.del, 1);
+    else if (d.switch) sw(+d.switch);
+    else if (d.undo) undo(+d.undo);
+    render();
+  });
+  document.getElementById("sum").addEventListener("click", function (e) {
+    if (!e.target.closest("#all")) return;
+    lines.forEach(function (l, i) { if (!l.art && l.match && l.match.t === "sure" && l.state === "offer") sw(i); });
+    render();
+  });
+  document.getElementById("pdf-btn").addEventListener("click", function () {
+    lines = [];
+    addFree("Toner schwarz XL", 240.00, 4);
+    addFree("Kopierpapier A4 recycling", 11.20, 20);
+    addFree("USB-C Kabel 2 m", 9.90, 6);
+    render();
+  });
+  document.querySelectorAll("[data-try]").forEach(function (b) {
+    b.addEventListener("click", function () { q.value = b.dataset.try; q.focus(); active = 0; open = {}; renderDrop(); });
+  });
+
+  addFree("Toner schwarz XL", 240.00, 4);
+  render();
+  window.P2 = { find: find, tier: tier, eur: eur, esc: esc, short: short };
+})();
+
+(function () {
+  var P = window.P2, eur = P.eur, esc = P.esc, short = P.short;
+  var lines = [], keeping = false, reason = null;
+  var box = document.getElementById("s-lines"), dlg = document.getElementById("s-dlg"), done = document.getElementById("s-done");
+
+  function add(text, price, qty) {
+    var g = P.find(text)[0], m = g && P.tier(g.s, text) === "sure" ? g.best : null;
+    lines.push({ desc: text, price: price, qty: qty, match: m, art: null });
+  }
+  function reset() {
+    lines = []; keeping = false; reason = null; done.innerHTML = "";
+    add("Toner schwarz XL", 240.00, 4);
+    add("Kopierpapier A4 recycling", 11.20, 20);
+    add("USB-C Kabel 2 m", 9.90, 6);
+    render();
+  }
+  function pending() { return lines.filter(function (l) { return l.match && !l.art; }); }
+  function save(l) { return Math.max(0, (l.price - l.match.price) * l.qty); }
+  function extra() { return pending().reduce(function (t, l) { return t + save(l); }, 0); }
+
+  function lineHtml(l, i) {
+    var a = l.art, right, below = "";
+    if (a) {
+      right = '<span class="chip cat">Catalog</span>';
+      below = '<div class="row"><span class="chip off">Was ' + esc(l.desc) + ' <span class="inner">' + eur(l.price) + '</span></span><span class="spacer"></span><button class="btn ghost" type="button" data-undo="' + i + '">Undo</button></div>';
+    } else if (l.match) {
+      right = '<span class="num"><span class="strike">' + eur(l.price) + "</span> " + eur(l.match.price) + "</span>";
+      below = '<div class="row"><span class="muted" style="font-size:12px">Did you mean</span><span class="chip cat">' + esc(l.match.desc) + ", " + esc(short(l.match.sup)) + '</span><span class="spacer"></span><button class="btn teal" type="button" data-sw="' + i + '">Switch, −' + eur(save(l)) + "</button></div>";
+    } else right = '<span class="num">' + eur(l.price) + "</span>";
+    var unit = a ? a.price : l.price;
+    return '<div class="pline"><div class="top2"><div class="d">' + esc(a ? a.desc : l.desc) + "<small>" + l.qty + " × " + eur(unit) + (a ? ", " + esc(short(a.sup)) : "") + "</small></div>" + right + "</div>" + below + "</div>";
+  }
+
+  function render() {
+    box.innerHTML = lines.map(lineHtml).join("");
+    document.getElementById("s-total").textContent = eur(lines.reduce(function (t, l) { return t + (l.art ? l.art.price : l.price) * l.qty; }, 0));
+    if (dlg.open) renderDlg();
+  }
+
+  function renderDlg() {
+    var p = pending(), html = "";
+    if (!p.length) keeping = false;
+    html += '<div class="m-head"><h3 id="s-dlg-title">' + (p.length ? "Use the catalogue price?" : "All on catalogue prices") + '</h3><button class="x" type="button" data-act="close" aria-label="Close">×</button></div>';
+    html += '<p class="m-text">' + (p.length ? p.length + (p.length > 1 ? " lines are" : " line is") + " in Acme's catalogue at a negotiated price." : "Every line with a catalogue match now uses it.") + "</p>";
+    html += '<div class="m-body">' + lines.map(function (l, i) { return l.match ? lineHtml(l, i) : ""; }).join("") + "</div>";
+    if (keeping) {
+      html += '<div class="m-ask"><b>Why keep your price?</b><div class="reasons">' + ["Urgent", "Other spec", "Out of stock", "Other"].map(function (r) {
+        return '<button type="button" data-r="' + r + '"' + (reason === r ? ' class="on"' : "") + ">" + r + "</button>";
+      }).join("") + '</div><span class="muted" style="font-size:12px">Your approver sees this next to +' + eur(extra()) + " vs catalog.</span></div>";
+    }
+    html += '<div class="m-foot">';
+    if (!p.length) html += '<button class="btn teal" type="button" data-act="submit">Submit request</button>';
+    else if (!keeping) html += '<button class="btn ghost" type="button" data-act="keep">Keep my prices</button><button class="btn teal" type="button" data-act="all">Switch all and submit, −' + eur(extra()) + "</button>";
+    else html += '<button class="btn ghost" type="button" data-act="back">Back</button><button class="btn" type="button" data-act="submit"' + (reason ? "" : " disabled") + ">Submit at my price</button>";
+    html += "</div>";
+    dlg.innerHTML = html;
+  }
+
+  function submit() {
+    var p = pending(), on = lines.filter(function (l) { return l.art; }).length;
+    var msg = "<b>Submitted.</b> " + on + " on catalogue";
+    if (p.length) msg += ", " + p.length + " at own price (" + esc(reason) + "). Approver sees +" + eur(extra()) + " vs catalog.";
+    else msg += ".";
+    if (dlg.open) dlg.close();
+    done.innerHTML = '<div class="sumbar"><span class="grow">' + msg + '</span><button class="btn ghost" type="button" data-act="reset">Start over</button></div>';
+  }
+
+  function onClick(e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var d = b.dataset;
+    if (d.sw) lines[+d.sw].art = lines[+d.sw].match;
+    else if (d.undo) lines[+d.undo].art = null;
+    else if (d.r) reason = d.r;
+    else if (d.act === "keep") keeping = true;
+    else if (d.act === "back") { keeping = false; reason = null; }
+    else if (d.act === "close") { dlg.close(); return; }
+    else if (d.act === "all") { pending().forEach(function (l) { l.art = l.match; }); render(); submit(); return; }
+    else if (d.act === "submit") { submit(); return; }
+    else if (d.act === "reset") { reset(); return; }
+    else return;
+    render();
+  }
+
+  box.addEventListener("click", onClick);
+  dlg.addEventListener("click", onClick);
+  done.addEventListener("click", onClick);
+  dlg.addEventListener("close", function () { keeping = false; reason = null; });
+  document.getElementById("s-submit").addEventListener("click", function () {
+    done.innerHTML = "";
+    if (pending().length) { dlg.showModal(); renderDlg(); } else submit();
+  });
+
+  reset();
+})();
+</script>

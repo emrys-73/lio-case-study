@@ -1,18 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
 import * as api from '@/lib/api';
 import { useCommodityGroups } from '@/lib/hooks/useCommodityGroups';
 import { Button, Input, Alert, Loader } from '@/components/base';
+import { AutoSetChip, AutoSetHelper, CorrectedNote, LockedGroupField, isStaff } from '@/components/CommodityAuto';
+import {
+  AlternativesBox,
+  LineCheck,
+  TotalsCheck,
+  fillMissingPrice,
+  markText,
+  useOwnDepartment,
+} from '@/components/ExtractionReview';
+import {
+  CatalogAddBox,
+  CatalogLineNote,
+  CatalogSwitchAllBar,
+  freeLine,
+  liveMatch,
+  newLineKey,
+  pickedLine,
+  switchLine,
+  toOrderLineInput,
+  undoLine,
+  useCatalogSuggest,
+  type CatalogLine,
+} from '@/components/CatalogSuggest';
+import type { Commodity } from '@/types/database';
 
-interface OrderLine {
-  positionDescription: string;
-  unitPrice: number;
-  amount: number;
-  unit: string;
-  totalPrice: number;
+type OrderLine = CatalogLine;
+
+function toFormLine(line: api.ExtractedOrderLine): OrderLine {
+  return {
+    key: newLineKey(),
+    ...fillMissingPrice(line),
+  };
+}
+
+const NOT_FOUND = 'Not found in the quote';
+const CATEGORISE_DELAY_MS = 400;
+
+function lineId(index: number): string {
+  return `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`;
+}
+
+async function categorise(lines: api.CategoriseLineInput[]) {
+  return api.commodityGroups.categorise(lines);
 }
 
 export default function NewRequestPage() {
@@ -25,9 +60,11 @@ export default function NewRequestPage() {
   const [vendorName, setVendorName] = useState('');
   const [vatId, setVatId] = useState('');
   const [department, setDepartment] = useState('');
+  useOwnDepartment(setDepartment);
   const [commodityGroupId, setCommodityGroupId] = useState<number | null>(null);
   const [orderLines, setOrderLines] = useState<OrderLine[]>([]);
   const [totalCost, setTotalCost] = useState<number>(0);
+  useCatalogSuggest(orderLines, setOrderLines, vendorName);
 
   // UI state
   const [file, setFile] = useState<File | null>(null);
@@ -35,24 +72,118 @@ export default function NewRequestPage() {
   const [success, setSuccess] = useState('');
   const [warning, setWarning] = useState('');
   const [extracting, setExtracting] = useState(false);
+  const [notFound, setNotFound] = useState<string[]>([]);
+  const [extraction, setExtraction] = useState<api.ExtractionResponse | undefined>();
+  const [printedTotal, setPrintedTotal] = useState<number | null>(null);
+  const [printedVat, setPrintedVat] = useState<number | null>(null);
+  const [printedGross, setPrintedGross] = useState<number | null>(null);
+  const [org, setOrg] = useState<api.MyOrganization | null>(null);
+  const [commodity, setCommodity] = useState<Commodity | null>(null);
+  const [savedCommodity, setSavedCommodity] = useState<Commodity | null>(null);
+  const ownGroupId = useRef<number | null>(null);
+  const categoriseRun = useRef(0);
+  const lockedRef = useRef(false);
+  const pickedRef = useRef(false);
+  const suggestedRef = useRef<number | null>(null);
+  const [suggestedId, setSuggestedId] = useState<number | null>(null);
+  const locked = Boolean(commodity?.locked && commodity.group_id);
+  const staff = isStaff(org?.role, commodity ?? savedCommodity);
+  const groupName = (id: number | null | undefined, fallback?: string | null) =>
+    fallback || commodityGroups?.find((g) => g.id === id)?.name || (id ? `Group ${id}` : '');
 
-  // PDF parsing mutation
-  const parsePDFMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const result = await api.pdf.parse(file);
-      if (!result.text) {
-        throw new Error('Failed to parse PDF');
+  const dropSuggestion = () => {
+    suggestedRef.current = null;
+    setSuggestedId(null);
+  };
+
+  const chooseGroup = (id: number | null) => {
+    pickedRef.current = true;
+    dropSuggestion();
+    ownGroupId.current = id;
+    setCommodityGroupId(id);
+  };
+
+  useEffect(() => {
+    Promise.resolve()
+      .then(() => api.organizations.getMine())
+      .then((mine) => setOrg(mine ?? null))
+      .catch(() => setOrg(null));
+  }, []);
+
+  const categoriseKey = useMemo(
+    () =>
+      JSON.stringify(
+        orderLines.map((line) => [line.positionDescription, line.amount, line.unitPrice]),
+      ),
+    [orderLines],
+  );
+
+  useEffect(() => {
+    const run = ++categoriseRun.current;
+    const lines: api.CategoriseLineInput[] = JSON.parse(categoriseKey).map(
+      ([description, quantity, unitPrice]: [string, number, number], index: number) => ({
+        id: lineId(index),
+        description,
+        quantity,
+        unit_price: Number(unitPrice || 0).toFixed(2),
+      }),
+    );
+    const release = () => {
+      if (lockedRef.current) {
+        lockedRef.current = false;
+        setCommodityGroupId(ownGroupId.current);
       }
-      return result.text;
-    },
-  });
+      if (suggestedRef.current !== null) {
+        dropSuggestion();
+        if (!pickedRef.current && ownGroupId.current === null) setCommodityGroupId(null);
+      }
+      setCommodity(null);
+    };
+    if (!lines.some((line) => line.description.trim())) {
+      release();
+      return;
+    }
+    const timer = setTimeout(() => {
+      Promise.resolve()
+        .then(() => categorise(lines))
+        .then((result) => {
+          if (run !== categoriseRun.current) return;
+          const next = result?.commodity;
+          if (next?.locked && next.group_id) {
+            dropSuggestion();
+            lockedRef.current = true;
+            setCommodity(next);
+            setCommodityGroupId(next.group_id);
+          } else if (
+            next?.source === 'model' &&
+            next.group_id &&
+            !pickedRef.current &&
+            ownGroupId.current === null
+          ) {
+            release();
+            suggestedRef.current = next.group_id;
+            setSuggestedId(next.group_id);
+            setCommodityGroupId(next.group_id);
+          } else {
+            release();
+          }
+        })
+        .catch(() => {
+          if (run === categoriseRun.current) release();
+        });
+    }, CATEGORISE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [categoriseKey]);
 
   // Handle file upload and extraction
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (!uploadedFile) return;
 
-    if (uploadedFile.type !== 'application/pdf') {
+    const isPdf =
+      ['application/pdf', 'application/x-pdf'].includes(uploadedFile.type) ||
+      uploadedFile.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
       setError('Please upload a PDF file');
       return;
     }
@@ -61,32 +192,35 @@ export default function NewRequestPage() {
     setError('');
     setSuccess('');
     setWarning('');
+    setExtraction(undefined);
     setExtracting(true);
 
     try {
-      // Step 1: Parse PDF
-      const pdfText = await parsePDFMutation.mutateAsync(uploadedFile);
-
-      // Step 2: Extract structured data AND classify commodity group in one AI call
-      const extractionResult = await api.extraction.extract(pdfText);
+      const extractionResult = await api.extraction.fromPdf(uploadedFile);
       
       if (!extractionResult.success || !extractionResult.data) {
         throw new Error(extractionResult.error || 'Failed to extract data');
       }
 
       const extracted = extractionResult.data;
+      setExtraction(extractionResult);
 
       // Step 3: Auto-fill form (including commodity group from extraction)
       setTitle(extracted.title || '');
       setVendorName(extracted.vendorName || '');
       setVatId(extracted.vatId || '');
-      setDepartment(extracted.department || '');
-      setOrderLines(extracted.orderLines || []);
+      setOrderLines((extracted.orderLines || []).map(toFormLine));
       setTotalCost(extracted.totalCost || 0);
+      setNotFound(extractionResult.missingFields || []);
+      setPrintedTotal(extractionResult.totals?.printed ?? null);
+      setPrintedVat(extractionResult.totals?.vat ?? null);
+      setPrintedGross(extractionResult.totals?.gross ?? null);
       
       // Set commodity group (now included in extraction)
       if (extracted.commodityGroupId) {
-        setCommodityGroupId(extracted.commodityGroupId);
+        ownGroupId.current = extracted.commodityGroupId;
+        dropSuggestion();
+        if (!lockedRef.current) setCommodityGroupId(extracted.commodityGroupId);
       }
 
       // Show warnings for missing fields
@@ -112,6 +246,7 @@ export default function NewRequestPage() {
     setOrderLines([
       ...orderLines,
       {
+        key: newLineKey(),
         positionDescription: '',
         unitPrice: 0,
         amount: 1,
@@ -138,6 +273,13 @@ export default function NewRequestPage() {
     setTotalCost(newTotal);
   };
 
+  const setLines = (updated: OrderLine[]) => {
+    setOrderLines(updated);
+    setTotalCost(updated.reduce((sum, line) => sum + line.totalPrice, 0));
+  };
+  const changeLine = (index: number, change: (line: OrderLine) => OrderLine) =>
+    setLines(orderLines.map((line, i) => (i === index ? change(line) : line)));
+
   // Remove order line
   const removeOrderLine = (index: number) => {
     const updated = orderLines.filter((_, i) => i !== index);
@@ -152,6 +294,7 @@ export default function NewRequestPage() {
     setError('');
     setSuccess('');
     setWarning('');
+    setSavedCommodity(null);
 
     // Validation with scroll to top on error
     if (!commodityGroupId) {
@@ -175,7 +318,8 @@ export default function NewRequestPage() {
         commodityGroupId: commodityGroupId,
         totalCost,
         department,
-        orderLines,
+        orderLines: orderLines.map(toOrderLineInput),
+        extraction,
       });
 
       // Attach the original PDF (if one was uploaded) so it shows on the detail page.
@@ -187,12 +331,13 @@ export default function NewRequestPage() {
         }
       }
 
+      setSavedCommodity(created?.commodity ?? null);
       setSuccess('Request created successfully! Redirecting...');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
         router.push('/dashboard/requests');
         router.refresh();
-      }, 1500);
+      }, created?.commodity?.corrected ? 3000 : 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create request');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -212,6 +357,19 @@ export default function NewRequestPage() {
       {error && <Alert variant="error" className="mb-6">{error}</Alert>}
       {warning && <Alert variant="warning" className="mb-6">{warning}</Alert>}
       {success && <Alert variant="success" className="mb-6">{success}</Alert>}
+      {success && (
+        <CorrectedNote
+          commodity={savedCommodity}
+          staff={staff}
+          orgName={org?.name}
+          groupName={groupName(savedCommodity?.group_id, savedCommodity?.group_name)}
+          fromName={
+            savedCommodity?.corrected_from_group_id
+              ? groupName(savedCommodity.corrected_from_group_id)
+              : null
+          }
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* PDF Upload Section */}
@@ -224,7 +382,7 @@ export default function NewRequestPage() {
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-accent-deep/50 transition-colors">
             <input
               type="file"
-              accept="application/pdf"
+              accept="application/pdf,.pdf"
               onChange={handleFileChange}
               className="hidden"
               id="pdf-upload"
@@ -297,6 +455,7 @@ export default function NewRequestPage() {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
               placeholder="IT Department"
+              helperText={!department ? 'Not set on your profile' : undefined}
             />
           </div>
 
@@ -306,6 +465,7 @@ export default function NewRequestPage() {
             onChange={(e) => setTitle(e.target.value)}
             required
             placeholder="Adobe Creative Cloud Subscription"
+            helperText={notFound.includes('Title/Short Description') && !title ? NOT_FOUND : undefined}
           />
         </div>
 
@@ -320,6 +480,7 @@ export default function NewRequestPage() {
               onChange={(e) => setVendorName(e.target.value)}
               required
               placeholder="Adobe Systems"
+              helperText={notFound.includes('Vendor Name') && !vendorName ? NOT_FOUND : undefined}
             />
 
             <Input
@@ -327,28 +488,40 @@ export default function NewRequestPage() {
               value={vatId}
               onChange={(e) => setVatId(e.target.value)}
               placeholder="DE123456789"
+              helperText={notFound.includes('VAT ID') && !vatId ? NOT_FOUND : undefined}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
               Commodity Group *
+              {locked && <AutoSetChip />}
             </label>
-            <select
-              value={commodityGroupId || ''}
-              onChange={(e) => setCommodityGroupId(Number(e.target.value))}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-accent-deep/60 focus:border-accent-deep/40"
-            >
-              <option value="">
-                {commodityGroups ? 'Select a commodity group' : 'Loading...'}
-              </option>
-              {commodityGroups?.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.id} - {group.category} - {group.name}
+            {locked && commodity ? (
+              <>
+                <LockedGroupField name={groupName(commodity.group_id, commodity.group_name)} />
+                <AutoSetHelper commodity={commodity} staff={staff} orgName={org?.name} />
+              </>
+            ) : (
+              <select
+                value={commodityGroupId || ''}
+                onChange={(e) => chooseGroup(e.target.value ? Number(e.target.value) : null)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-accent-deep/60 focus:border-accent-deep/40"
+              >
+                <option value="">
+                  {commodityGroups ? 'Select a commodity group' : 'Loading...'}
                 </option>
-              ))}
-            </select>
+                {commodityGroups?.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.id} - {group.category} - {group.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {!locked && suggestedId !== null && commodityGroupId === suggestedId && (
+              <p className="mt-1.5 text-xs text-ink/55">Suggested, change it if it&apos;s not right</p>
+            )}
           </div>
         </div>
 
@@ -361,6 +534,18 @@ export default function NewRequestPage() {
             </Button>
           </div>
 
+          <CatalogAddBox
+            onPick={(article) => setLines([...orderLines, pickedLine(article)])}
+            onFree={(text) => setLines([...orderLines, freeLine(text)])}
+          />
+
+          {extraction && (
+            <CatalogSwitchAllBar
+              lines={orderLines}
+              onSwitchAll={() => setLines(orderLines.map((line) => (liveMatch(line) ? switchLine(line) : line)))}
+            />
+          )}
+
           {orderLines.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               No order lines yet. Add one to get started.
@@ -368,7 +553,7 @@ export default function NewRequestPage() {
           ) : (
             <div className="space-y-4">
               {orderLines.map((line, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div key={line.key} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-sm font-medium text-gray-700">Line {index + 1}</h3>
                     <button
@@ -402,6 +587,7 @@ export default function NewRequestPage() {
                         updateOrderLine(index, 'unitPrice', parseFloat(e.target.value) || 0)
                       }
                       required
+                      helperText={markText(line, 'unitPrice')}
                     />
 
                     <Input
@@ -413,6 +599,7 @@ export default function NewRequestPage() {
                         updateOrderLine(index, 'amount', parseFloat(e.target.value) || 1)
                       }
                       required
+                      helperText={markText(line, 'amount')}
                     />
 
                     <Input
@@ -424,16 +611,29 @@ export default function NewRequestPage() {
                     />
                   </div>
 
+                  <CatalogLineNote
+                    line={line}
+                    onSwitch={() => changeLine(index, switchLine)}
+                    onUndo={() => changeLine(index, undoLine)}
+                  />
+
                   <div className="mt-2 text-right">
                     <span className="text-sm text-gray-600">Total: </span>
                     <span className="text-lg font-semibold tracking-tight text-ink">
                       €{line.totalPrice.toFixed(2)}
                     </span>
                   </div>
+
+                  <LineCheck line={line} />
                 </div>
               ))}
             </div>
           )}
+
+          <AlternativesBox
+            extraction={extraction}
+            onAdd={(line) => setLines([...orderLines, { ...line, key: newLineKey() }])}
+          />
         </div>
 
         {/* Total Cost */}
@@ -444,6 +644,12 @@ export default function NewRequestPage() {
               €{totalCost.toFixed(2)}
             </span>
           </div>
+          <TotalsCheck
+            totalCost={totalCost}
+            printedTotal={printedTotal}
+            printedVat={printedVat}
+            printedGross={printedGross}
+          />
         </div>
 
         {/* Submit */}

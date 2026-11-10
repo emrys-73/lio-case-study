@@ -26,7 +26,9 @@ from app.schemas.organizations import (
     OrganizationCreate,
     OrganizationOut,
     OrganizationSettings,
+    OrganizationSettingsUpdate,
 )
+from app.services.organization_settings import InvalidSettings, load_settings, save_settings
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])
 
@@ -84,20 +86,25 @@ def get_settings(
     membership: OrganizationMember = Depends(get_current_membership),
     db: Session = Depends(get_db),
 ) -> OrganizationSettings:
-    org = db.get(Organization, membership.organization_id)
-    return OrganizationSettings(**(org.settings or {}))
+    return load_settings(db.get(Organization, membership.organization_id))
 
 
 @router.patch("/me/settings", response_model=OrganizationSettings)
 def update_settings(
-    payload: OrganizationSettings,
+    payload: OrganizationSettingsUpdate,
     membership: OrganizationMember = Depends(require_org_admin),
     db: Session = Depends(get_db),
 ) -> OrganizationSettings:
     org = db.get(Organization, membership.organization_id)
-    org.settings = payload.model_dump()
+    try:
+        actor = db.get(Profile, membership.user_id)
+        saved = save_settings(db, org, payload, actor.email if actor else str(membership.user_id))
+    except InvalidSettings as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)
+        ) from error
     db.commit()
-    return payload
+    return saved
 
 
 @router.get("/me/members", response_model=MembersResponse)
