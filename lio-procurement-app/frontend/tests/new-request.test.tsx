@@ -120,4 +120,17 @@ describe('new request from a PDF quote', () => {
     await screen.findByDisplayValue('Hoffmann Nürnberg GmbH');
     expect(screen.queryByText(/The lines add up to/)).not.toBeInTheDocument();
   });
+
+  it('warns when the lines plus VAT do not make the gross on the quote', async () => {
+    vi.mocked(api.extraction.extract).mockResolvedValue({
+      ...hoffmann,
+      totals: { computed: 17000, printed: 17000, match: true, vat: 3230, gross: 20330, grossMatch: false },
+    } as never);
+    const { container } = renderPage();
+    await uploadQuote(container);
+
+    expect(
+      await screen.findByText(/The lines plus VAT come to €20230.00, the quote's gross is €20330.00/),
+    ).toBeInTheDocument();
+  });
 });

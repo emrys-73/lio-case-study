@@ -19,10 +19,19 @@ def same_amount(a: float, b: float) -> bool:
     return _cents(a) == _cents(b)
 
 
-def check_totals(lines: Iterable[HasTotal], printed: float | None) -> dict:
+def check_totals(
+    lines: Iterable[HasTotal],
+    printed: float | None,
+    vat: float | None = None,
+    gross: float | None = None,
+) -> dict:
     computed = add_up(lines)
+    both = vat is not None and gross is not None
     return {
         "computed": computed,
         "printed": printed,
         "match": None if printed is None else same_amount(computed, printed),
+        "vat": vat,
+        "gross": gross,
+        "grossMatch": same_amount(computed + vat, gross) if both else None,
     }

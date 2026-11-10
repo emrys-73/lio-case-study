@@ -33,19 +33,34 @@ def test_a_line_with_no_total_counts_as_zero():
 def test_lines_matching_the_printed_total():
     assert check_totals(_lines(1438.0, 320.0), 1758.0) == {
         "computed": 1758.0, "printed": 1758.0, "match": True,
+        "vat": None, "gross": None, "grossMatch": None,
     }
 
 
 def test_lines_not_matching_the_printed_total():
     assert check_totals(_lines(715.26, 622.0), 1847.19) == {
         "computed": 1337.26, "printed": 1847.19, "match": False,
+        "vat": None, "gross": None, "grossMatch": None,
     }
 
 
 def test_no_printed_total_means_nothing_to_compare():
     assert check_totals(_lines(100.0), None) == {
         "computed": 100.0, "printed": None, "match": None,
+        "vat": None, "gross": None, "grossMatch": None,
     }
+
+
+def test_lines_plus_vat_make_the_gross():
+    totals = check_totals(_lines(1467.61, 10.55), 1478.16, vat=280.85, gross=1759.01)
+    assert totals["match"] is True
+    assert totals["grossMatch"] is True
+
+
+def test_a_missing_line_shows_up_against_the_gross():
+    totals = check_totals(_lines(1467.61), 1467.61, vat=280.85, gross=1759.01)
+    assert totals["match"] is True
+    assert totals["grossMatch"] is False
 
 
 def test_extraction_total_is_the_sum_of_the_lines():
@@ -55,14 +70,27 @@ def test_extraction_total_is_the_sum_of_the_lines():
     }))
     totals = apply_totals(data)
     assert data.total_cost == 17000.0
-    assert totals == {"computed": 17000.0, "printed": 17230.0, "match": False}
+    assert {k: totals[k] for k in ("computed", "printed", "match")} == {
+        "computed": 17000.0, "printed": 17230.0, "match": False,
+    }
 
 
 def test_extraction_with_no_lines_keeps_the_printed_total():
     data = parse_reply(json.dumps({"orderLines": [], "totalCost": 500.0}))
     totals = apply_totals(data)
     assert data.total_cost == 500.0
-    assert totals == {"computed": 0.0, "printed": 500.0, "match": False}
+    assert {k: totals[k] for k in ("computed", "printed", "match")} == {
+        "computed": 0.0, "printed": 500.0, "match": False,
+    }
+
+
+def test_extraction_checks_the_lines_against_the_gross():
+    data = parse_reply(json.dumps({
+        "orderLines": [{"totalPrice": 1467.61}],
+        "totalCost": 1467.61, "vatAmount": 280.85, "grossTotal": 1759.01,
+    }))
+    totals = apply_totals(data)
+    assert (totals["vat"], totals["gross"], totals["grossMatch"]) == (280.85, 1759.01, False)
 
 
 @pytest.fixture(scope="module")

@@ -154,7 +154,9 @@ def parse_reply(content: str) -> ExtractedVendorData:
 
 
 def apply_totals(extracted: ExtractedVendorData) -> dict:
-    totals = check_totals(extracted.order_lines, extracted.total_cost)
+    totals = check_totals(
+        extracted.order_lines, extracted.total_cost, extracted.vat_amount, extracted.gross_total
+    )
     if extracted.order_lines:
         extracted.total_cost = totals["computed"]
     return totals

@@ -50,6 +50,12 @@ export default function NewRequestPage() {
   const [notFound, setNotFound] = useState<string[]>([]);
   const [printedTotal, setPrintedTotal] = useState<number | null>(null);
   const totalsDiffer = printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
+  const [printedVat, setPrintedVat] = useState<number | null>(null);
+  const [printedGross, setPrintedGross] = useState<number | null>(null);
+  const grossDiffers =
+    printedVat !== null &&
+    printedGross !== null &&
+    Math.abs(totalCost + printedVat - printedGross) >= 0.005;
 
   // PDF parsing mutation
   const parsePDFMutation = useMutation({
@@ -100,6 +106,8 @@ export default function NewRequestPage() {
       setTotalCost(extracted.totalCost || 0);
       setNotFound(extractionResult.missingFields || []);
       setPrintedTotal(extractionResult.totals?.printed ?? null);
+      setPrintedVat(extractionResult.totals?.vat ?? null);
+      setPrintedGross(extractionResult.totals?.gross ?? null);
       
       // Set commodity group (now included in extraction)
       if (extracted.commodityGroupId) {
@@ -232,6 +240,12 @@ export default function NewRequestPage() {
         <Alert variant="warning" className="mb-6">
           The lines add up to €{totalCost.toFixed(2)}, the quote says €{printedTotal.toFixed(2)}.
           Check the lines before you submit.
+        </Alert>
+      )}
+      {grossDiffers && (
+        <Alert variant="warning" className="mb-6">
+          The lines plus VAT come to €{(totalCost + printedVat).toFixed(2)}, the quote&apos;s gross is
+          €{printedGross.toFixed(2)}. A line may be missing.
         </Alert>
       )}
       {success && <Alert variant="success" className="mb-6">{success}</Alert>}

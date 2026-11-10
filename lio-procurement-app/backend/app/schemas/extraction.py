@@ -53,9 +53,14 @@ class ExtractedVendorData(BaseModel):
 
 
 class ExtractionTotals(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     computed: float
     printed: float | None = None
     match: bool | None = None
+    vat: float | None = None
+    gross: float | None = None
+    gross_match: bool | None = Field(default=None, alias="grossMatch")
 
 
 class ExtractionResponse(BaseModel):

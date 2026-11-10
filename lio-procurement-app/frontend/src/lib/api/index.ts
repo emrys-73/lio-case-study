@@ -115,6 +115,9 @@ export interface ExtractionTotals {
   computed: number;
   printed: number | null;
   match: boolean | null;
+  vat?: number | null;
+  gross?: number | null;
+  grossMatch?: boolean | null;
 }
 
 export interface Supplier {
