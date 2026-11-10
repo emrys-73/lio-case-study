@@ -1,0 +1,22 @@
+{
+  "id": "stylegreen",
+  "pdf": "AN-OF2312380-Kdnr-57692.pdf",
+  "status": "checked against the PDF by Adrian, 2026-11-10",
+  "notes": [
+    "VAT ID DE271073640 is in the page footer, which is a picture. The text layer does not contain it.",
+    "Brand is styleGREEN; the legal entity in the terms is FlowerArt GmbH.",
+    "Decimal quantities: 1.28 qm and 4.80 Lfm.",
+    "Shipping 113.85 sits in the totals block."
+  ],
+  "vendorName": ["styleGREEN", "FlowerArt GmbH"],
+  "vatId": "DE271073640",
+  "customer": "Lio Technologies GmbH",
+  "totals": {"positionsNet": 1186.14, "net": 1299.99, "gross": 1546.99},
+  "lines": [
+    {"description": "styleGREEN INDIVIDUAL m2 Modul Wald- und Kugelmoos 160 x 80 cm", "unitPrice": [559.00], "amount": 1.28, "unit": "sqm", "totalPrice": 715.52, "kind": "item"},
+    {"description": "styleGREEN INDIVIDUAL Kantenbegruenung Waldmoos pro Lfm", "unitPrice": [25.13], "amount": 4.80, "unit": "m", "totalPrice": 120.62, "kind": "item"},
+    {"description": "Logo Acrylglas weiss 5mm ask Lio 80 cm", "unitPrice": [350.00], "amount": 1, "unit": "piece", "totalPrice": 350.00, "kind": "item"},
+    {"description": "Versandkosten", "unitPrice": [113.85], "amount": 1, "unit": null, "totalPrice": 113.85, "kind": "charge"}
+  ],
+  "excluded": []
+}

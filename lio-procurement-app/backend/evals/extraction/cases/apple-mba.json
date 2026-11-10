@@ -1,0 +1,19 @@
+{
+  "id": "apple-mba",
+  "pdf": "Quote_1__Lio_Technologies_GmbH__1x_MBA___2212618452.pdf",
+  "status": "checked against the PDF by Adrian, 2026-11-10",
+  "notes": [
+    "Prices are written with a leading euro sign: €1.467,61.",
+    "Copyright levy 10.55 is taxed too: 19% of 1,478.16 = 280.85.",
+    "VAT ID is labelled UID."
+  ],
+  "vendorName": ["Apple", "Apple Business Team", "Apple Retail Germany B.V. & Co. KG"],
+  "vatId": "DE258811348",
+  "customer": "Lio Technologies GmbH",
+  "totals": {"positionsNet": 1467.61, "net": 1478.16, "gross": 1759.01},
+  "lines": [
+    {"description": "13 inch MacBook Air Apple M2 Chip Space Grau", "unitPrice": [1467.61], "amount": 1, "unit": "piece", "totalPrice": 1467.61, "kind": "item"},
+    {"description": "Urheberrechtsabgabe", "unitPrice": [10.55], "amount": 1, "unit": null, "totalPrice": 10.55, "kind": "charge"}
+  ],
+  "excluded": []
+}

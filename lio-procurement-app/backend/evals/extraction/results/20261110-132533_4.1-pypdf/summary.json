@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "label": "4.1-pypdf",
+    "model": "gpt-4.1",
+    "textSource": "pypdf",
+    "runsPerCase": 3,
+    "startedAt": "2026-11-10T13:25:33+00:00"
+  },
+  "overall": {
+    "runs": 15,
+    "crashes": 6,
+    "crashesWhereModelReplyWasUsable": 6,
+    "fullyCorrect": 0,
+    "vendorName": 9,
+    "vatId": 9,
+    "totalCostNet": 0,
+    "totalKinds": {
+      "gross": 9
+    },
+    "itemsFound": 12,
+    "itemsExpected": 24,
+    "chargesFound": 6,
+    "lineFieldsRight": 48,
+    "lineFieldsChecked": 48,
+    "alternativesCounted": 9,
+    "extraLines": 9,
+    "linesSumToTotal": 0,
+    "avgSeconds": 3.4,
+    "promptTokens": 371256,
+    "completionTokens": 4673,
+    "chargesExpected": 15
+  },
+  "perCase": {
+    "apple-mba": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "gross",
+        "gross"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        1,
+        1,
+        1
+      ],
+      "departments": [
+        "Lio Technologies GmbH"
+      ]
+    },
+    "dream-in-green": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "gross",
+        "gross"
+      ],
+      "alternativesCounted": [
+        1,
+        1,
+        1
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "Lio Technologies GmbH"
+      ]
+    },
+    "gaertner-gregg": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "gross",
+        "gross",
+        "gross"
+      ],
+      "alternativesCounted": [
+        2,
+        2,
+        2
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "Lio Technologies GmbH"
+      ]
+    },
+    "hoffmann": {
+      "runs": 3,
+      "crashes": 3,
+      "fullyCorrect": 0,
+      "errors": [
+        "1 validation error for ExtractedVendorData\nvatId\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further info"
+      ],
+      "totalKinds": [
+        "crash",
+        "crash",
+        "crash"
+      ],
+      "alternativesCounted": [
+        null,
+        null,
+        null
+      ],
+      "missingCharges": [
+        null,
+        null,
+        null
+      ],
+      "departments": []
+    },
+    "stylegreen": {
+      "runs": 3,
+      "crashes": 3,
+      "fullyCorrect": 0,
+      "errors": [
+        "1 validation error for ExtractedVendorData\nvatId\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further info"
+      ],
+      "totalKinds": [
+        "crash",
+        "crash",
+        "crash"
+      ],
+      "alternativesCounted": [
+        null,
+        null,
+        null
+      ],
+      "missingCharges": [
+        null,
+        null,
+        null
+      ],
+      "departments": []
+    }
+  }
+}

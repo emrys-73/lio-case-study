@@ -124,7 +124,7 @@ def extract_vendor_data(pdf_text: str, db: Session) -> ExtractionResponse:
                 {"role": "user", "content": _build_prompt(pdf_text, commodity_groups_list)},
             ],
             max_completion_tokens=4000,
-            temperature=0.3,
+            temperature=0,
         )
 
         content = response.choices[0].message.content
