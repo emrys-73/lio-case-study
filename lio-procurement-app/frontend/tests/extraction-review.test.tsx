@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AlternativesBox,
   LineCheck,
@@ -12,8 +13,11 @@ import {
   alternativesOf,
   fillMissingPrice,
   markText,
+  useOwnDepartment,
 } from '@/components/ExtractionReview';
-import type * as api from '@/lib/api';
+import * as api from '@/lib/api';
+
+vi.mock('@/lib/api', () => ({ auth: { me: vi.fn() } }));
 
 function extractionWith(alternatives: unknown): api.ExtractionResponse {
   return {
@@ -186,5 +190,35 @@ describe('totals check under the total', () => {
       <TotalsCheck totalCost={17000} printedTotal={15000} printedVat={2850} printedGross={20230} />,
     );
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+function DepartmentField({ start = '' }: { start?: string }) {
+  const [department, setDepartment] = useState(start);
+  useOwnDepartment(setDepartment);
+  return <input aria-label="Department" value={department} onChange={(e) => setDepartment(e.target.value)} />;
+}
+
+describe('department from the requester, not the quote', () => {
+  beforeEach(() => vi.mocked(api.auth.me).mockReset());
+
+  it('fills it from the signed-in profile', async () => {
+    vi.mocked(api.auth.me).mockResolvedValue({ profile: { department: 'Marketing' } } as never);
+    render(<DepartmentField />);
+    await waitFor(() => expect(screen.getByLabelText('Department')).toHaveValue('Marketing'));
+  });
+
+  it('never overwrites what is already typed', async () => {
+    vi.mocked(api.auth.me).mockResolvedValue({ profile: { department: 'Marketing' } } as never);
+    render(<DepartmentField start="Finance" />);
+    await waitFor(() => expect(api.auth.me).toHaveBeenCalled());
+    expect(screen.getByLabelText('Department')).toHaveValue('Finance');
+  });
+
+  it('stays empty when the profile has none', async () => {
+    vi.mocked(api.auth.me).mockResolvedValue({ profile: { department: null } } as never);
+    render(<DepartmentField />);
+    await waitFor(() => expect(api.auth.me).toHaveBeenCalled());
+    expect(screen.getByLabelText('Department')).toHaveValue('');
   });
 });

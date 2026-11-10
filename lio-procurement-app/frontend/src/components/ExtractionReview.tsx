@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { Alert, Button } from '@/components/base';
 import { grossFits } from '@/lib/totals';
-import type * as api from '@/lib/api';
+import * as api from '@/lib/api';
 
 export interface Alternative {
   positionDescription: string | null;
@@ -176,4 +176,20 @@ export function TotalsCheck({
       Check the lines before you submit.
     </Alert>
   );
+}
+
+export function useOwnDepartment(setDepartment: Dispatch<SetStateAction<string>>) {
+  useEffect(() => {
+    let live = true;
+    Promise.resolve()
+      .then(() => api.auth.me())
+      .then((me) => {
+        const own = me?.profile?.department?.trim();
+        if (live && own) setDepartment((current) => current || own);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [setDepartment]);
 }
