@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models import CommodityGroup
 from app.schemas.extraction import ExtractedVendorData, ExtractionResponse
-from app.services.lines import drop_vat_lines
+from app.services.lines import drop_listed_alternatives, drop_vat_lines
 from app.services.ocr import PictureText, read_pictures, render_pages
 from app.services.pdf import extract_pages
 from app.services.totals import check_totals
@@ -260,6 +260,7 @@ def extract_vendor_data(
         return ExtractionResponse(success=False, error=str(exc))
 
     drop_vat_lines(extracted)
+    drop_listed_alternatives(extracted)
     totals = apply_totals(extracted)
     missing_fields = find_missing_fields(extracted)
 
