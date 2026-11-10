@@ -94,10 +94,10 @@ pre mark { background: #fde68a; color: var(--ink); padding: 0 2px; border-radius
   <p class="quote">"Anything below €2,000 shouldn't need approval at all."</p>
 
   <h2>Do we have tests?</h2>
-  <p><span class="status no">Not for this</span></p>
+  <p><span class="status ok">Built 10 Nov</span></p>
   <ul>
-    <li>One test covers the approval flow: who can approve, and only once.</li>
-    <li>Nothing tests an amount limit. There is none.</li>
+    <li>50 backend tests in <code>tests/test_approval.py</code>: the rule, the setting, create, edit and the seed.</li>
+    <li>4 frontend tests for the "Auto" label. Full backend suite: 324 passed.</li>
   </ul>
 
   <h2>How it works today</h2>
@@ -109,7 +109,7 @@ pre mark { background: #fde68a; color: var(--ink); padding: 0 2px; border-radius
   </ul>
 
   <h2>Tests to write first</h2>
-  <p><span class="status wait">Needs your OK</span></p>
+  <p><span class="status ok">All pass</span></p>
   <ul>
     <li>€1,999.99 is approved on create.</li>
     <li>€2,000.00 stays pending.</li>
@@ -140,6 +140,7 @@ pre mark { background: #fde68a; color: var(--ink); padding: 0 2px; border-radius
   <ul>
     <li>An admin screen to set the limit.</li>
     <li>Use the form's gross check at save too, so correct quotes stop waiting for a buyer.</li>
+    <li>Clearing the limit through the API drops the key, so the seed puts €2,000 back on the next start. Store an empty limit instead.</li>
     <li>Stop requesters closing a request, and stop anyone closing one before approval.</li>
     <li>Splitting one order into small ones to stay under the limit. Not solved. Flag it to Acme.</li>
   </ul>

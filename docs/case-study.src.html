@@ -56,14 +56,14 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
   <h2 id="progress">Progress</h2>
   <div class="progress">
     <div class="prow all">
-      <div class="phead"><span class="pname"><b>Whole case study</b> <span class="pwhat">all four asks plus setup and the PR</span></span><span class="pnum">20 of 29 steps, 69%</span></div>
-      <div class="bar" role="img" aria-label="Whole case study: 20 of 29 steps done"><div class="fill" style="width:69%"></div></div>
-      <p class="pleft">Committed steps only. Nothing is pushed. Status 10 Nov, 18:05.</p>
+      <div class="phead"><span class="pname"><b>Whole case study</b> <span class="pwhat">all four asks plus setup and the PR</span></span><span class="pnum">23 of 25 steps, 92%</span></div>
+      <div class="bar" role="img" aria-label="Whole case study: 23 of 25 steps done"><div class="fill" style="width:92%"></div></div>
+      <p class="pleft">Committed steps only. All four asks are committed and pushed. Status 10 Nov, 18:40.</p>
     </div>
     <div class="prow">
-      <div class="phead"><span class="pname"><a href="#problem-1">Problem 1</a> <span class="pwhat">PDF extraction</span></span><span class="pnum">9 of 11 steps, 82%</span></div>
-      <div class="bar" role="img" aria-label="Problem 1: 9 of 11 steps done"><div class="fill" style="width:82%"></div></div>
-      <p class="pleft">Alternatives kept out of the lines and shown under them, department from the profile, committed 17:47 to 18:00. Left: vendor tied to the VAT ID owner (noted, not building now), group list out of the prompt (waits for the classifier).</p>
+      <div class="phead"><span class="pname"><a href="#problem-1">Problem 1</a> <span class="pwhat">PDF extraction</span></span><span class="pnum">9 of 9 steps, 100%</span></div>
+      <div class="bar" role="img" aria-label="Problem 1: 9 of 9 steps done"><div class="fill" style="width:100%"></div></div>
+      <p class="pleft">Alternatives kept out of the lines and shown under them, department from the profile, committed 17:47 to 18:00. Moved to later, Acme didn't ask for them: vendor tied to the VAT ID owner, group list out of the prompt (needs the classifier). Still wrong in the eval: Apple's copyright levy is dropped on most runs, the form warns every time.</p>
     </div>
     <div class="prow">
       <div class="phead"><span class="pname"><a href="#problem-2">Problem 2</a> <span class="pwhat">Negotiated prices</span></span><span class="pnum">5 of 5 steps, 100%</span></div>
@@ -71,14 +71,14 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
       <p class="pleft">The form now suggests the catalogue article for a line and switches to it in one tap, committed 18:12 in <code>a29abcd</code> and <code>b1cdd25</code>. Search eval: 39 of 40 wordings right, 6 of 10 on a blind set. Left, not counted as steps: the eval answer key needs your check, Acme confirms which supplier wins, suggestions in the edit form, the approver flag.</p>
     </div>
     <div class="prow">
-      <div class="phead"><span class="pname"><a href="#problem-3">Problem 3</a> <span class="pwhat">Commodity groups</span></span><span class="pnum">5 of 7 steps, 71%</span></div>
-      <div class="bar" role="img" aria-label="Problem 3: 5 of 7 steps done"><div class="fill" style="width:71%"></div></div>
-      <p class="pleft">Acme's three examples now land in the right group through the form, a PDF and the API, committed 17:46 in <code>4b41554</code> and <code>4335a96</code>. Left: search for groups, classifier with its eval.</p>
+      <div class="phead"><span class="pname"><a href="#problem-3">Problem 3</a> <span class="pwhat">Commodity groups</span></span><span class="pnum">5 of 5 steps, 100%</span></div>
+      <div class="bar" role="img" aria-label="Problem 3: 5 of 5 steps done"><div class="fill" style="width:100%"></div></div>
+      <p class="pleft">Acme's three examples now land in the right group through the form, a PDF and the API, committed 17:46 in <code>4b41554</code> and <code>4335a96</code>. Extra, not asked by Acme and not counted: a classifier that suggests a group when no rule matches, built 18:21 in <code>678e4f9</code>. It has no tests and no eval yet. To confirm with Acme: the two stand-in groups and the €500 limit.</p>
     </div>
     <div class="prow">
-      <div class="phead"><span class="pname"><a href="#problem-4">Bonus</a> <span class="pwhat">Approval limit</span></span><span class="pnum">0 of 3 steps, 0%</span></div>
-      <div class="bar" role="img" aria-label="Bonus: 0 of 3 steps done"><div class="fill" style="width:0%"></div></div>
-      <p class="pleft">Limit as a setting, the approval rule and an "Auto" label in the lists are built with 43 tests, not committed yet. Left: auto-approval at save and back to pending on edit, which wait for Problem 2 to commit its change to the same file.</p>
+      <div class="phead"><span class="pname"><a href="#problem-4">Bonus</a> <span class="pwhat">Approval limit</span></span><span class="pnum">3 of 3 steps, 100%</span></div>
+      <div class="bar" role="img" aria-label="Bonus: 3 of 3 steps done"><div class="fill" style="width:100%"></div></div>
+      <p class="pleft">Requests under the company limit approve themselves at create and edit, and go back to a buyer when an edit raises the total. For Acme that is €2,000 net, strictly below. Committed in <code>0d4b951</code>, <code>9a389e5</code> and <code>f6cfd9c</code>. Not counted: a screen to set the limit, and catching an order split to stay under it.</p>
     </div>
     <div class="prow">
       <div class="phead"><span class="pname"><a href="#order">Shared</a> <span class="pwhat">Setup, final check, PR</span></span><span class="pnum">1 of 3 steps, 33%</span></div>
@@ -88,6 +88,7 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
   </div>
   <ul>
     <li>A step counts when it is committed with its tests. Steps are not equal in size, so read this as a count, not as time left.</li>
+    <li>Only what Acme asked for is counted. Four steps were taken out of the count on 10 Nov, 18:20, because the brief doesn't ask for them: search for groups, the classifier, the group list out of the extraction prompt, vendor tied to the VAT ID owner. The first two were built anyway at 18:21, untested.</li>
     <li>Problem 1 scores 12/15 quotes fully right in the eval, up from 9/15, after fixes 8 to 10. Run as an Acme user it scored 6/15 before those fixes, not re-run yet. Detail in <a href="#status">Where we are</a>.</li>
   </ul>
 
@@ -109,7 +110,7 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
   </ul>
 
   <h2 id="status">Where we are</h2>
-  <p><span class="status wait">10 Nov, 17:20</span> Problem 1 and the rules of Problem 3 are built. Nothing is pushed.</p>
+  <p><span class="status wait">10 Nov, 18:23</span> All four asks are built, committed and pushed.</p>
   <div class="tablewrap">
   <table>
     <thead><tr><th>Extraction, 15 live runs</th><th class="t">Before</th><th class="t">Now</th></tr></thead>
@@ -142,7 +143,7 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
       </ul>
       <p class="label">Being built now</p>
       <ul>
-        <li>Problem 3, committed 17:46 in <code>4b41554</code> and <code>4335a96</code>, not pushed:
+        <li>Problem 3, committed 17:46 in <code>4b41554</code> and <code>4335a96</code>:
           <ul>
             <li>Acme's three rules are seeded: cable ties, toner, small software.</li>
             <li><code>POST /categorise</code> tells the form the group while the person types.</li>
@@ -159,11 +160,13 @@ details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
     <div>
       <p class="label">Not started</p>
       <ul>
-        <li>Search for commodity groups. The catalogue search and its eval are done.</li>
-        <li>Classifier and its eval. So the group list is still in the extractor prompt.</li>
-        <li>Approval limit.</li>
-        <li>Alternatives as options to pick. Department from the profile.</li>
         <li>End-to-end check and the PR.</li>
+      </ul>
+      <p class="label">Later, not asked by Acme</p>
+      <ul>
+        <li>Tests and an eval for the classifier. It is built (<code>678e4f9</code>): code shortlists 15 of the 380 groups, one model call picks one or none. Nobody has measured how good its picks are.</li>
+        <li>The group list out of the extraction prompt. Waits for the classifier's eval.</li>
+        <li>Vendor tied to whoever owns the VAT ID and bank details.</li>
       </ul>
     </div>
   </div>
@@ -540,10 +543,10 @@ action: "auto_approved"
       <tr><td class="n">4</td><td><b>Totals.</b> Added up in code at every save. <span class="status ok">Done</span> <code>6929e80</code>, <code>db18415</code>, <code>f4ad0e8</code></td><td>1, ★</td></tr>
       <tr><td class="n">5</td><td><b>Extractor.</b> Schema allows empty. Structured output. Clear spec. Buyer name. Snapshot stored. <span class="status ok">Done</span> <code>6cd66db</code> to <code>8e56e49</code></td><td>1</td></tr>
       <tr><td class="n">5b</td><td><b>Text in pictures.</b> Failing styleGREEN test first. Local OCR on every upload. Page picture to the model only when needed. <span class="status ok">Done</span> <code>97820f2</code>, <code>c8123ea</code></td><td>1</td></tr>
-      <tr><td class="n">6</td><td><b>Search.</b> Eval first, then the search. <span class="status ok">Done for articles</span> <code>a29abcd</code>. Not started for groups.</td><td>2, 3</td></tr>
-      <tr><td class="n">7</td><td><b>Classifier.</b> Its eval, then the call. Only then the group list leaves the extractor. <span class="status no">Not started</span></td><td>3, 1</td></tr>
+      <tr><td class="n">6</td><td><b>Search.</b> Eval first, then the search. <span class="status ok">Done for articles</span> <code>a29abcd</code>. For groups: built inside the classifier, no eval.</td><td>2, 3</td></tr>
+      <tr><td class="n">7</td><td><b>Classifier.</b> Its eval, then the call. Only then the group list leaves the extractor. <span class="status wait">Built, not tested</span> <code>678e4f9</code>. The group list is still in the extractor.</td><td>3, 1</td></tr>
       <tr><td class="n">8</td><td><b>Article suggestions</b> on the same search. <span class="status ok">Done</span> <code>a29abcd</code>, <code>b1cdd25</code></td><td>2</td></tr>
-      <tr><td class="n">9</td><td><b>Approval limit.</b> Only if time is left. <span class="status no">Not started</span></td><td>★</td></tr>
+      <tr><td class="n">9</td><td><b>Approval limit.</b> <span class="status ok">Done</span> <code>0d4b951</code>, <code>9a389e5</code>, <code>f6cfd9c</code></td><td>★</td></tr>
     </tbody>
   </table>
   </div>
@@ -551,7 +554,7 @@ action: "auto_approved"
     <li>Frontend tests land with the step that changes the form: 3, 5 and 8.</li>
     <li>Step 5b comes after step 5. Until the schema allows an empty VAT ID, styleGREEN crashes and the gain can't be measured.</li>
     <li>Step 5b rebuilt the backend image (tesseract with German). Done 10 Nov, the container was recreated.</li>
-    <li>Steps 0 to 5b are committed. Next: search (6), classifier (7), article suggestions (8).</li>
+    <li>Steps 0 to 6 and 8 are committed. The classifier (7) is built but not tested. The approval limit (9) is committed. Next: the end-to-end check and the PR.</li>
     <li>Step 7 waits for the classifier on purpose. Otherwise uploads lose their group suggestion in between.</li>
   </ul>
 
