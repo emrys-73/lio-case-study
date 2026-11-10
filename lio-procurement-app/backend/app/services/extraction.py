@@ -86,6 +86,33 @@ def _strip_markdown_fences(content: str) -> str:
     return cleaned
 
 
+def parse_reply(content: str) -> ExtractedVendorData:
+    return ExtractedVendorData.model_validate(json.loads(_strip_markdown_fences(content)))
+
+
+def _blank(value: str | None) -> bool:
+    return value is None or not value.strip()
+
+
+def find_missing_fields(extracted: ExtractedVendorData) -> list[str]:
+    missing: list[str] = []
+    if _blank(extracted.title):
+        missing.append("Title/Short Description")
+    if _blank(extracted.vendor_name):
+        missing.append("Vendor Name")
+    if _blank(extracted.vat_id):
+        missing.append("VAT ID")
+    if _blank(extracted.department):
+        missing.append("Department")
+    if not extracted.order_lines:
+        missing.append("Order Lines")
+    if not extracted.total_cost:
+        missing.append("Total Cost")
+    if not extracted.commodity_group_id or not extracted.commodity_group_name:
+        missing.append("Commodity Group")
+    return missing
+
+
 def extract_vendor_data(pdf_text: str, db: Session) -> ExtractionResponse:
     """Extract vendor data and classify commodity group in one AI call.
 
@@ -131,29 +158,12 @@ def extract_vendor_data(pdf_text: str, db: Session) -> ExtractionResponse:
         if not content:
             return ExtractionResponse(success=False, error="Empty response from AI")
 
-        extracted = ExtractedVendorData.model_validate(
-            json.loads(_strip_markdown_fences(content))
-        )
+        extracted = parse_reply(content)
     except Exception as exc:  # noqa: BLE001 — mirror the original catch-all
         logger.exception("Error extracting vendor data")
         return ExtractionResponse(success=False, error=str(exc))
 
-    # Check which fields are missing or empty (same rules as the original).
-    missing_fields: list[str] = []
-    if not extracted.title.strip():
-        missing_fields.append("Title/Short Description")
-    if not extracted.vendor_name.strip():
-        missing_fields.append("Vendor Name")
-    if not extracted.vat_id.strip():
-        missing_fields.append("VAT ID")
-    if not extracted.department.strip():
-        missing_fields.append("Department")
-    if not extracted.order_lines:
-        missing_fields.append("Order Lines")
-    if not extracted.total_cost:
-        missing_fields.append("Total Cost")
-    if not extracted.commodity_group_id or not extracted.commodity_group_name:
-        missing_fields.append("Commodity Group")
+    missing_fields = find_missing_fields(extracted)
 
     # Validate that the returned commodity group id actually exists.
     if extracted.commodity_group_id is not None:
