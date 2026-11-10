@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -9,6 +9,8 @@ MemberRole = Literal["admin", "buyer", "requester"]
 # Request fields an organization may optionally mark as required. (The other
 # request fields are always required by the app.)
 ConfigurableRequiredField = Literal["vat_id", "department"]
+
+ApprovalLimit = Annotated[float, Field(gt=0, allow_inf_nan=False, strict=True)]
 
 
 class _RuleFields(BaseModel):
@@ -51,6 +53,9 @@ class OrganizationSettings(BaseModel):
 
     required_fields: list[ConfigurableRequiredField] = Field(default_factory=list)
     commodity_rules: list[CommodityRule] = Field(default_factory=list)
+    approval_limit: ApprovalLimit | None = Field(
+        default=None, exclude_if=lambda limit: limit is None
+    )
 
 
 class OrganizationSettingsUpdate(BaseModel):
@@ -58,6 +63,7 @@ class OrganizationSettingsUpdate(BaseModel):
 
     required_fields: list[ConfigurableRequiredField] | None = None
     commodity_rules: list[CommodityRuleIn] | None = None
+    approval_limit: ApprovalLimit | None = None
 
 
 class OrganizationCreate(BaseModel):

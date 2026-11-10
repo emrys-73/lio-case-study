@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, object_session
 
 from app.models import CommodityGroup, Organization
 from app.schemas.organizations import (
+    ApprovalLimit,
     CommodityRule,
     CommodityRuleIn,
     ConfigurableRequiredField,
@@ -19,6 +20,7 @@ from app.services.keywords import words
 logger = logging.getLogger(__name__)
 
 _required_field = TypeAdapter(ConfigurableRequiredField)
+_approval_limit = TypeAdapter(ApprovalLimit | None)
 
 
 class InvalidSettings(ValueError):
@@ -66,7 +68,24 @@ def load_settings(org: Organization | None) -> OrganizationSettings:
                 )
         rules = [rule for rule in rules if rule.commodity_group_id not in missing]
 
-    return OrganizationSettings(required_fields=required_fields, commodity_rules=rules)
+    return OrganizationSettings(
+        required_fields=required_fields,
+        commodity_rules=rules,
+        approval_limit=_read_approval_limit(org, raw),
+    )
+
+
+def _read_approval_limit(org: Organization, raw: dict) -> float | None:
+    value = raw.get("approval_limit")
+    try:
+        return _approval_limit.validate_python(value)
+    except ValidationError:
+        logger.warning(
+            "Organization %s settings: skipped approval_limit %r, not a positive number",
+            org.id,
+            value,
+        )
+        return None
 
 
 _RULE_CONTENT = {"keywords", "commodity_group_id", "reason", "max_amount"}
@@ -81,6 +100,8 @@ def save_settings(
 ) -> OrganizationSettings:
     current = load_settings(org)
     changes = update.model_dump(exclude_unset=True, exclude_none=True)
+    if "approval_limit" in update.model_fields_set:
+        changes["approval_limit"] = update.approval_limit
     if update.commodity_rules is not None:
         changes["commodity_rules"] = [
             rule.model_dump()
