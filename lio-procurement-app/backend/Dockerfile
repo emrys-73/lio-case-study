@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Install dependencies first for better layer caching
 COPY pyproject.toml ./
-RUN pip install --upgrade pip && pip install .
+RUN pip install --upgrade pip && pip install ".[dev]"
 
 # Copy application code
 COPY . .
