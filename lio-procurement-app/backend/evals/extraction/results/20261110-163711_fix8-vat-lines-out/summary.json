@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "label": "fix8-vat-lines-out",
+    "model": "gpt-4o-mini-2024-07-18",
+    "textSource": "pdf",
+    "runsPerCase": 3,
+    "startedAt": "2026-11-10T16:37:11+00:00",
+    "withoutGroupList": false,
+    "buyer": "each quote's addressee"
+  },
+  "overall": {
+    "runs": 15,
+    "crashes": 0,
+    "crashesWhereModelReplyWasUsable": 0,
+    "fullyCorrect": 10,
+    "vendorName": 15,
+    "vatId": 15,
+    "totalCostNet": 10,
+    "totalKinds": {
+      "net": 10,
+      "items_only_net": 2,
+      "other": 3
+    },
+    "itemsFound": 24,
+    "itemsExpected": 24,
+    "chargesFound": 13,
+    "lineFieldsRight": 101,
+    "lineFieldsChecked": 101,
+    "alternativesCounted": 3,
+    "extraLines": 3,
+    "linesSumToTotal": 15,
+    "vatAmount": 9,
+    "grossTotal": 15,
+    "wrong": 5,
+    "wrongAndSilent": 0,
+    "linesRight": 10,
+    "falseAlarms": 0,
+    "avgSeconds": 15.5,
+    "promptTokens": 676125,
+    "completionTokens": 3870,
+    "ocrAddedText": 12,
+    "pageImagesSent": 3,
+    "chargesExpected": 15
+  },
+  "perCase": {
+    "apple-mba": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 1,
+      "errors": [],
+      "totalKinds": [
+        "net",
+        "items_only_net",
+        "items_only_net"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        1,
+        1
+      ],
+      "departments": [
+        "None"
+      ]
+    },
+    "dream-in-green": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 0,
+      "errors": [],
+      "totalKinds": [
+        "other",
+        "other",
+        "other"
+      ],
+      "alternativesCounted": [
+        1,
+        1,
+        1
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "None"
+      ]
+    },
+    "gaertner-gregg": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 3,
+      "errors": [],
+      "totalKinds": [
+        "net",
+        "net",
+        "net"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "Raumbegrünung"
+      ]
+    },
+    "hoffmann": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 3,
+      "errors": [],
+      "totalKinds": [
+        "net",
+        "net",
+        "net"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "Einkauf / Technik"
+      ]
+    },
+    "stylegreen": {
+      "runs": 3,
+      "crashes": 0,
+      "fullyCorrect": 3,
+      "errors": [],
+      "totalKinds": [
+        "net",
+        "net",
+        "net"
+      ],
+      "alternativesCounted": [
+        0,
+        0,
+        0
+      ],
+      "missingCharges": [
+        0,
+        0,
+        0
+      ],
+      "departments": [
+        "None"
+      ]
+    }
+  }
+}
