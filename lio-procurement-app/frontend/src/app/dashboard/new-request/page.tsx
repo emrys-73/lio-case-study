@@ -83,12 +83,22 @@ export default function NewRequestPage() {
   const ownGroupId = useRef<number | null>(null);
   const categoriseRun = useRef(0);
   const lockedRef = useRef(false);
+  const pickedRef = useRef(false);
+  const suggestedRef = useRef<number | null>(null);
+  const [suggestedId, setSuggestedId] = useState<number | null>(null);
   const locked = Boolean(commodity?.locked && commodity.group_id);
   const staff = isStaff(org?.role, commodity ?? savedCommodity);
   const groupName = (id: number | null | undefined, fallback?: string | null) =>
     fallback || commodityGroups?.find((g) => g.id === id)?.name || (id ? `Group ${id}` : '');
 
+  const dropSuggestion = () => {
+    suggestedRef.current = null;
+    setSuggestedId(null);
+  };
+
   const chooseGroup = (id: number | null) => {
+    pickedRef.current = true;
+    dropSuggestion();
     ownGroupId.current = id;
     setCommodityGroupId(id);
   };
@@ -123,6 +133,10 @@ export default function NewRequestPage() {
         lockedRef.current = false;
         setCommodityGroupId(ownGroupId.current);
       }
+      if (suggestedRef.current !== null) {
+        dropSuggestion();
+        if (!pickedRef.current && ownGroupId.current === null) setCommodityGroupId(null);
+      }
       setCommodity(null);
     };
     if (!lines.some((line) => line.description.trim())) {
@@ -136,8 +150,19 @@ export default function NewRequestPage() {
           if (run !== categoriseRun.current) return;
           const next = result?.commodity;
           if (next?.locked && next.group_id) {
+            dropSuggestion();
             lockedRef.current = true;
             setCommodity(next);
+            setCommodityGroupId(next.group_id);
+          } else if (
+            next?.source === 'model' &&
+            next.group_id &&
+            !pickedRef.current &&
+            ownGroupId.current === null
+          ) {
+            release();
+            suggestedRef.current = next.group_id;
+            setSuggestedId(next.group_id);
             setCommodityGroupId(next.group_id);
           } else {
             release();
@@ -194,6 +219,7 @@ export default function NewRequestPage() {
       // Set commodity group (now included in extraction)
       if (extracted.commodityGroupId) {
         ownGroupId.current = extracted.commodityGroupId;
+        dropSuggestion();
         if (!lockedRef.current) setCommodityGroupId(extracted.commodityGroupId);
       }
 
@@ -492,6 +518,9 @@ export default function NewRequestPage() {
                   </option>
                 ))}
               </select>
+            )}
+            {!locked && suggestedId !== null && commodityGroupId === suggestedId && (
+              <p className="mt-1.5 text-xs text-ink/55">Suggested, change it if it&apos;s not right</p>
             )}
           </div>
         </div>

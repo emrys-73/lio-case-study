@@ -6,6 +6,7 @@ from app.db.session import get_db
 from app.models import OrganizationMember
 from app.schemas.categorise import CategoriseIn, CategoriseOut, LineCategoryOut
 from app.services.categorisation import best_hit, commodity_block, company_rules, match_line
+from app.services.classifier import classify
 
 router = APIRouter(prefix="/categorise", tags=["categorise"])
 
@@ -37,6 +38,12 @@ def categorise_lines(
             )
         )
     hit = best_hit(rules, items)
+    if hit is None and any(len(line.description.strip()) >= 3 for line in payload.lines):
+        suggestion = classify([line.description for line in payload.lines])
+        if suggestion is not None:
+            commodity = commodity_block(db, membership.role, suggestion.group_id, "model", None)
+            commodity = commodity.model_copy(update={"reason": suggestion.reason or None})
+            return CategoriseOut(lines=lines, commodity=commodity)
     commodity = commodity_block(
         db,
         membership.role,
