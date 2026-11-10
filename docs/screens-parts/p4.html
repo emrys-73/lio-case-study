@@ -1,0 +1,414 @@
+<section class="prob" id="p4">
+<style>
+.badge.p4-b { width: auto; padding: 0 7px; border-radius: 999px; }
+.p4-track { height: 8px; border-radius: 999px; background: #e6e8eb; overflow: hidden; }
+.p4-track i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.p4-box { flex: none; width: 14px; height: 14px; border-radius: 4px; border: 1px solid #c4c8ce; background: #fff; display: inline-grid; place-items: center; font-size: 9px; color: #fff; }
+.p4-box.on { background: var(--accent); border-color: var(--accent); }
+.p4-box.lock { background: var(--muted); border-color: var(--muted); }
+.p4-banner { border-radius: 10px; padding: 10px 12px; border: 1px solid #c7e1e5; background: var(--accent-soft); color: var(--ink); font-size: 13px; }
+.p4-banner.warn { background: var(--warn-soft); border-color: #f0d9b0; }
+.p4-banner.plain { background: #f8f9fa; border-color: #e6e8eb; }
+.p4-banner ul { margin: 6px 0 0; }
+.p4-banner li { margin: 3px 0; }
+.p4-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); }
+.p4-check input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; flex: none; }
+.p4-check.locked { color: var(--muted); }
+.p4-price { width: 96px; border: 1px solid #d6d9de; border-radius: 8px; padding: 4px 8px; font: inherit; font-size: 13px; color: var(--ink); background: #fff; text-align: right; outline: none; }
+.p4-price:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.p4-click { cursor: pointer; border: 1px solid transparent; }
+.p4-click:hover { border-color: #d6d9de; }
+.p4-click.p4-sel { border-color: var(--accent); background: var(--accent-soft); }
+.p4-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+.p4-sims { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 14px; }
+</style>
+
+<div class="prob-head"><span class="kicker">PROBLEM 4, BONUS</span><h2 class="prob-title">Approval Limit</h2><p class="sub">No buyer sign-off under €2,000</p></div>
+<div class="open now"><h3>Build now</h3><ul><li>Optional bonus, only if time is left.</li><li>4.2 An "Auto" chip next to the real status in the lists.</li><li>Later: 4.1 hint before submit (needs a preview endpoint), 4.3 reason banner, 4.4 admin settings card. The prototype still shows them.</li></ul></div>
+
+<h2 id="p4-before" data-later><span class="badge p4-b">4.1</span>Before submit</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Line under the total</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="total"><span>Net total</span><b>€1,585.60</b></div>
+      <div class="row"><span class="chip cat">Auto-approves</span><span class="muted" style="font-size:12px">Under the €2,000 limit, no buyer needed</span></div>
+      <div class="total" style="margin-top:6px"><span>Net total</span><b>€1,585.60</b></div>
+      <div class="row"><span class="chip warn">Goes to a buyer</span><span class="muted" style="font-size:12px">PDF total doesn't match the lines</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Limit meter</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval limit <span class="num">€1,585.60 <small>of €2,000</small></span></div>
+        <div class="p4-track"><i style="width:79%"></i></div>
+        <span class="muted" style="font-size:12px">€414.40 left before a buyer signs off</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Tell at submit</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="total"><span>Total Cost</span><b>€1,585.60</b></div>
+      <div class="ui" style="align-items:center;text-align:center;gap:6px">
+        <b>Request submitted</b>
+        <span class="chip cat">Approved</span>
+        <span class="muted" style="font-size:12px">No buyer needed</span>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: one line next to the total the requester already watches, and it names the reason when something sends it to a buyer.</p>
+
+<h2 id="p4-lists"><span class="badge p4-b">4.2</span>Auto-approved in the lists</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Auto chip</h3><span class="pick">Pick</span></div>
+    <div class="screen"><div class="bar">Lio<span>Requests</span></div><div class="in">
+      <div class="line"><div class="d">Office monitors<small>€1,585.60</small></div><span class="chip cat">Approved</span><span class="chip out">Auto</span></div>
+      <div class="line"><div class="d">Laptops IT<small>€3,410.00</small></div><span class="chip warn">Pending</span></div>
+      <span class="p4-label">Approvals, recently decided</span>
+      <div class="line"><div class="d">Office monitors<small>Lio, under €2,000</small></div><span class="chip cat">Approved</span><span class="chip out">Auto</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Own tab</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Approvals</span></div><div class="in">
+      <div class="row"><span class="chip off">Pending 3</span><span class="chip cat">Auto-approved 12</span><span class="chip off">Decided</span></div>
+      <div class="line"><div class="d">Office monitors<small>€1,585.60</small></div><span class="btn ghost">Undo</span></div>
+      <div class="line"><div class="d">Lab gloves<small>€440.00</small></div><span class="btn ghost">Undo</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Same as manual</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requests</span></div><div class="in">
+      <div class="line"><div class="d">Office monitors<small>€1,585.60</small></div><span class="chip cat">Approved</span></div>
+      <div class="line"><div class="d">Laptops IT<small>€3,410.00</small></div><span class="chip warn">Pending</span></div>
+      <span class="muted" style="font-size:12px">Buyers never see auto-approved requests</span>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">Why: the status stays the real "Approved", and a small Auto chip lets a buyer spot what skipped them without a new tab to check.</p>
+
+<h2 id="p4-detail" data-later><span class="badge p4-b">4.3</span>Request detail</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Reason banner</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="row"><b style="font-size:15px">Office monitors</b><span class="chip warn">Pending</span></div>
+      <div class="p4-banner warn"><b>Sent to a buyer, though under €2,000</b>
+        <ul><li>PDF total €1,640.00 doesn't match the lines, €1,585.60</li></ul>
+      </div>
+      <div class="p4-banner"><b>Auto-approved by Lio.</b> Net €1,585.60 is under the €2,000 limit.</div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Activity only</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Activity</div>
+        <div class="line"><div class="d">Lio approved this<small>Under the €2,000 limit, 10 Nov, 14:02</small></div></div>
+        <div class="line"><div class="d">Anna Weber created this<small>10 Nov, 14:02</small></div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Checklist</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval checks</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Net under €2,000</div>
+        <div class="p4-check"><span class="p4-box"></span>Totals match the PDF</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Group rule kept</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Group picked with high confidence</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: one sentence answers "why" without reading a checklist; the same reasons also go into the Activity log for the record.</p>
+
+<h2 id="p4-admin" data-later><span class="badge p4-b">4.4</span>Admin setting</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Card in Settings</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Settings</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval</div>
+        <span class="muted" style="font-size:12px">Approve without a buyer below (net)</span>
+        <div class="inp">€ 2,000.00</div>
+        <span class="p4-label">Always send to a buyer when</span>
+        <div class="p4-check locked"><span class="p4-box lock">✓</span>Totals don't match the PDF</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>A group rule was overridden</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>The group was a low-confidence pick</div>
+        <div class="p4-check"><span class="p4-box"></span>A cheaper catalogue match was ignored</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Limit per group</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Settings</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval limits</div>
+        <div class="line"><div class="d">Default</div><span class="num">€2,000</span></div>
+        <div class="line"><div class="d">IT Hardware</div><span class="num">€1,000</span></div>
+        <div class="line"><div class="d">Office Supplies</div><span class="num">€500</span></div>
+        <span class="btn ghost" style="align-self:flex-start">+ Add group</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>On or off</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Settings</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Request Settings</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Skip buyer sign-off under €2,000</div>
+        <div class="p4-check"><span class="p4-box"></span>Require VAT ID</div>
+        <div class="p4-check"><span class="p4-box"></span>Require Department</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: one number and a short list Acme can tune, next to the Request Settings admins already use; totals mismatch is locked on because it was decided.</p>
+
+<h2 id="p4-try"><span class="badge">▶</span>Try it</h2>
+<div class="proto">
+  <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Organization</span></div>
+  <div class="in">
+    <div class="ui">
+      <div class="ui-title">Order Lines <button class="btn ghost" type="button" id="p4-add">+ Add laptop</button></div>
+      <div id="p4-lines" class="tiers"></div>
+    </div>
+    <div class="total"><span>Net total</span><b id="p4-total">€0.00</b></div>
+    <div class="row" id="p4-hint"></div>
+    <div class="ui">
+      <span class="p4-label">Simulate</span>
+      <div class="p4-sims">
+        <label class="p4-check"><input type="checkbox" data-sim="totals_mismatch">PDF total doesn't match the lines</label>
+        <label class="p4-check"><input type="checkbox" data-sim="group_rule_overridden">Group rule overridden</label>
+        <label class="p4-check"><input type="checkbox" data-sim="group_low_confidence">Group picked with low confidence</label>
+        <label class="p4-check"><input type="checkbox" data-sim="cheaper_catalog_ignored">Cheaper catalogue match ignored</label>
+      </div>
+    </div>
+    <div class="row"><span class="spacer"></span><button class="btn" type="button" id="p4-submit" style="padding:7px 16px;font-size:13px">Submit request</button></div>
+
+    <div class="ui">
+      <div class="ui-title">Requests <span class="muted" style="font-weight:400;font-size:12px">Click one</span></div>
+      <div id="p4-list" class="tiers"></div>
+    </div>
+    <div class="ui" id="p4-view"></div>
+
+    <div class="ui">
+      <div class="ui-title">Organization, Settings</div>
+      <span class="p4-label">Approval</span>
+      <label class="muted" style="font-size:12px" for="p4-limit">Approve without a buyer below (net, empty for no limit)</label>
+      <div class="row"><span class="muted">€</span><input class="p4-price" id="p4-limit" type="text" inputmode="decimal" value="2000" style="width:120px;text-align:left"></div>
+      <span class="p4-label">Always send to a buyer when</span>
+      <label class="p4-check locked"><input type="checkbox" checked disabled>Totals don't match the PDF</label>
+      <label class="p4-check"><input type="checkbox" data-chk="group_rule_overridden" checked>A group rule was overridden</label>
+      <label class="p4-check"><input type="checkbox" data-chk="group_low_confidence" checked>The group was a low-confidence pick</label>
+      <label class="p4-check"><input type="checkbox" data-chk="cheaper_catalog_ignored">A cheaper catalogue match was ignored</label>
+      <span class="muted" style="font-size:12px">Changes apply to new requests. Past decisions stay as they were.</span>
+    </div>
+  </div>
+</div>
+
+<div class="open">
+  <h3 style="color:var(--accent);margin-bottom:6px">Contract</h3>
+  <ul>
+    <li><b>Request responses</b> (list, detail) add <code>approval</code>: <code>{ decision: "auto_approved" | "needs_buyer", decided_by: "system" | "user", decided_at: datetime | null, net_total: decimal string, limit: decimal string | null, reasons: Reason[] }</code>.</li>
+    <li><b>Reason</b>: <code>{ code: string, message: string, line_id: uuid | null }</code>. Codes: <code>under_limit</code>, <code>over_limit</code>, <code>no_limit</code>, <code>no_total</code>, <code>totals_mismatch</code>, <code>group_rule_overridden</code>, <code>group_low_confidence</code>, <code>cheaper_catalog_ignored</code>, <code>edited_over_limit</code>. The last three group codes are proposals.</li>
+    <li><b>Statuses stay as they are</b>: <code>approval_status</code> is <code>pending | approved | rejected</code>, <code>status</code> is <code>open | in_progress | closed</code>. Auto-approval sets <code>approved</code>, <code>approved_by: null</code>, <code>approval.decided_by: "system"</code>.</li>
+    <li><b>Before submit</b>: <code>POST /requests/approval-check</code> takes the draft (lines, commodity group, flags) and returns the same <code>approval</code> object without saving. Save recomputes it; the preview is a hint only.</li>
+    <li><b>Setting</b>: <code>organizations.settings.approval = { auto_approve_below: number | null, always_to_buyer: { group_rule_overridden: bool, group_low_confidence: bool, cheaper_catalog_ignored: bool } }</code>. Net EUR, strictly below. <code>null</code> means no limit. Totals mismatch is not a setting, always on. Read and PATCH (merge) through the existing org settings endpoint, admin only.</li>
+    <li><b>Activity</b>: one <code>RequestActivity</code> on create or edit, <code>action: "auto_approved" | "sent_to_buyer"</code>, <code>detail: { net_total, limit, reasons }</code>.</li>
+  </ul>
+</div>
+
+<script>(function(){
+  function eur(n) { return "€" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function eurL(n) { return eur(n).replace(/\.00$/, ""); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function num(v) { var n = parseFloat(String(v).replace(/[€\s]/g, "").replace(",", ".")); return isFinite(n) ? n : NaN; }
+
+  var lines = [
+    { desc: "Business laptop 14\" i7, 32 GB", qty: 1, price: 1130 },
+    { desc: "24-inch monitor 1440p IPS", qty: 2, price: 185 },
+    { desc: "Copy paper A4 recycled 80 g", qty: 10, price: 8.56 }
+  ];
+  var sims = { totals_mismatch: false, group_rule_overridden: false, group_low_confidence: false, cheaper_catalog_ignored: false };
+  var settings = { limit: 2000, checks: { group_rule_overridden: true, group_low_confidence: true, cheaper_catalog_ignored: false } };
+  var requests = [], selected = null, seq = 0;
+
+  var MSG = {
+    group_rule_overridden: "The commodity group rule was overridden",
+    group_low_confidence: "The commodity group was picked with low confidence",
+    cheaper_catalog_ignored: "A line kept its price over a cheaper catalogue match"
+  };
+
+  function net() {
+    var t = 0;
+    lines.forEach(function (l) { t += Math.round(l.qty * (isFinite(l.price) ? l.price : 0) * 100); });
+    return t / 100;
+  }
+
+  function decide(total, s) {
+    var lim = settings.limit, blockers = [];
+    if (!(lim > 0)) return { auto: false, limit: null, total: total, under: false, reasons: [{ code: "no_limit", message: "No limit is set, every request goes to a buyer" }] };
+    if (total <= 0) return { auto: false, limit: lim, total: total, under: false, reasons: [{ code: "no_total", message: "No total yet" }] };
+    if (total >= lim) return { auto: false, limit: lim, total: total, under: false, reasons: [{ code: "over_limit", message: "Net " + eur(total) + " is at or over the " + eurL(lim) + " limit" }] };
+    if (s.totals_mismatch) blockers.push({ code: "totals_mismatch", message: "PDF total " + eur(total + 54.4) + " doesn't match the lines, " + eur(total) });
+    Object.keys(MSG).forEach(function (k) { if (s[k] && settings.checks[k]) blockers.push({ code: k, message: MSG[k] }); });
+    if (blockers.length) return { auto: false, limit: lim, total: total, under: true, reasons: blockers };
+    return { auto: true, limit: lim, total: total, under: true, reasons: [{ code: "under_limit", message: "Net " + eur(total) + " is under the " + eurL(lim) + " limit" }] };
+  }
+
+  var linesEl = document.getElementById("p4-lines");
+  var totalEl = document.getElementById("p4-total");
+  var hintEl = document.getElementById("p4-hint");
+  var listEl = document.getElementById("p4-list");
+  var viewEl = document.getElementById("p4-view");
+
+  function renderLines() {
+    var html = "";
+    lines.forEach(function (l, i) {
+      html += '<div class="pline"><div class="top2">' +
+        '<div class="d">' + esc(l.desc) + '<small>' + l.qty + ' × ' + (isFinite(l.price) ? eur(l.price) : "no price") + '</small></div>' +
+        '<span class="qty"><button type="button" data-q="' + i + '" data-d="-1" aria-label="Less">−</button><span>' + l.qty + '</span><button type="button" data-q="' + i + '" data-d="1" aria-label="More">+</button></span>' +
+        '<input class="p4-price" type="text" inputmode="decimal" data-p="' + i + '" value="' + esc(l.price.toFixed(2)) + '" aria-label="Unit price">' +
+        '<button class="x" type="button" data-rm="' + i + '" aria-label="Remove">×</button>' +
+        '</div></div>';
+    });
+    linesEl.innerHTML = html || '<div class="empty">No lines</div>';
+  }
+
+  function renderTotal() {
+    var t = net(), d = decide(t, sims);
+    totalEl.textContent = eur(t);
+    linesEl.querySelectorAll("[data-p]").forEach(function (inp) {
+      var l = lines[+inp.getAttribute("data-p")], sm = inp.parentNode.querySelector(".d small");
+      if (sm) sm.textContent = l.qty + " × " + (isFinite(l.price) ? eur(l.price) : "no price");
+    });
+    var chip, text;
+    if (d.auto) { chip = '<span class="chip cat">Auto-approves</span>'; text = "Under the " + eurL(d.limit) + " limit, no buyer needed"; }
+    else {
+      chip = '<span class="chip warn">Goes to a buyer</span>';
+      text = d.reasons.length > 1 ? d.reasons[0].message + ", and " + (d.reasons.length - 1) + " more" : d.reasons[0].message;
+    }
+    hintEl.innerHTML = chip + '<span class="muted" style="font-size:12px">' + esc(text) + '</span>';
+  }
+
+  function titleFor() {
+    seq++;
+    var first = lines[0] ? lines[0].desc.split(",")[0] : "Request";
+    return first + " #" + seq;
+  }
+
+  function renderList() {
+    if (!requests.length) { listEl.innerHTML = '<div class="empty">No requests yet</div>'; return; }
+    var html = "";
+    requests.forEach(function (r) {
+      var d = r.decision;
+      html += '<div class="line p4-click' + (selected === r.id ? " p4-sel" : "") + '" data-r="' + r.id + '" role="button" tabindex="0">' +
+        '<div class="d">' + esc(r.title) + '<small>' + esc(eur(d.total)) + '</small></div>' +
+        (d.auto ? '<span class="chip cat">Approved</span><span class="chip out">Auto</span>' : '<span class="chip warn">Pending</span>') +
+        '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  function renderView() {
+    var r = null;
+    requests.forEach(function (x) { if (x.id === selected) r = x; });
+    if (!r) { viewEl.innerHTML = '<div class="ui-title">Request detail</div><div class="empty">Click a request above</div>'; return; }
+    var d = r.decision, head = '<div class="row"><b style="font-size:15px;color:var(--ink)">' + esc(r.title) + '</b>' +
+      (d.auto ? '<span class="chip cat">Approved</span><span class="chip out">Auto</span>' : '<span class="chip warn">Pending</span>') + '</div>', body;
+    if (d.auto) body = '<div class="p4-banner"><b>Auto-approved by Lio.</b> ' + esc(d.reasons[0].message) + '.</div>';
+    else if (d.under) {
+      body = '<div class="p4-banner warn"><b>Sent to a buyer, though under ' + esc(eurL(d.limit)) + '</b><ul>';
+      d.reasons.forEach(function (x) { body += '<li>' + esc(x.message) + '</li>'; });
+      body += '</ul></div>';
+    } else body = '<div class="p4-banner plain"><b>Waiting for a buyer.</b> ' + esc(d.reasons[0].message) + '.</div>';
+    var act = '<span class="p4-label">Activity</span><div class="line"><div class="d">' +
+      (d.auto ? "Lio approved this" : "Lio sent this to a buyer") + '<small>' + esc(d.reasons.map(function (x) { return x.code; }).join(", ")) + '</small></div></div>';
+    viewEl.innerHTML = head + body + act;
+  }
+
+  function addRequest(title, total, s) {
+    var r = { id: "r" + (requests.length + 1), title: title, decision: decide(total, s) };
+    requests.unshift(r);
+    return r;
+  }
+
+  linesEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    if (b.hasAttribute("data-q")) {
+      var l = lines[+b.getAttribute("data-q")];
+      l.qty = Math.max(1, l.qty + +b.getAttribute("data-d"));
+    } else if (b.hasAttribute("data-rm")) {
+      lines.splice(+b.getAttribute("data-rm"), 1);
+    } else return;
+    renderLines(); renderTotal();
+  });
+  linesEl.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t.hasAttribute("data-p")) return;
+    var v = num(t.value);
+    lines[+t.getAttribute("data-p")].price = isFinite(v) && v >= 0 ? v : 0;
+    renderTotal();
+  });
+  linesEl.addEventListener("change", function (e) {
+    if (e.target.hasAttribute("data-p")) renderLines();
+  });
+
+  document.getElementById("p4-add").addEventListener("click", function () {
+    lines.push({ desc: "Business laptop 15\" Ryzen 7, 16 GB", qty: 1, price: 1229 });
+    renderLines(); renderTotal();
+  });
+
+  document.querySelectorAll("#p4 [data-sim]").forEach(function (c) {
+    c.addEventListener("change", function () { sims[c.getAttribute("data-sim")] = c.checked; renderTotal(); });
+  });
+  document.querySelectorAll("#p4 [data-chk]").forEach(function (c) {
+    c.addEventListener("change", function () { settings.checks[c.getAttribute("data-chk")] = c.checked; renderTotal(); });
+  });
+  document.getElementById("p4-limit").addEventListener("input", function (e) {
+    var v = num(e.target.value);
+    settings.limit = e.target.value.trim() === "" || !isFinite(v) ? null : v;
+    renderTotal();
+  });
+
+  document.getElementById("p4-submit").addEventListener("click", function () {
+    if (!lines.length) return;
+    var copy = {};
+    Object.keys(sims).forEach(function (k) { copy[k] = sims[k]; });
+    var r = addRequest(titleFor(), net(), copy);
+    selected = r.id;
+    renderList(); renderView();
+  });
+
+  function pick(e) {
+    var row = e.target.closest("[data-r]");
+    if (!row) return;
+    selected = row.getAttribute("data-r");
+    renderList(); renderView();
+  }
+  listEl.addEventListener("click", pick);
+  listEl.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(e); } });
+
+  addRequest("Lab gloves", 440, { totals_mismatch: false });
+  addRequest("Laptops IT", 3410, { totals_mismatch: false });
+  addRequest("Printer toner", 1131.2, { totals_mismatch: true, group_rule_overridden: true });
+
+  renderLines(); renderTotal(); renderList(); renderView();
+})();</script>
+</section>

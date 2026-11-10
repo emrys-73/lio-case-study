@@ -1,0 +1,556 @@
+<title>Lio Film Storyboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the artifact column (brief PDF style) holding one 16:9 player, then a two-up grid of looping scene cards */
+:root {
+  --bg: #ffffff;
+  --ink: #111317;
+  --body: #1f2328;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #f5f6f8;
+  --accent: #136f7d;
+  --accent-deep: #0e5560;
+  --accent-light: #6fa9b2;
+  --accent-pale: #d5e7ea;
+  --dark: #1f2328;
+  --sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --shadow: 0 12px 32px rgba(17,19,23,.08);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 2px solid var(--accent); gap: 12px; }
+.logo { display: flex; align-items: center; color: var(--ink); }
+.logo svg { height: 26px; width: auto; }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+h1 { font-size: clamp(34px, 6vw, 44px); line-height: 1.1; font-weight: 700; color: var(--ink); margin: 36px 0 4px; letter-spacing: -.02em; text-wrap: balance; }
+.sub { font-size: 21px; color: var(--muted); font-weight: 300; margin: 0; }
+h2 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 48px 0 14px; }
+ul { margin: 8px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin: 0 0 4px; }
+
+/* player */
+.player { margin-top: 28px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.stage { position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden; background: #fff; }
+.world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; font-family: var(--sans); color: var(--ink); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px; border-top: 1px solid var(--line); background: var(--panel); }
+.btn { font: 700 13px var(--sans); border: 0; border-radius: 6px; padding: 8px 14px; cursor: pointer; background: var(--dark); color: #fff; }
+.btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+.btn:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.time { font: 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
+.track { height: 4px; background: var(--line); }
+.track i { display: block; height: 100%; width: 0; background: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 14px; background: var(--panel); }
+.chip { font: 12px var(--sans); border: 1px solid var(--line); background: #fff; color: var(--body); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* storyboard cards */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 700px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.card { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 6px; overflow: hidden; min-width: 0; background: #fff; }
+.card .stage { border-bottom: 1px solid var(--line); }
+.card .info { padding: 14px 16px 16px; }
+.head { display: flex; gap: 10px; align-items: center; }
+.badge { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.head h3 { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0; }
+.head .t { margin-left: auto; font: 12px var(--mono); color: var(--faint); font-variant-numeric: tabular-nums; }
+.card ul { font-size: 14px; }
+.move { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+.tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; border-radius: 999px; padding: 1px 8px; margin-right: 4px; }
+.tag.real { background: var(--accent-pale); color: var(--accent-deep); }
+.tag.tbd { border: 1px dashed var(--accent); color: var(--accent); }
+.note { border: 1px solid var(--line); border-left: 4px solid var(--ink); border-radius: 6px; padding: 14px 18px; margin-top: 18px; }
+.note h3 { margin: 0 0 4px; font-size: 16px; color: var(--ink); }
+
+/* ---------- the film world (1920x1080 units) ---------- */
+.w-center { position: absolute; inset: 0; display: grid; place-items: center; }
+.line { display: flex; gap: 22px; align-items: baseline; font-size: 56px; font-weight: 400; letter-spacing: -.01em; white-space: nowrap; }
+.hero { font-size: 128px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; }
+.c-ink { color: var(--ink); } .c-t { color: var(--accent); } .c-deep { color: var(--accent-deep); } .c-l { color: var(--accent-light); } .c-m { color: var(--faint); }
+.w-kicker { position: absolute; left: 96px; top: 84px; font-size: 22px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+.lcard { position: absolute; background: #fff; border: 2px solid var(--line); border-left: 8px solid var(--accent); border-radius: 10px; box-shadow: var(--shadow); padding: 30px 36px; width: 640px; }
+.lcard .bdg { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; font-size: 24px; display: grid; place-items: center; margin-bottom: 14px; }
+.lcard b { display: block; font-size: 38px; color: var(--ink); line-height: 1.15; }
+.lcard span { display: block; font-size: 26px; color: var(--muted); margin-top: 6px; }
+.row { position: absolute; background: #fff; border: 2px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 26px 34px; display: flex; align-items: center; gap: 28px; font-size: 32px; color: var(--ink); white-space: nowrap; }
+.row .k { color: var(--muted); font-size: 24px; }
+.strike { color: var(--faint); text-decoration: line-through; }
+.pill { border-radius: 999px; padding: 8px 20px; font-size: 24px; font-weight: 700; }
+.pill.t { background: var(--accent); color: #fff; }
+.pill.o { border: 2px solid var(--accent); color: var(--accent); }
+.pill.k { background: var(--dark); color: #fff; }
+.tbdbox { border: 3px dashed var(--accent); border-radius: 12px; padding: 4px 22px; color: var(--accent); }
+.mac { position: absolute; left: 50%; top: 50%; width: 1240px; height: 760px; margin: -380px 0 0 -620px; perspective: 1800px; }
+.mac .lid { position: absolute; inset: 0 0 34px 0; background: var(--ink); border-radius: 30px; padding: 18px; transform-origin: 50% 100%; }
+.mac .scr { width: 100%; height: 100%; background: #fff; border-radius: 12px; overflow: hidden; display: grid; grid-template-columns: 230px 1fr; }
+.mac .base { position: absolute; left: -50px; right: -50px; bottom: 0; height: 34px; background: #c9ccd2; border-radius: 0 0 26px 26px; }
+.mac .side { background: var(--panel); border-right: 2px solid var(--line); padding: 28px 22px; }
+.mac .side i { display: block; height: 14px; border-radius: 7px; background: var(--line); margin: 18px 0; }
+.mac .side svg { height: 30px; width: auto; color: var(--ink); }
+.mac .main { padding: 34px 40px; }
+.mac .main h4 { margin: 0 0 22px; font-size: 34px; color: var(--ink); }
+.mac .f { display: flex; justify-content: space-between; border-bottom: 2px solid var(--line); padding: 16px 0; font-size: 26px; color: var(--ink); }
+.mac .f em { font-style: normal; color: var(--muted); }
+.bar { position: absolute; left: 360px; top: 560px; width: 1200px; height: 64px; border-radius: 32px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 32px; }
+.ring { width: 220px; height: 220px; border-radius: 50%; border: 6px solid var(--accent); display: grid; place-items: center; background: #fff; box-shadow: var(--shadow); }
+.cursor { position: absolute; width: 56px; height: 56px; z-index: 9; }
+.conf i { position: absolute; top: -40px; width: 26px; height: 14px; border-radius: 3px; }
+.pdf { position: absolute; width: 260px; height: 330px; background: #fff; border: 3px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 30px 26px; }
+.pdf b { display: inline-block; background: var(--ink); color: #fff; font-size: 26px; padding: 2px 14px; border-radius: 6px; }
+.pdf i { display: block; height: 12px; border-radius: 6px; background: var(--line); margin: 20px 0; }
+
+@property --n { syntax: '<integer>'; inherits: false; initial-value: 0; }
+.num { counter-reset: n var(--n); }
+.num::before { content: counter(n); }
+
+@keyframes pop { from { opacity: 0; filter: blur(4px); transform: scale(1.06); } to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes grow { from { transform: scale(1); } to { transform: scale(1.04); } }
+@keyframes dot { from { transform: scale(1); opacity: 1; filter: blur(0); } 90% { opacity: 1; } to { transform: scale(.12); opacity: 0; filter: blur(2px); } }
+@keyframes hero { 0% { opacity: 0; transform: scale(1.6); filter: blur(10px); } 1% { opacity: 1; } 100% { opacity: 1; transform: scale(1); filter: blur(0); } }
+@keyframes drift { from { transform: scale(1); } to { transform: scale(.94); } }
+@keyframes out { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(8px); } }
+@keyframes inB { from { opacity: 0; filter: blur(8px); transform: scale(.9); } to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes up { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: none; } }
+@keyframes fromR { from { opacity: 0; transform: translateX(260px); } to { opacity: 1; transform: none; } }
+@keyframes tilt { from { opacity: 0; transform: rotateX(58deg) scale(.7); } to { opacity: 1; transform: rotateX(10deg) rotateY(-8deg) scale(1); } }
+@keyframes push { from { transform: rotateX(10deg) rotateY(-8deg) scale(1); } to { transform: rotateX(0) rotateY(0) scale(1.35) translate(-90px, 70px); } }
+@keyframes drop { from { transform: none; opacity: 1; } 80% { opacity: 1; } to { transform: translateY(240px) scale(.3); opacity: 0; } }
+@keyframes split { 0% { transform: translate(0,0) rotateY(0) rotate(0); opacity: 1; } 40% { transform: translate(0,0) rotateY(88deg) rotate(0); } 100% { transform: translate(var(--x), var(--y)) rotateY(0) rotate(var(--r)); opacity: 1; } }
+@keyframes fill { from { width: 0; } to { width: var(--w); } }
+@keyframes count { from { --n: 0; } to { --n: var(--to); } }
+@keyframes draw { from { stroke-dashoffset: 120; } to { stroke-dashoffset: 0; } }
+@keyframes fall { from { transform: translate(0, 0) rotate(0); opacity: 1; } 75% { opacity: 1; } to { transform: translate(var(--dx), 1100px) rotate(var(--r)); opacity: 0; } }
+@keyframes burst { 0% { transform: scale(14) rotate(-20deg); opacity: .35; } 25% { transform: scale(3) rotate(0); opacity: 1; } 100% { transform: scale(1) rotate(45deg); opacity: 1; } }
+@keyframes fly { 0% { transform: translate(0,0); } 50% { transform: translate(-260px, 220px); } 100% { transform: translate(var(--fx), var(--fy)); } }
+@keyframes wob { 0%,100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }
+@keyframes dl { from { transform: translateX(0); } to { transform: translateX(-120px); } }
+@keyframes press { 0%,100% { transform: scale(1); } 50% { transform: scale(.94); } }
+@keyframes mv { from { transform: translate(var(--cx), var(--cy)); } to { transform: translate(0,0); } }
+@keyframes track { from { letter-spacing: .08em; opacity: 0; } to { letter-spacing: -.01em; opacity: 1; } }
+@keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+.q { position: absolute; left: 0; right: 0; top: 168px; text-align: center; font-size: 54px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); }
+.opt { position: absolute; top: 320px; height: 500px; background: #fff; border: 2px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 30px 32px; }
+.opt .ltr { font-size: 20px; font-weight: 700; letter-spacing: .2em; color: var(--muted); }
+.opt b { display: block; font-size: 36px; color: var(--ink); margin: 8px 0 18px; line-height: 1.15; }
+.opt p { margin: 10px 0; font-size: 25px; line-height: 1.3; color: var(--body); padding-left: 30px; position: relative; }
+.opt p::before { position: absolute; left: 0; font-weight: 700; }
+.opt .pro::before { content: "+"; color: var(--accent); }
+.opt .con::before { content: "\2212"; color: var(--ink); }
+.opt .cost { position: absolute; left: 32px; right: 32px; bottom: 24px; font-size: 21px; color: var(--muted); border-top: 2px solid var(--line); padding-top: 12px; }
+.opt .ring2 { position: absolute; inset: -4px; border: 6px solid var(--accent); border-radius: 14px; }
+.opt .chosen { position: absolute; top: -24px; right: 24px; }
+.why { position: absolute; left: 0; right: 0; top: 880px; text-align: center; font-size: 36px; color: var(--ink); }
+.nd { position: absolute; display: grid; place-content: center; text-align: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; font-size: 28px; font-weight: 700; color: var(--ink); padding: 0 18px; line-height: 1.15; }
+.nd small { display: block; font-weight: 400; font-size: 21px; color: var(--muted); margin-top: 6px; }
+.nd.ai { border-style: dashed; }
+.nd.dec { border-radius: 999px; border-color: var(--accent); color: var(--accent); }
+.nd.t { background: var(--accent); border-color: var(--accent); color: #fff; }
+.nd.t small { color: #e3f0f2; }
+.nd.end { border-radius: 999px; background: var(--ink); border-color: var(--ink); color: #fff; }
+.legend { position: absolute; right: 96px; top: 84px; display: flex; gap: 28px; font-size: 22px; color: var(--muted); }
+.legend span { display: flex; align-items: center; gap: 10px; }
+.legend i { width: 40px; height: 24px; border: 3px solid var(--ink); border-radius: 6px; }
+.legend i.ai { border-style: dashed; }
+.legend i.dec { border-color: var(--accent); border-radius: 999px; }
+.wt { position: absolute; left: 200px; top: 300px; width: 1520px; border-collapse: collapse; font-size: 30px; }
+.wt th { background: var(--dark); color: #fff; text-align: left; font-size: 20px; letter-spacing: .12em; text-transform: uppercase; padding: 18px 26px; }
+.wt td { padding: 22px 26px; border-bottom: 2px solid var(--line); color: var(--ink); }
+.wt tr.hl td { color: var(--accent); font-weight: 700; }
+@keyframes dim { to { opacity: .35; filter: grayscale(1); } }
+@keyframes drawp { 0% { stroke-dashoffset: 1; opacity: 0; } 1% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 1; } }
+.dlog { overflow-x: auto; }
+.dlog table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 14px; }
+.dlog th { background: var(--dark); color: #fff; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 12px 14px; }
+.dlog td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.dlog td:nth-child(4) { font-weight: 700; color: var(--ink); }
+.tag.open { background: var(--panel); color: var(--muted); border: 1px solid var(--line); }
+.paused, .paused * { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) { .world * { animation-duration: .001s !important; animation-delay: 0s !important; } }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <span class="logo" id="logoSrc"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">VIDEO STORYBOARD</span>
+  </div>
+
+  <h1>How we decided, scene by scene</h1>
+  <p class="sub">About two minutes in one take. Less "we fixed it", more how: what we measured, which options we compared, what each one cost, and why we picked one. A rough animatic to judge the story before the real render.</p>
+
+  <div class="player">
+    <div class="stage" id="main"><div class="world" id="mainWorld"></div></div>
+    <div class="track"><i id="prog"></i></div>
+    <div class="controls">
+      <button class="btn" id="play">Play</button>
+      <button class="btn ghost" id="restart">Restart</button>
+      <span class="time" id="time">0.0 / 0.0 s</span>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="note">
+    <h3>How to read this</h3>
+    <ul>
+      <li>This is a sketch with simple CSS moves, not the final film. The real one will have smoother camera moves, real Lio screens inside Apple device frames, and music.</li>
+      <li>Order follows our priorities: categories (Problem 3), then prices (Problem 2), then PDF quotes (Problem 1), then auto-approval (Problem 4) as the bonus, in black like the bonus card on the case study.</li>
+      <li>Diagrams: solid box is code, dashed box is the AI, a teal pill is a yes or no check, black is where it ends with a person. Checks are pills, not diamonds, to keep to the no-diagonal rule.</li>
+      <li>Each problem follows the same arc: what goes wrong, the options side by side with their cost, the chosen one and why, a diagram of how it now works, then the numbers.</li>
+      <li><span class="tag real">real</span> marks numbers from our evals today. <span class="tag tbd">after</span> marks a number we fill in once the fix is built and the eval is run again. Nothing is made up.</li>
+    </ul>
+  </div>
+
+  <h2>Scenes</h2>
+  <div class="grid" id="grid"></div>
+
+  <h2>Decision log</h2>
+  <p>Every decision the film shows, in one place. "Proposed" means it still needs your or Acme's yes before it is final.</p>
+  <div class="dlog"><table><thead><tr><th>Problem</th><th>Question</th><th>Options</th><th>Picked</th><th>Why</th><th>Cost</th><th>Status</th></tr></thead><tbody id="dlog"></tbody></table></div>
+
+  <h2>Still needed before the real render</h2>
+  <ul>
+    <li>The "after" numbers from rerunning the extraction eval and the search eval.</li>
+    <li>Screenshots of the fixed screens (rule chip, "Did you mean" switch, new request with filled fields).</li>
+    <li>Apple device frames (MacBook Pro, iPhone) from Apple's design resources.</li>
+    <li>A music track with a steady beat, about 120 BPM, so the words land on it.</li>
+    <li>Your OK on the story order and the closing line, and on the decisions still marked "proposed".</li>
+    <li>Problem 4 has no eval yet, so its scenes show the rule working, not a score. Real amounts from Acme's requests can replace the example ones.</li>
+  </ul>
+</div>
+
+<script>
+const LOGO = document.querySelector('#logoSrc svg').outerHTML;
+const EASE = 'cubic-bezier(.2,.7,.2,1)', EXPO = 'cubic-bezier(.16,1,.3,1)', IN = 'cubic-bezier(.55,0,1,.45)';
+const A = (n, d, t, e = EASE, f = 'both') => `${n} ${d}s ${e} ${t}s ${f}`;
+const an = (...xs) => `animation:${xs.join(',')};`;
+const pop = t => an(A('pop', .08, t));
+const W = (txt, t, c = 'c-ink', extra = '') => `<span class="${c}" style="${pop(t)}${extra}">${txt}</span>`;
+const STAR = (s = 120, c = 'var(--accent)') => `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><path fill="${c}" d="M50 0C55 35 65 45 100 50C65 55 55 65 50 100C45 65 35 55 0 50C35 45 45 35 50 0Z"/></svg>`;
+const CUR = `<svg viewBox="0 0 24 24" width="56" height="56"><path d="M4 2l15 9-6.5 1.5L16 20l-3 1.5-3.5-7.5L4 18z" fill="#fff" stroke="#111317" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+const cursor = (x, y, t, cx = 300, cy = 260, press = 0) =>
+  `<div class="cursor" style="left:${x}px;top:${y}px;--cx:${cx}px;--cy:${cy}px;${an(A('pop', .1, t), A('mv', .5, t, EXPO))}"><div style="${press ? an(A('press', .2, press)) : ''}">${CUR}</div></div>`;
+const kicker = (txt, t = 0) => `<div class="w-kicker" style="${an(A('inB', .25, t))}">${txt}</div>`;
+const confetti = t => {
+  const cols = ['var(--accent)', 'var(--ink)', 'var(--accent-light)', 'var(--faint)'];
+  let s = '<div class="conf">';
+  for (let i = 0; i < 36; i++) {
+    const x = (i * 157) % 1920, dx = ((i * 73) % 300) - 150, r = ((i * 97) % 720) - 360, d = 1.1 + (i % 5) * .15, dl = t + (i % 6) * .04;
+    s += `<i style="left:${x}px;background:${cols[i % 4]};--dx:${dx}px;--r:${r}deg;${an(A('fall', d, dl, 'cubic-bezier(.3,.1,.6,1)'))}"></i>`;
+  }
+  return s + '</div>';
+};
+const mac = (title, fields, style) => `<div class="mac" style="${style}"><div class="lid"><div class="scr"><div class="side">${LOGO}<i></i><i style="width:70%"></i><i style="width:85%"></i></div><div class="main"><h4>${title}</h4>${fields.map(f => `<div class="f">${f}</div>`).join('')}</div></div></div><div class="base"></div></div>`;
+
+let UID = 0;
+const ARROW = id => `<defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ink)"/></marker></defs>`;
+const q = (txt, t = .1) => `<div class="q" style="${an(A('inB', .3, t))}">${txt}</div>`;
+
+function options({ kick, kc, question, opts, pick, why, tp = 3 }) {
+  const n = opts.length, w = n === 3 ? 520 : 700, gap = 44, left = (1920 - (n * w + (n - 1) * gap)) / 2;
+  return `<div class="w-kicker" style="${kc ? 'color:var(--ink);' : ''}${an(A('inB', .25, 0))}">${kick}</div>${q(question)}` +
+    opts.map((o, i) => `<div class="opt" style="left:${left + i * (w + gap)}px;width:${w}px;${an(A('up', .45, .5 + i * .35, EXPO), ...(i === pick ? [] : [A('dim', .4, tp, EASE, 'forwards')]))}">
+      <div class="ltr">OPTION ${'ABC'[i]}</div><b>${o[0]}</b>${o[1].map(p => `<p class="pro">${p}</p>`).join('')}${o[2].map(p => `<p class="con">${p}</p>`).join('')}<div class="cost">${o[3]}</div>
+      ${i === pick ? `<div class="ring2" style="${an(A('inB', .25, tp))}"></div><span class="pill t chosen" style="${pop(tp + .1)}">Chosen</span>` : ''}</div>`).join('') +
+    `<div class="why" style="${pop(tp + .6)}"><b class="c-t">Why:</b> ${why}</div>`;
+}
+
+function flow({ kick, kc, title, nodes, edges }) {
+  const id = 'ah' + (++UID), N = Object.fromEntries(nodes.map(n => [n.id, { w: 300, h: 110, ...n }]));
+  const shown = new Set(), at = {}; let t = .5, svg = '';
+  const showNode = k => { if (!shown.has(k)) { shown.add(k); at[k] = t; } };
+  showNode(nodes[0].id); t += .35;
+  edges.forEach(([a, b, label, back]) => {
+    const A1 = N[a], B1 = N[b], ax = A1.x + A1.w / 2, ay = A1.y + A1.h / 2, bx = B1.x + B1.w / 2, by = B1.y + B1.h / 2;
+    let p;
+    if (back) { const yb = Math.max(A1.y + A1.h, B1.y + B1.h) + 70; p = [[ax, A1.y + A1.h], [ax, yb], [bx, yb], [bx, B1.y + B1.h]]; }
+    else if (Math.abs(ay - by) < 10) p = ax < bx ? [[A1.x + A1.w, ay], [B1.x, by]] : [[A1.x, ay], [B1.x + B1.w, by]];
+    else if (Math.abs(ax - bx) < 10) p = ay < by ? [[ax, A1.y + A1.h], [bx, B1.y]] : [[ax, A1.y], [bx, B1.y + B1.h]];
+    else { const sx = bx > ax ? A1.x + A1.w : A1.x; p = [[sx, ay], [bx, ay], [bx, by > ay ? B1.y : B1.y + B1.h]]; }
+    svg += `<polyline points="${p.map(v => v.join(',')).join(' ')}" pathLength="1" marker-end="url(#${id})" style="fill:none;stroke:var(--ink);stroke-width:3;stroke-dasharray:1;${an(A('drawp', .35, t))}"/>`;
+    if (label) {
+      let best = 0, li = 0; for (let i = 0; i < p.length - 1; i++) { const d = Math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]); if (d > best) { best = d; li = i; } }
+      const mx = (p[li][0] + p[li + 1][0]) / 2, my = (p[li][1] + p[li + 1][1]) / 2, vert = p[li][0] === p[li + 1][0];
+      svg += `<text x="${mx + (vert ? 14 : 0)}" y="${my - (vert ? 0 : 14)}" text-anchor="${vert ? 'start' : 'middle'}" style="fill:var(--accent);font:700 22px var(--sans);${an(A('inB', .2, t + .2))}">${label}</text>`;
+    }
+    t += .3; showNode(b); t += .35;
+  });
+  nodes.forEach(n => showNode(n.id));
+  return `${kick ? `<div class="w-kicker" style="${kc ? 'color:var(--ink);' : ''}${an(A('inB', .25, 0))}">${kick}</div>` : ''}${q(title)}
+    <svg width="1920" height="1080" style="position:absolute;inset:0;overflow:visible">${ARROW(id)}${svg}</svg>` +
+    Object.values(N).map(n => `<div class="nd ${n.kind || ''}" style="left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px;${an(A('inB', .3, at[n.id]))}">${n.label}</div>`).join('') +
+    `<div class="legend" style="${an(A('inB', .3, .2))}"><span><i></i>code</span><span><i class="ai"></i>AI</span><span><i class="dec"></i>check</span></div>`;
+}
+
+function seq({ kick, kc, title, actors, msgs }) {
+  const id = 'ah' + (++UID), x0 = 230, step = (1920 - 2 * x0) / (actors.length - 1), X = i => x0 + i * step;
+  let s = '';
+  msgs.forEach(([a, b, label, reply], i) => {
+    const y = 370 + i * 88, t = .9 + i * .45, x1 = X(a), x2 = X(b);
+    if (a === b) s += `<polyline points="${x1},${y - 14} ${x1 + 110},${y - 14} ${x1 + 110},${y + 26} ${x1 + 8},${y + 26}" pathLength="1" marker-end="url(#${id})" style="fill:none;stroke:var(--ink);stroke-width:3;stroke-dasharray:1;${an(A('drawp', .35, t))}"/><text x="${x1 + 126}" y="${y + 14}" style="fill:var(--ink);font:22px var(--sans);${an(A('inB', .2, t + .1))}">${label}</text>`;
+    else s += `<line x1="${x1}" y1="${y}" x2="${x2 + (x2 > x1 ? -6 : 6)}" y2="${y}" ${reply ? '' : 'pathLength="1"'} marker-end="url(#${id})" style="stroke:var(--ink);stroke-width:3;${reply ? `stroke-dasharray:10 8;${an(A('inB', .3, t))}` : `stroke-dasharray:1;${an(A('drawp', .35, t))}`}"/><text x="${(x1 + x2) / 2}" y="${y - 14}" text-anchor="middle" style="fill:${reply ? 'var(--muted)' : 'var(--ink)'};font:22px var(--sans);${an(A('inB', .2, t + .1))}">${label}</text>`;
+  });
+  return `<div class="w-kicker" style="${kc ? 'color:var(--ink);' : ''}${an(A('inB', .25, 0))}">${kick}</div>${q(title)}
+    <svg width="1920" height="1080" style="position:absolute;inset:0;overflow:visible">${ARROW(id)}
+    ${actors.map((a, i) => `<line x1="${X(i)}" y1="300" x2="${X(i)}" y2="1040" style="stroke:var(--line);stroke-width:3;stroke-dasharray:8 10;${an(A('inB', .3, .5))}"/>`).join('')}${s}</svg>` +
+    actors.map((a, i) => `<div class="nd ${a[1] || ''}" style="left:${X(i) - 135}px;top:210px;width:270px;height:90px;font-size:24px;${an(A('inB', .3, .3 + i * .08))}">${a[0]}</div>`).join('');
+}
+
+function table({ kick, kc, title, cols, rows, hl = -1, verdict, tv = 3.4 }) {
+  return `<div class="w-kicker" style="${kc ? 'color:var(--ink);' : ''}${an(A('inB', .25, 0))}">${kick}</div>${q(title)}
+    <table class="wt"><thead style="${an(A('inB', .3, .3))}"><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map((r, i) => `<tr class="${i === hl ? 'hl' : ''}" style="${pop(.7 + i * .45)}">${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>
+    ${verdict ? `<div class="why" style="${pop(tv)}">${verdict}</div>` : ''}`;
+}
+
+const SCENES = [
+  { id: 'open', title: 'Open', dur: 4.6, tags: [],
+    move: 'Word pop on the beat, then zoom-through to a bold hero line (rulebook 6.1, 6.2)',
+    bullets: ['"Acme sent four asks." shrinks to a dot.', 'The hero line flies in: "Here is how we decided."'],
+    html: () => `
+      <div class="w-center"><div class="line" style="${an(A('grow', 2.2, 0, 'linear'), A('dot', .2, 2.2, IN, 'forwards'))}">
+        ${W('Acme', .15, 'c-l')}${W('sent', .5)}${W('four', .85, 'c-t')}${W('asks.', 1.2)}</div></div>
+      <div class="w-center"><div style="${an(A('drift', 2, 2.7, 'linear'))}"><div class="hero" style="font-size:112px;${an(A('hero', .3, 2.4, EXPO))}">Here is how we <span class="c-t">decided.</span></div></div></div>` },
+
+  { id: 'method', title: 'The loop we used every time', dur: 6.4, tags: [],
+    move: 'Activity diagram draws itself box by box (new: diagram block)',
+    bullets: ['Same loop for every problem: measure today, write the eval, compare options, decide, build with tests, measure again.', 'If the new number is not good enough, the arrow goes back to the options.'],
+    html: () => flow({ title: 'Measure first. Then change.', nodes: [
+      { id: 'm', x: 110, y: 440, w: 250, label: 'Measure today' },
+      { id: 'e', x: 400, y: 440, w: 250, label: 'Write the eval' },
+      { id: 'o', x: 690, y: 440, w: 250, label: 'Compare options' },
+      { id: 'd', x: 980, y: 440, w: 250, label: 'Decide', kind: 't' },
+      { id: 'b', x: 1270, y: 440, w: 250, label: 'Build with tests' },
+      { id: 'r', x: 1560, y: 440, w: 250, label: 'Good enough?', kind: 'dec' }],
+      edges: [['m', 'e'], ['e', 'o'], ['o', 'd'], ['d', 'b'], ['b', 'r'], ['r', 'o', 'no, try the next option', true]] }) },
+
+  { id: 'p3-problem', title: 'Categories go wrong', dur: 5.2, tags: ['real'],
+    move: 'Kicker label, word pop, line cards slide in from the right (rulebook 6.1, 8)',
+    bullets: ['Label: PROBLEM 3, CATEGORIES.', 'Three request lines land, each with the wrong group crossed out and the group Acme wants in teal.'],
+    html: () => `
+      ${kicker('PROBLEM 3, CATEGORIES')}
+      <div class="w-center" style="align-items:start;padding-top:230px"><div class="line">${W('The AI', .2, 'c-l')}${W('guesses', .55, 'c-t')}${W('the category.', .9)}</div></div>
+      ${[['Printer toner', 'Toner Cartridges', 'IT Hardware'], ['Cable ties', 'Facility Management', 'Electrical Engineering'], ['Small software plan', 'Software', 'Office Supplies']].map((r, i) =>
+        `<div class="row" style="left:330px;top:${400 + i * 150}px;width:1260px;${an(A('fromR', .45, 1.5 + i * .35, EXPO))}"><span style="width:330px">${r[0]}</span><span class="strike">${r[1]}</span><span style="margin-left:auto" class="pill o">${r[2]}</span></div>`).join('')}` },
+
+  { id: 'p3-where', title: 'Where Acme rules live', dur: 7, tags: [],
+    move: 'Three option cards rise, two dim, the chosen one gets a teal ring (new: options block)',
+    bullets: ['A: tell the AI in the prompt. B: a new rules table. C: typed rules in the org settings, checked in code.', 'Chosen C: the AI never decides a locked line, it is testable, and there is no database change.', 'Cost: settings saves must merge instead of replace, and every reader goes through one loader.'],
+    html: () => options({ kick: 'PROBLEM 3, DECISION', question: 'Where do Acme’s rules live?', pick: 2,
+      opts: [['Tell the AI in the prompt', ['Quick to build'], ['AI can still ignore it', 'Cannot test it'], 'cost: cheapest now, breaks later'],
+             ['A new rules table', ['Clean data model'], ['Needs a migration', 'New admin screens'], 'cost: most build time'],
+             ['Typed rules in org settings', ['AI never decides a locked line', 'Testable, no DB change'], ['Saves must merge, not replace'], 'cost: one loader for every reader']],
+      why: 'Acme said these quirks are non-negotiable, so code decides, not the model.' }) },
+
+  { id: 'p3-flow', title: 'Every line goes through one step', dur: 7.2, tags: [],
+    move: 'Activity diagram with a check pill and two exits (diagram block)',
+    bullets: ['One categorising step for typed requests, PDFs and agents.', 'Rule hit: the group is locked and the AI never runs. Miss: search gives a short list, the AI picks from it, a person decides if it is unsure.'],
+    html: () => flow({ kick: 'PROBLEM 3, HOW IT WORKS', title: 'Rules first. AI last.', nodes: [
+      { id: 'l', x: 120, y: 330, w: 260, label: 'Request line' },
+      { id: 'r', x: 470, y: 330, w: 280, label: 'Acme rule hit?', kind: 'dec' },
+      { id: 'k', x: 470, y: 600, w: 280, label: 'Locked group', kind: 't' },
+      { id: 's', x: 840, y: 330, w: 280, label: 'Search<small>top 15 groups</small>' },
+      { id: 'a', x: 1210, y: 330, w: 280, label: 'AI picks<small>from the list</small>', kind: 'ai' },
+      { id: 'c', x: 1210, y: 600, w: 280, label: 'Sure?', kind: 'dec' },
+      { id: 'g', x: 840, y: 840, w: 280, label: 'Group set', kind: 't' },
+      { id: 'p', x: 1580, y: 840, w: 240, label: 'A person', kind: 'end' }],
+      edges: [['l', 'r'], ['r', 'k', 'yes'], ['r', 's', 'no'], ['s', 'a'], ['a', 'c'], ['c', 'g', 'yes'], ['c', 'p', 'no']] }) },
+
+  { id: 'p3-cost', title: 'What it costs per call', dur: 6, tags: ['real', 'tbd'],
+    move: 'Dark-header table, rows pop one per beat (new: table block)',
+    bullets: ['Today every PDF call pastes all 2,000 groups: about 108k characters, about 27k tokens.', 'New: a rule hit costs nothing, a miss sends about 15 groups. The new token count comes from the rerun.'],
+    html: () => table({ kick: 'PROBLEM 3, TRADE-OFF', title: 'The group list was most of every prompt', hl: 2,
+      cols: ['Path', 'Groups sent to the AI', 'Prompt size'],
+      rows: [['Today, every call', '2,000', '~27k tokens'], ['New, rule hit', '0, AI skipped', '0'], ['New, no rule', '~15', '<span class="tbdbox" style="font-size:24px">after</span>']],
+      verdict: '<b class="c-t">Trade-off:</b> one more step to maintain, much less to send.' }) },
+
+  { id: 'p2-problem', title: 'Prices nobody finds', dur: 5, tags: ['real'],
+    move: 'Laptop panel tilts in from flat (rulebook 8, folder to panel)',
+    bullets: ['Label: PROBLEM 2, PRICES.', 'Root cause: there was no matching at all, so the baseline is 0.'],
+    html: () => `
+      ${kicker('PROBLEM 2, PRICES')}
+      ${mac('New request', ['<span>USB-C docking station</span><em>typed price</em>', '<span>Laptop stand</span><em>typed price</em>', '<span>Catalogue matches</span><em>none, no matching exists</em>'], `top:58%;${an(A('tilt', .8, .2, EXPO))}`)}
+      <div class="w-center" style="align-items:start;padding-top:150px"><div class="line">${W('Negotiated prices.', 1.3, 'c-t')}${W('Nobody', 2.1, 'c-l')}${W('finds them.', 2.45)}</div></div>` },
+
+  { id: 'p2-nudge', title: 'How hard to push', dur: 7, tags: [],
+    move: 'Options block',
+    bullets: ['A: show every maybe match with a percent. B: only sure matches, "Did you mean" plus Switch. C: a pop-up at submit that asks for a reason.', 'Chosen B. C stays on the shelf in case Acme makes catalogue use a rule.'],
+    html: () => options({ kick: 'PROBLEM 2, DECISION', question: 'How hard should Lio push the catalogue?', pick: 1,
+      opts: [['Show every maybe, with a %', ['Catches more'], ['Noisy, people learn to ignore it'], 'cost: trust'],
+             ['Only sure matches, one Switch', ['Quiet, one tap, Undo'], ['Misses some unsure matches'], 'cost: a few missed matches'],
+             ['Pop-up at submit, ask why', ['Strongest push'], ['Slows every request'], 'cost: speed, goodwill']],
+      why: 'People ignore a nagging tool. One sure suggestion gets used.' }) },
+
+  { id: 'p2-search', title: 'One search, two jobs', dur: 6.6, tags: ['tbd'],
+    move: 'Component diagram (diagram block)',
+    bullets: ['The same search finds catalogue articles (Problem 2) and category groups (Problem 3).', 'Three ways to build it: word match, embeddings, or both in two steps. A search eval with about 20 real wordings picks the winner by top-3 hit rate.'],
+    html: () => flow({ kick: 'SHARED, DECISION', title: 'Build one search. Let the eval pick how.', nodes: [
+      { id: 'e', x: 120, y: 560, w: 300, label: 'Search eval<small>~20 wordings, top-3 hits</small>', kind: 'dec', h: 130 },
+      { id: 's', x: 650, y: 560, w: 520, label: 'Search<small>A word match, B embeddings, C two-step</small>', kind: 't', h: 130 },
+      { id: 'c', x: 1420, y: 360, w: 380, label: 'Categories<small>Problem 3</small>' },
+      { id: 'a', x: 1420, y: 760, w: 380, label: 'Catalogue articles<small>Problem 2</small>' }],
+      edges: [['e', 's', 'picks A, B or C'], ['s', 'c'], ['s', 'a']] }) },
+
+  { id: 'p2-fix', title: 'Did you mean', dur: 5.2, tags: [],
+    move: 'Push in on one row, chip slides in, cursor clicks Switch (rulebook 8, click)',
+    bullets: ['A "Did you mean" row slides in with the catalogue article.', 'Cursor clicks the teal Switch. The line now uses the negotiated price, with Undo.'],
+    html: () => `
+      <div class="row" style="left:300px;top:330px;width:1320px;${an(A('inB', .3, 0))}"><span>USB-C docking station</span><span class="k" style="margin-left:auto">typed price</span></div>
+      <div class="row" style="left:300px;top:500px;width:1320px;background:var(--panel);${an(A('fromR', .5, .7, EXPO))}"><span class="k">Did you mean</span><span>Catalogue article, negotiated price</span><span style="margin-left:auto;${an(A('press', .2, 2.55))}" class="pill t">Switch</span></div>
+      ${cursor(1500, 540, 1.6, 320, 300, 2.55)}
+      <div class="row" style="left:300px;top:330px;width:1320px;${an(A('inB', .25, 2.8))}"><span>Catalogue article</span><span class="pill o" style="margin-left:auto">Negotiated price</span><span class="k">Undo</span></div>
+      <div class="w-center" style="align-items:start;padding-top:760px"><div class="line">${W('One tap.', 3.3, 'c-t')}${W('Right price.', 3.65)}</div></div>` },
+
+  { id: 'p2-store', title: 'Where the match is saved', dur: 6, tags: [],
+    move: 'Options block, two options',
+    bullets: ['A: a new article column on every line (needs a migration). B: write it to the request activity log.', 'Chosen B: no database change. Lines with no match are logged too, so Acme can later see what it buys off-catalogue.'],
+    html: () => options({ kick: 'PROBLEM 2, DECISION', question: 'Where do we save which article was picked?', pick: 1,
+      opts: [['New column on each line', ['Easy to report on'], ['Migration on live data'], 'cost: a migration'],
+             ['Request activity log', ['No database change', 'Also logs "no match"'], ['Reports need to read the log'], 'cost: slower reports later']],
+      why: 'We agreed on no database changes for this round.' }) },
+
+  { id: 'p1-problem', title: 'Quotes come in broken', dur: 5.6, tags: ['real'],
+    move: 'Object between words, then it drops into the panel (rulebook 7, 8 folder to panel)',
+    bullets: ['Label: PROBLEM 1, PDF QUOTES.', 'The PDF drops into the New request screen. Fields come back empty or wrong.'],
+    html: () => `
+      ${kicker('PROBLEM 1, PDF QUOTES')}
+      <div class="w-center"><div class="line" style="gap:120px;${an(A('out', .15, 1.9, EASE, 'forwards'))}">${W('Five real quotes', .15, 'c-l')}<span style="width:260px"></span>${W('in.', .7, 'c-t')}</div></div>
+      <div class="pdf" style="left:830px;top:375px;${an(A('inB', .3, .4))}"><div style="${an(A('drop', .45, 2.1, IN, 'forwards'))}"><b>PDF</b><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i></div></div>
+      ${mac('New request', ['<span>Supplier</span><em>Hoffmann</em>', '<span>VAT ID</span><em class="strike">empty, crashed</em>', '<span>Total</span><em class="strike">gross, not net</em>', '<span>Lines add up</span><em class="strike">no</em>'], `top:56%;${an(A('tilt', .7, 2.3, EXPO))}`)}` },
+
+  { id: 'p1-eval', title: 'What we tested', dur: 8, tags: ['real'],
+    move: 'Table block, verdict line lands last',
+    bullets: ['Baseline: 0 of 15 fully correct, 6 of 15 crashed, 0 of 27 line sets add up.', 'A stronger model made the same errors (3 times faster). Layout text was no better and swapped vendor and customer 3 of 15 times. Temperature 0 kept the scores and made replies steadier.', 'So the problem was our spec and schema, not the model or the parser.'],
+    html: () => table({ kick: 'PROBLEM 1, EVAL', title: 'Five quotes, three runs each', hl: -1, tv: 2.9,
+      cols: ['What we changed', 'Result', 'Keep?'],
+      rows: [['Nothing (baseline)', '0/15 correct, 6/15 crash', '<span class="c-m">start</span>'], ['Stronger model', 'same errors, 3x faster', 'no'], ['Layout text from the PDF', 'no better, 3/15 swaps', 'no'], ['Temperature 0', 'same score, steadier', '<b class="c-t">yes</b>']],
+      verdict: '<b class="c-t">Not the model. Not the parser.</b> Our spec and schema.' }) },
+
+  { id: 'p1-seq', title: 'The new upload, step by step', dur: 7.4, tags: [],
+    move: 'Sequence diagram, one message per beat (new: sequence block)',
+    bullets: ['The AI only reads fields and lines, with a strict schema and clear rules (net total, charges as lines, alternatives left out).', 'Code adds up the totals and flags a mismatch. The save gate applies Acme rules. The extraction is saved so it becomes eval data later.'],
+    html: () => seq({ kick: 'PROBLEM 1, HOW IT WORKS', title: 'The AI reads. Code checks.', actors: [['Browser'], ['Lio API'], ['Extractor', 'ai'], ['Totals check'], ['Save gate'], ['Database']],
+      msgs: [[0, 1, 'upload PDF'], [1, 2, 'text + page images'], [2, 1, 'fields + lines, strict JSON', 1], [1, 3, 'add up in code'], [3, 1, 'match, or flag it', 1], [1, 4, 'apply Acme rules'], [4, 5, 'save + log the extraction']] }) },
+
+  { id: 'p1-fix', title: 'What we changed', dur: 5.6, tags: [],
+    move: 'Card split into four (rulebook 9, card split)',
+    bullets: ['Empty is OK. Strict output. Clear rules. Totals in code.'],
+    html: () => {
+      const cards = [['1', 'Empty is OK', 'no more crashes'], ['2', 'Strict output', 'always valid JSON'], ['3', 'Clear rules', 'net, charges, alternatives'], ['4', 'Totals in code', 'mismatch gets flagged']];
+      const pos = [[-560, -280, -6], [560, -280, 5], [-560, 280, 5], [560, 280, -6]];
+      return cards.map((c, i) => `<div class="lcard" style="left:640px;top:410px;--x:${pos[i][0]}px;--y:${pos[i][1]}px;--r:${pos[i][2]}deg;${an(A('split', 1.1, .3 + i * .04, EXPO))}"><div class="bdg">${c[0]}</div><b>${c[1]}</b><span>${c[2]}</span></div>`).join('') +
+        `<div class="w-center"><div class="line">${W('Clear rules.', 1.6, 'c-t', 'font-weight:700')}${W('Checked in code.', 2, 'c-ink', 'font-weight:700')}</div></div>`;
+    } },
+
+  { id: 'p1-after', title: 'The score after', dur: 4.8, tags: ['tbd'],
+    move: 'Bar fills, then bar to ring, Done with flat confetti (rulebook 8, 9 Done)',
+    bullets: ['Same eval, run again after the fixes. The bar fills to the new score.'],
+    html: () => `
+      <div style="position:absolute;left:360px;top:330px;font-size:60px;display:flex;gap:22px;align-items:center;${an(A('pop', .08, .2), A('out', .15, 2.3, EASE, 'forwards'))}"><span class="tbdbox">new score</span><span class="c-l">/15</span><span class="c-m">fully correct</span></div>
+      <div class="bar" style="${an(A('inB', .3, .1), A('out', .15, 2.3, EASE, 'forwards'))}"><i style="--w:100%;${an(A('fill', 1.6, .5, 'cubic-bezier(.3,.6,.2,1)'))}"></i></div>
+      <div class="w-center" style="${an(A('inB', .3, 2.4))}"><div style="display:grid;justify-items:center;gap:30px"><div class="hero c-t" style="font-size:80px">Done</div><div class="ring"><svg width="120" height="120" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="120" style="${an(A('draw', .45, 2.6))}"/></svg></div></div></div>
+      ${confetti(2.7)}` },
+
+  { id: 'p4-total', title: 'Which total counts', dur: 7, tags: [],
+    move: 'Options block, bonus in black',
+    bullets: ['A: the total the browser sends. B: the gross total on the PDF. C: the net total, added up in code.', 'Chosen C. A total that does not add up never approves itself.'],
+    html: () => options({ kick: 'BONUS, AUTO-APPROVAL', kc: 1, question: 'Which total decides "under €2,000"?', pick: 2,
+      opts: [['Total the browser sends', ['Already there'], ['Anyone can change it'], 'cost: trust'],
+             ['Gross total on the PDF', ['Matches the paper'], ['VAT rates differ', 'AI got it wrong before'], 'cost: wrong approvals'],
+             ['Net total, added up in code', ['Same number every time', 'Mismatch goes to a person'], ['Needs the totals check'], 'cost: one more check']],
+      why: 'An automatic approval must rest on a number we computed ourselves.' }) },
+
+  { id: 'p4-state', title: 'Request states', dur: 6.6, tags: [],
+    move: 'State diagram (diagram block)',
+    bullets: ['Submitted, then one check: net under €2,000, totals match, no rule override.', 'Yes: approved on its own and logged. No: waits for a person as today.'],
+    html: () => flow({ kick: 'BONUS, HOW IT WORKS', kc: 1, title: 'One check before a person is needed', nodes: [
+      { id: 's', x: 120, y: 450, w: 250, label: 'Submitted' },
+      { id: 'c', x: 470, y: 430, w: 440, h: 150, label: 'Net under €2,000<small>totals match, no rule override</small>', kind: 'dec' },
+      { id: 'a', x: 1060, y: 300, w: 330, label: 'Approved on its own', kind: 't' },
+      { id: 'w', x: 1060, y: 640, w: 330, label: 'Waiting for a person' },
+      { id: 'd', x: 1560, y: 640, w: 250, label: 'Approved or rejected', kind: 'end' }],
+      edges: [['s', 'c'], ['c', 'a', 'yes'], ['c', 'w', 'no'], ['w', 'd']] }) },
+
+  { id: 'p4-fix', title: 'Approved on its own', dur: 5.6, tags: [],
+    move: 'Pills flip from waiting to approved one per beat',
+    bullets: ['Small requests approve themselves. One with totals that differ goes to a person.', 'Amounts are examples.'],
+    html: () => `
+      <div class="w-center" style="align-items:start;padding-top:200px"><div class="line">${W('Under €2,000.', 2.3, 'c-ink', 'font-weight:700')}${W('Checked.', 2.7, 'c-l')}${W('Approved.', 3.1, 'c-t', 'font-weight:700')}</div></div>
+      ${[['Desk lamps', '€180', 1], ['Printer toner', '€420', 1], ['Laptop stand', '€95', 0], ['Cable ties', '€38', 1]].map((r, i) =>
+        `<div class="row" style="left:420px;top:${360 + i * 140}px;width:1080px"><span style="width:330px">${r[0]}</span><span class="k">${r[1]} net</span><span style="margin-left:auto;position:relative;width:420px;height:56px"><span class="pill o" style="position:absolute;right:0;top:0;${an(A('out', .12, .4 + i * .35, EASE, 'forwards'))}">Waiting for approval</span><span class="pill ${r[2] ? 't' : 'k'}" style="position:absolute;right:0;top:0;${an(A('pop', .1, .5 + i * .35))}">${r[2] ? 'Approved' : 'Totals differ, to a person'}</span></span></div>`).join('')}` },
+
+  { id: 'close', title: 'Close on the logo', dur: 7.4, tags: [],
+    move: 'Sparkle burst, star caret, line drifts, snaps to the logo (rulebook 6.4, 6.5, 8)',
+    bullets: ['Words: "Measure. Compare. Decide. Measure again." with the star as the caret.', 'The line drifts left and vanishes. The Lio logo and FDE CASE STUDY land.'],
+    html: () => `
+      <div style="position:absolute;left:900px;top:480px;${an(A('fly', 1, 1.2, 'cubic-bezier(.45,0,.25,1)'), A('out', .1, 5.4, EASE, 'forwards'))};--fx:560px;--fy:20px">
+        <div style="${an(A('burst', 1.1, 0, EXPO), A('wob', .5, 2.2, 'ease-in-out', 'none'))};transform-origin:60px 60px;animation-iteration-count:1,7">${STAR(120)}</div></div>
+      <div class="w-center"><div class="line" style="${an(A('dl', .8, 4.6, IN, 'forwards'), A('out', .05, 5.4, EASE, 'forwards'))}">${W('Measure.', 2.3, 'c-l')}${W('Compare.', 2.7, 'c-t')}${W('Decide.', 3.1, 'c-ink', 'font-weight:700')}${W('Measure again.', 3.5, 'c-deep')}</div></div>
+      <div class="w-center"><div style="display:grid;justify-items:center;gap:26px">
+        <div style="display:flex;align-items:center;gap:40px;color:var(--ink);${an(A('inB', .3, 5.45, EXPO))}"><span style="height:110px;display:block">${LOGO.replace('<svg ', '<svg style="height:110px;width:auto" ')}</span></div>
+        <div style="height:4px;width:520px;background:var(--accent);${an(A('wipe', .5, 5.7, EXPO))}"></div>
+        <div style="font-size:26px;font-weight:700;color:var(--accent);${an(A('track', .4, 5.9, EXPO))}">FDE CASE STUDY</div></div></div>` },
+];
+
+const DECISIONS = [
+  ['3', 'Where do Acme rules live?', 'Prompt text; new table; typed org settings', 'Typed org settings, checked in code', 'AI never decides a locked line, testable, no migration', 'Settings saves must merge; one loader for every reader', 'decided'],
+  ['3', 'Who picks the group?', 'AI from 2,000 groups; rules then search then AI then person', 'Rules first, AI last', 'Deterministic where Acme cares, AI only on a short list', 'One more step to maintain', 'decided'],
+  ['3', 'Who may override a rule?', 'Anyone; nobody; buyer or admin', 'Buyer or admin, logged', 'Rules hold, with a way out for real exceptions', 'Requesters must ask', 'decided'],
+  ['2 + 3', 'How does search work?', 'Word match; embeddings; two-step', 'The search eval picks', 'Top-3 hit rate on about 20 real wordings', 'Need to build the eval first', 'eval decides'],
+  ['2', 'How hard to push the catalogue?', 'Every maybe with %; sure only with Switch; pop-up at submit', 'Sure only, one Switch, Undo', 'A quiet tool gets used', 'Some unsure matches are not shown', 'decided'],
+  ['2', 'Where to save the picked article?', 'New line column; activity log', 'Activity log, plus "no match"', 'No database change', 'Reports read the log', 'decided'],
+  ['1', 'Is it the model or the parser?', 'Stronger model; layout text; temperature 0', 'Keep the model, temperature 0', 'Eval showed the same errors either way', 'None, it is cheaper', 'decided'],
+  ['1', 'Which total, which lines?', 'Gross or net; charges dropped or kept; alternatives counted or not', 'Net, charges as lines, alternatives left out', 'One clear spec the eval can score', 'Needs Acme to confirm', 'proposed'],
+  ['1', 'Text inside pictures?', 'Ignore; OCR; send page images', 'Page images, OCR as fallback', 'The styleGREEN VAT ID only exists as a picture', 'More tokens per call', 'proposed'],
+  ['4', 'Which total decides under €2,000?', 'Browser total; PDF gross; net added up in code', 'Net, added up in code', 'Approval rests on a number we computed', 'Needs the totals check first', 'proposed'],
+];
+
+let t0 = 0; const starts = SCENES.map(s => { const v = t0; t0 += s.dur; return v; }); const TOTAL = t0;
+const fmt = s => s.toFixed(1);
+
+function fit(stage) { const w = stage.querySelector('.world'); const set = () => { w.style.transform = `scale(${stage.clientWidth / 1920})`; }; set(); new ResizeObserver(set).observe(stage); }
+function show(world, i) { world.innerHTML = SCENES[i].html(); }
+
+/* main player */
+const main = document.getElementById('main'), mw = document.getElementById('mainWorld');
+const playBtn = document.getElementById('play'), prog = document.getElementById('prog'), timeEl = document.getElementById('time');
+const chipsEl = document.getElementById('chips');
+fit(main);
+SCENES.forEach((s, i) => { const b = document.createElement('button'); b.className = 'chip'; b.id = 'chip-' + s.id; b.textContent = `${i + 1}. ${s.title}`; b.onclick = () => jump(i); chipsEl.appendChild(b); });
+let cur = 0, elapsed = 0, playing = false, last = 0;
+function mark() { [...chipsEl.children].forEach((c, i) => c.classList.toggle('on', i === cur)); }
+function jump(i) { cur = i; elapsed = starts[i]; show(mw, i); mark(); tick(true); if (!playing) toggle(true); }
+function toggle(force) { playing = force ?? !playing; playBtn.textContent = playing ? 'Pause' : 'Play'; mw.classList.toggle('paused', !playing); last = performance.now(); if (playing) requestAnimationFrame(loop); }
+function tick() { prog.style.width = (elapsed / TOTAL * 100) + '%'; timeEl.textContent = `${fmt(elapsed)} / ${fmt(TOTAL)} s`; }
+function loop(now) {
+  if (!playing) return;
+  elapsed += (now - last) / 1000; last = now;
+  if (elapsed >= TOTAL) { elapsed = TOTAL; tick(); toggle(false); return; }
+  if (elapsed >= starts[cur] + SCENES[cur].dur) { cur++; show(mw, cur); mark(); }
+  tick(); requestAnimationFrame(loop);
+}
+playBtn.onclick = () => { if (elapsed >= TOTAL) { jump(0); return; } toggle(); };
+document.getElementById('restart').onclick = () => jump(0);
+show(mw, 0); mw.classList.add('paused'); mark(); tick();
+
+document.getElementById('dlog').innerHTML = DECISIONS.map(d => `<tr>${d.slice(0, 6).map(c => `<td>${c}</td>`).join('')}<td><span class="tag ${d[6] === 'decided' ? 'real' : d[6] === 'proposed' ? 'tbd' : 'open'}">${d[6]}</span></td></tr>`).join('');
+
+/* storyboard cards, each loops its own scene while on screen */
+const grid = document.getElementById('grid');
+SCENES.forEach((s, i) => {
+  const c = document.createElement('article'); c.className = 'card';
+  c.innerHTML = `<div class="stage"><div class="world"></div></div><div class="info"><div class="head"><span class="badge">${i + 1}</span><h3>${s.title}</h3><span class="t">${fmt(starts[i])}–${fmt(starts[i] + s.dur)} s</span></div>
+    <ul>${s.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+    <p class="move">${s.tags.map(t => `<span class="tag ${t}">${t === 'real' ? 'real numbers' : 'after numbers'}</span>`).join('')}Move: ${s.move}</p></div>`;
+  grid.appendChild(c);
+  const st = c.querySelector('.stage'), w = st.querySelector('.world'); fit(st); show(w, i);
+  let timer = null;
+  const run = () => { show(w, i); timer = setTimeout(run, (s.dur + 1) * 1000); };
+  new IntersectionObserver(es => es.forEach(e => { clearTimeout(timer); if (e.isIntersecting) run(); })).observe(st);
+});
+</script>

@@ -1,0 +1,2311 @@
+<title>Lio Screens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --body: #1f2328;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #f5f6f8;
+  --accent: #136f7d;
+  --accent-soft: #e7f2f4;
+  --dark: #111317;
+  --app: #f3f4f6;
+  --warn: #9a5b00;
+  --warn-soft: #fdf3e2;
+  --sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid var(--accent); }
+.logo { display: flex; align-items: center; gap: 6px; font-size: 20px; color: var(--ink); letter-spacing: -.01em; }
+.logo svg { height: 26px; width: auto; display: block; }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+h1 { font-size: clamp(34px, 6vw, 44px); line-height: 1.1; font-weight: 700; color: var(--ink); margin: 36px 0 4px; letter-spacing: -.02em; text-wrap: balance; }
+.sub { font-size: 21px; color: var(--muted); font-weight: 300; margin: 0; }
+h2 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 56px 0 14px; display: flex; align-items: center; gap: 10px; }
+h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin: 0; }
+a { color: var(--accent); font-weight: 700; text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul { margin: 0; padding-left: 22px; list-style: none; }
+li { position: relative; margin: 6px 0; }
+li::before { content: ""; position: absolute; left: -15px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+b { color: var(--ink); }
+.nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 18px 0 0; font-size: 14px; }
+.nav .here { color: var(--ink); font-weight: 700; }
+.badge { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 0; }
+.flow a { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px 4px 4px; font-size: 13px; color: var(--ink); }
+.flow a .badge { width: 22px; height: 22px; font-size: 11px; }
+
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; }
+.opt { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.opt-head { display: flex; align-items: center; gap: 8px; }
+.letter { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--ink); font-size: 11px; font-weight: 700; display: grid; place-items: center; color: var(--ink); }
+.pick { margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 9px; }
+.opt.chosen .letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.screen { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--app); font-size: 13px; line-height: 1.4; color: var(--body); }
+.screen .bar { background: var(--dark); height: 26px; display: flex; align-items: center; gap: 6px; padding: 0 12px; color: #fff; font-size: 12px; }
+.screen .bar span { opacity: .5; margin-left: auto; font-size: 11px; }
+.screen .in { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.ui { background: #fff; border: 1px solid #e6e8eb; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.ui-title { font-weight: 700; color: var(--ink); font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.inp { border: 1px solid #d6d9de; border-radius: 8px; padding: 7px 10px; background: #fff; color: var(--ink); display: flex; align-items: center; gap: 8px; min-width: 0; }
+.inp.focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.inp .ph { color: var(--faint); }
+.caret { width: 1px; height: 14px; background: var(--ink); }
+.drop { border: 1px solid #e1e4e8; border-radius: 8px; background: #fff; box-shadow: 0 6px 18px rgba(17,19,23,.08); overflow: hidden; }
+.drow { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-top: 1px solid #f0f1f3; min-width: 0; }
+.drow:first-child { border-top: 0; }
+.drow.hl { background: var(--accent-soft); }
+.drow .d { flex: 1; min-width: 0; }
+.drow .d div:first-child { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drow .s { color: var(--muted); font-size: 11px; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); font-weight: 700; }
+.num small { font-weight: 400; color: var(--muted); }
+.drow.free { color: var(--muted); }
+.line { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #f8f9fa; border-radius: 8px; min-width: 0; flex-wrap: wrap; }
+.line .d { flex: 1; min-width: 120px; color: var(--ink); }
+.line .d small { display: block; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+.chip.cat { background: var(--accent-soft); color: var(--accent); }
+.chip.off { background: #f1f2f4; color: var(--muted); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.out { border-color: #d6d9de; color: var(--ink); background: #fff; }
+.chip .inner { background: #fff; border-radius: 999px; padding: 0 7px; color: var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; background: var(--dark); color: #fff; border: 1px solid var(--dark); white-space: nowrap; cursor: pointer; font-family: inherit; }
+.btn.ghost { background: #fff; color: var(--ink); border-color: #d6d9de; }
+.btn.teal { background: var(--accent); border-color: var(--accent); }
+.strike { text-decoration: line-through; color: var(--faint); font-weight: 400; }
+.sumbar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; background: var(--accent-soft); border: 1px solid #c7e1e5; color: var(--ink); flex-wrap: wrap; }
+.sumbar .grow { flex: 1; min-width: 0; }
+.total { display: flex; justify-content: space-between; align-items: center; background: var(--accent-soft); border: 1px solid #c7e1e5; border-radius: 10px; padding: 10px 12px; color: var(--ink); }
+.total b { color: var(--accent); font-size: 17px; }
+.muted { color: var(--muted); }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.spacer { flex: 1; }
+.tiers { display: grid; gap: 8px; }
+.tier { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: center; }
+.tier .t { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.meter { display: inline-flex; gap: 2px; }
+.meter i { width: 5px; height: 10px; border-radius: 2px; background: #d6d9de; }
+.meter i.on { background: var(--accent); }
+
+.later { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+.open { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 16px 20px; margin-top: 14px; }
+
+.proto { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--app); font-size: 14px; line-height: 1.45; }
+.proto .bar { background: var(--dark); color: #fff; height: 34px; display: flex; align-items: center; gap: 18px; padding: 0 16px; font-size: 13px; }
+.proto .bar .on { background: #2a2d33; border-radius: 999px; padding: 2px 10px; }
+.proto .bar .dim { opacity: .55; }
+.proto .in { padding: 18px; display: flex; flex-direction: column; gap: 14px; max-width: 720px; margin: 0 auto; }
+.proto .ui { padding: 16px; gap: 10px; }
+.proto .ui-title { font-size: 15px; }
+.search { position: relative; }
+.search input { width: 100%; border: 1px solid #d6d9de; border-radius: 10px; padding: 10px 12px 10px 34px; font: inherit; color: var(--ink); background: #fff; outline: none; }
+.search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--faint); }
+.search .drop { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 5; max-height: 330px; overflow-y: auto; }
+.search .drow { cursor: pointer; padding: 9px 12px; }
+.search .drow:hover, .search .drow.hl { background: var(--accent-soft); }
+.more { font-size: 11px; color: var(--accent); font-weight: 700; background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; }
+.qty { display: inline-flex; align-items: center; border: 1px solid #d6d9de; border-radius: 999px; background: #fff; }
+.qty button { border: 0; background: none; width: 24px; height: 24px; cursor: pointer; color: var(--ink); font-size: 14px; }
+.qty span { min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; font-size: 13px; }
+.pline { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: #f8f9fa; border-radius: 10px; }
+.pline .top2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pline .d { flex: 1; min-width: 140px; color: var(--ink); }
+.pline .d small { display: block; color: var(--muted); font-size: 12px; }
+.reasons { display: flex; gap: 6px; flex-wrap: wrap; }
+.reasons button { border: 1px solid #d6d9de; background: #fff; border-radius: 999px; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; color: var(--ink); }
+.reasons button:hover { border-color: var(--ink); }
+.x { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; }
+.x:hover { color: var(--ink); }
+.empty { color: var(--faint); text-align: center; padding: 14px 0; font-size: 13px; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drop[hidden] { display: none; }
+.alt { margin-top: 72px; padding-top: 8px; border-top: 2px solid var(--accent); }
+.alt .tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; margin-top: 16px; }
+.alt h2 { margin-top: 10px; }
+.alt > ul { margin-bottom: 18px; }
+#s-lines .chip, .modal .chip { white-space: normal; }
+.modal { border: 0; border-radius: 14px; padding: 0; width: min(540px, calc(100vw - 32px)); max-height: calc(100vh - 48px); color: var(--body); font-family: var(--sans); font-size: 14px; line-height: 1.45; box-shadow: 0 20px 50px rgba(17,19,23,.25); }
+.modal::backdrop { background: rgba(17,19,23,.45); }
+.m-head { display: flex; align-items: flex-start; gap: 10px; padding: 18px 20px 4px; }
+.m-head h3 { font-size: 17px; flex: 1; }
+.m-text { padding: 0 20px; color: var(--muted); margin: 0 0 12px; }
+.m-body { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
+.m-ask { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 8px; }
+.m-ask b { font-size: 13px; }
+.m-foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding: 16px 20px 18px; margin-top: 16px; border-top: 1px solid var(--line); }
+.m-foot .btn { padding: 7px 14px; font-size: 13px; }
+.reasons button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--faint); }
+@media (max-width: 600px) {
+  .proto .in { padding: 12px; }
+  .proto .bar .dim { display: none; }
+}
+.prob { margin-top: 88px; }
+.prob:first-of-type { margin-top: 48px; }
+.prob-head { border-top: 2px solid var(--ink); padding-top: 14px; }
+.prob-title { font-size: clamp(28px, 5vw, 34px); color: var(--ink); margin: 6px 0 2px; display: block; }
+.prob h2 .badge { width: auto; min-width: 24px; padding: 0 7px; border-radius: 999px; }
+.pnav { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 0; }
+.pnav a { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); border-radius: 999px; padding: 5px 14px; font-size: 13px; color: var(--ink); }
+.pnav a b { color: var(--accent); }
+.contract pre { background: #f8f9fa; border-radius: 8px; padding: 12px 14px; font-family: var(--mono); font-size: 12px; line-height: 1.5; overflow-x: auto; margin: 8px 0 0; white-space: pre; }
+.pick.is-later { background: #fff; color: var(--muted); border: 1px solid var(--line); }
+h2[data-later]::after { content: "Later"; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
+.flow a.is-later { color: var(--faint); }
+.flow a.is-later .badge { background: #c9ced4; }
+.open.now { margin: 18px 0 0; }
+.open.now h3 { color: var(--accent); margin-bottom: 6px; }
+</style>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="logo"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">SCREENS</span>
+  </div>
+
+  <h1>Lio Screens</h1>
+  <p class="sub">Every UI change for problems 1 to 4, pick one per step</p>
+  <div class="nav"><a href="https://claude.ai/artifact/2WE1vvNYGuj9t99Z37f6w5">Playbook ↗</a><a href="https://claude.ai/artifact/2wyQCsPwmHWkDDEDTkAdz4">App Map ↗</a><a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5">Case Study ↗</a><span class="here">Screens</span></div>
+  <div class="pnav"><a href="#p1"><b>1</b>PDF Extraction</a><a href="#p2"><b>2</b>Negotiated Prices</a><a href="#p3"><b>3</b>Commodity Groups</a><a href="#p4"><b>4</b>Approval Limit</a></div>
+<style>
+#p1 .p1-badge { width: auto; min-width: 24px; padding: 0 7px; border-radius: 999px; }
+#p1 .p1-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+#p1 .p1-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#p1 .p1-field label { font-size: 12px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+#p1 .p1-field input, #p1 .p1-price { width: 100%; border: 1px solid #d6d9de; border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; color: var(--ink); background: #fff; outline: none; min-width: 0; }
+#p1 .p1-field input:focus, #p1 .p1-price:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+#p1 .p1-field.p1-need input, #p1 .inp.p1-need { border-color: #e2b469; background: var(--warn-soft); }
+#p1 .p1-field input[readonly] { background: #f8f9fa; color: var(--muted); }
+#p1 .p1-alts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }
+#p1 .p1-err { font-size: 13px; color: var(--warn); }
+#p1 .p1-check { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2b469; background: var(--warn-soft); color: var(--ink); }
+#p1 .p1-check.p1-ok { border-color: #c7e1e5; background: #fff; }
+#p1 .p1-price { width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
+#p1 .p1-done { padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 13px; }
+#p1 pre { margin: 10px 0 0; padding: 12px 14px; background: var(--panel); border-radius: 8px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+</style>
+<section class="prob" id="p1">
+  <div class="prob-head"><span class="kicker">PROBLEM 1</span><h2 class="prob-title">PDF Extraction</h2><p class="sub">Quotes come out wrong, empty, or crash</p></div>
+  <div class="flow"><a href="#p1-alt"><span class="badge">1.1</span>Alternatives</a><a href="#p1-total"><span class="badge">1.2</span>Total mismatch</a><a href="#p1-empty"><span class="badge">1.3</span>Empty fields</a><a href="#p1-try"><span class="badge">▶</span>Try it</a></div>
+
+<div class="open now"><h3>Build now</h3><ul><li>1.1 Alternatives kept out of the lines and total, one line "N alternatives in this offer, not included".</li><li>1.2 The flag under the total when the lines don't add up to the quote. A mismatch never auto-approves.</li><li>1.3 Empty fields marked in place. They never block submit; only the org's required fields do.</li><li>Later: picking an alternative, and the one-tap fixes for a mismatch.</li></ul></div>
+
+  <h2 id="p1-alt"><span class="badge p1-badge">1.1</span>Alternatives</h2>
+  <div class="open" style="margin:0 0 16px"><h3 style="color:var(--accent);margin-bottom:6px">Now: not included, one line</h3><ul><li>Alternatives stay out of the lines and the total. Under the lines: <b>"2 alternatives in this offer, not included"</b>.</li><li>Picking an alternative is not in the brief. The options below are a design for later, not built.</li></ul></div>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Swap in place</h3><span class="pick is-later">Later</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="pline">
+            <div class="top2"><div class="d">1.1 Moosbild 70:30 mit Schriftzug<small>1 piece</small></div><span class="num">€1,438.00</span></div>
+            <div class="row"><span class="muted" style="font-size:12px">Or</span><span class="chip out">1.1a Ballenmoos <span class="inner">€1,926.00</span></span><span class="chip out">1.1b Waldmoos <span class="inner">€1,685.00</span></span></div>
+          </div>
+          <div class="line"><div class="d">Transport, Verpackung und Versand</div><span class="num">€320.00</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Separate card</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+          <div class="line"><div class="d">Transport, Verpackung und Versand</div><span class="num">€320.00</span></div>
+        </div>
+        <div class="ui">
+          <div class="ui-title">Alternatives in the offer <span class="chip off">Not in total</span></div>
+          <div class="line"><div class="d">1.1a Ballenmoos</div><span class="num">€1,926.00</span><span class="btn ghost">+ Add</span></div>
+          <div class="line"><div class="d">1.1b Waldmoos</div><span class="num">€1,685.00</span><span class="btn ghost">+ Add</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Ask on upload</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">This offer has options for 1.1</div>
+          <div class="line"><div class="d">1.1 Moosbild, as quoted</div><span class="num">€1,438.00</span><span class="chip cat">Chosen</span></div>
+          <div class="line"><div class="d">1.1a Ballenmoos</div><span class="num">€1,926.00</span></div>
+          <div class="line"><div class="d">1.1b Waldmoos</div><span class="num">€1,685.00</span></div>
+          <div class="row"><span class="spacer"></span><span class="btn teal">Continue</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">If built later: the alternative sits next to the line it replaces, so one tap swaps it and the total can never count both.</p>
+
+  <h2 id="p1-total"><span class="badge p1-badge">1.2</span>Total mismatch</h2>
+  <div class="opts">
+    <div class="opt">
+      <div class="opt-head"><span class="letter">A</span><h3>Banner on top</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="sumbar" style="background:var(--warn-soft);border-color:#e2b469"><span class="grow">The lines add up to €1,438.00, the quote says €1,758.00. Check the lines before you submit.</span></div>
+        <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+        <div class="total"><span>Total Cost</span><b>€1,438.00</b></div>
+      </div></div>
+    </div>
+
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">B</span><h3>Check at the total</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+        <div class="total"><span>Total Cost</span><b>€1,438.00</b></div>
+        <div class="p1-check" style="padding:9px 11px">
+          <div class="row"><span class="chip warn">€320.00 short</span><span style="font-size:12px">Quote says €1,758.00 net</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Block submit</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Moosbild 70:30 mit Schriftzug</div><span class="num">€1,438.00</span></div>
+        <div class="total"><span>Total Cost</span><b>€1,438.00</b></div>
+        <div class="row"><span class="muted" style="font-size:12px">Fix the total to submit</span><span class="spacer"></span><span class="btn" style="opacity:.4">Create Request</span></div>
+      </div></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">Why: the gap shows right where the total is and updates as the lines change, so a missed line is caught before submit. A request that still differs never auto-approves.</p>
+  <p class="muted" style="font-size:13px;margin:4px 0 0">Later: one-tap fixes (add the missing line, or confirm the lines with a reason).</p>
+
+  <h2 id="p1-empty"><span class="badge p1-badge">1.3</span>Empty fields</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Mark in place</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Vendor Information</div>
+          <div class="muted" style="font-size:12px">Vendor Name</div>
+          <div class="inp">Gärtner Gregg</div>
+          <div class="row" style="font-size:12px"><span class="muted">VAT ID</span><span class="chip warn">Not found in the PDF</span></div>
+          <div class="inp p1-need"><span class="ph">DE123456789</span></div>
+        </div>
+        <div class="row"><span class="muted" style="font-size:12px">1 field empty</span><span class="spacer"></span><span class="btn">Create Request</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>List at the top</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="sumbar" style="background:var(--warn-soft);border-color:#e2b469"><span class="grow">Could not extract: VAT ID, Title. Please fill in these fields manually.</span></div>
+        <div class="ui">
+          <div class="ui-title">Vendor Information</div>
+          <div class="inp">Gärtner Gregg</div>
+          <div class="inp"><span class="ph">DE123456789</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Fill one by one</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">2 things the quote did not say <span class="muted" style="font-weight:400">1 of 2</span></div>
+          <div class="muted" style="font-size:12px">VAT ID of Gärtner Gregg</div>
+          <div class="inp focus"><span class="caret"></span></div>
+          <div class="row"><span class="btn ghost">Skip</span><span class="spacer"></span><span class="btn teal">Next</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">Why: the flag sits on the field itself and clears as you type. Empty fields never block Create Request, because a real quote can lack one (Hoffmann has no VAT ID). Only the fields in the organisation's <code>required_fields</code> setting block submit, as they do today.</p>
+
+  <h2 id="p1-try"><span class="badge">▶</span>Try it</h2>
+  <div class="proto">
+    <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Articles</span></div>
+    <div class="in">
+      <div class="sumbar"><span class="grow"><b>AngebotA0492_23.Pdf</b> read. Check the marked fields.</span><button class="btn ghost" type="button" id="p1-reset">Start over</button></div>
+
+      <div class="ui">
+        <div class="ui-title">Request Details</div>
+        <div class="p1-grid">
+          <div class="p1-field"><label for="p1-f-requestor">Requestor Name</label><input id="p1-f-requestor" type="text" value="Anna Weber" readonly></div>
+          <div class="p1-field"><label for="p1-f-dept">Department <span class="chip off">From your profile</span></label><input id="p1-f-dept" type="text" value="Facilities" readonly></div>
+        </div>
+        <div class="p1-field" data-p1-f="title"><label for="p1-f-title">Title / Short Description <span class="chip off">Required</span> <span class="chip warn" data-p1-flag="title">Not found in the PDF</span></label><input id="p1-f-title" type="text" placeholder="Moss picture for reception" autocomplete="off"></div>
+      </div>
+
+      <div class="ui">
+        <div class="ui-title">Vendor Information</div>
+        <div class="p1-grid">
+          <div class="p1-field" data-p1-f="vendor"><label for="p1-f-vendor">Vendor Name <span class="chip warn" data-p1-flag="vendor">Not found in the PDF</span></label><input id="p1-f-vendor" type="text" placeholder="Vendor" autocomplete="off"></div>
+          <div class="p1-field" data-p1-f="vat"><label for="p1-f-vat">VAT ID <span class="chip warn" data-p1-flag="vat">Not found in the PDF</span></label><input id="p1-f-vat" type="text" placeholder="DE123456789" autocomplete="off"></div>
+        </div>
+      </div>
+
+      <div class="ui">
+        <div class="ui-title">Order Lines <span class="muted" style="font-weight:400;font-size:12px">from the offer</span></div>
+        <div id="p1-lines" class="tiers"></div>
+        <div class="row"><button class="btn ghost" type="button" id="p1-add">+ Add line</button></div>
+        <div class="p1-alts" id="p1-alts"></div>
+      </div>
+
+      <div class="total"><span>Total Cost</span><b id="p1-sum">€0.00</b></div>
+      <div id="p1-check"></div>
+
+      <div class="row"><span class="muted" id="p1-left" style="font-size:13px"></span><span class="p1-err" id="p1-err"></span><span class="spacer"></span><button class="btn" type="button" id="p1-submit" style="padding:7px 16px;font-size:13px">Create Request</button></div>
+      <div id="p1-done"></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:13px;margin:8px 0 0">Mock data from the Gärtner Gregg quote. Title is in this organisation's <code>required_fields</code>.</p>
+  <p class="muted" style="font-size:13px;margin:4px 0 0">The data is staged to show every flag at once: the shipping line and the VAT ID are missing, and no title was found.</p>
+
+  <div class="open">
+    <h3 style="color:var(--accent);margin-bottom:6px">Contract</h3>
+    <ul>
+      <li>Extraction reply. Every field may be null, it never errors on a missing value.</li>
+      <li>Totals are added up by the backend in code, never by the model. Alternatives are never in <code>linesNet</code>.</li>
+      <li><code>department</code> comes from the user profile, not from this reply.</li>
+    </ul>
+<pre>{
+  "title": string | null,
+  "vendorName": string | null,
+  "vatId": string | null,
+  "missingFields": ("title" | "vendorName" | "vatId")[],
+  "currency": "EUR",
+  "orderLines": [{
+    "position": string | null,
+    "description": string,
+    "amount": number,
+    "unit": string | null,
+    "unitPrice": number,
+    "totalPrice": number
+  }],
+  "alternatives": [{
+    "position": string,
+    "replaces": string | null,
+    "description": string,
+    "amount": number,
+    "unit": string | null,
+    "unitPrice": number,
+    "totalPrice": number
+  }],
+  "totals": {
+    "printedNet": number | null,
+    "linesNet": number,
+    "differs": boolean
+  }
+}</pre>
+    <ul style="margin-top:12px">
+      <li><code>alternatives</code> come back on their own, only to show "not included". They are never sent back.</li>
+      <li>On Create Request, the frontend adds to today's request body: <code>totalCheck: { printedNet: number | null, linesNet: number }</code>.</li>
+      <li><code>missingFields</code> never block submit. Only the organisation's <code>required_fields</code> do.</li>
+      <li>Backend rule: if <code>printedNet</code> and <code>linesNet</code> differ, the request never auto-approves.</li>
+      <li class="muted">Later: <code>pickedAlternatives</code>, <code>totalCheck</code> acknowledged + reason.</li>
+    </ul>
+  </div>
+</section>
+<script>(function(){
+  var root = document.getElementById("p1");
+  if (!root) return;
+  var PRINTED = 1758.00;
+  var ALTS = [
+    { pos: "1.1a", desc: "Nur Ballenmoos", price: 1926.00 },
+    { pos: "1.1b", desc: "Flächig Waldmoos", price: 1685.00 }
+  ];
+  var REQUIRED = ["title"];
+  var LABELS = { title: "Title", vendor: "Vendor Name", vat: "VAT ID" };
+  var state;
+
+  function fresh() {
+    return {
+      fields: { title: "", vendor: "Gärtner Gregg", vat: "" },
+      lines: [
+        { id: 1, pos: "1.1", desc: "Moosbild 70:30 mit Schriftzug askLio", amount: 1, unit: "piece", price: 1438.00 }
+      ],
+      nextId: 2,
+      err: "",
+      done: false
+    };
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function money(n) {
+    var neg = n < 0;
+    var parts = Math.abs(n).toFixed(2).split(".");
+    var whole = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return (neg ? "-" : "") + "€" + whole + "." + parts[1];
+  }
+  function lineTotal(l) {
+    return l.added ? l.price : l.price * l.amount;
+  }
+  function linesNet() {
+    var t = 0;
+    for (var i = 0; i < state.lines.length; i++) t += lineTotal(state.lines[i]);
+    return Math.round(t * 100) / 100;
+  }
+  function diff() {
+    return Math.round((PRINTED - linesNet()) * 100) / 100;
+  }
+  function differs() {
+    return Math.abs(diff()) >= 0.005;
+  }
+  function empties() {
+    var n = 0;
+    for (var k in state.fields) if (!state.fields[k].trim()) n++;
+    return n;
+  }
+  function requiredEmpty() {
+    var out = [];
+    for (var i = 0; i < REQUIRED.length; i++) if (!state.fields[REQUIRED[i]].trim()) out.push(LABELS[REQUIRED[i]]);
+    return out;
+  }
+
+  function renderLines() {
+    var box = document.getElementById("p1-lines");
+    var h = "";
+    for (var i = 0; i < state.lines.length; i++) {
+      var l = state.lines[i];
+      var price = '<input class="p1-price" type="number" step="0.01" inputmode="decimal" aria-label="Line total" data-p1-price="' + l.id + '" value="' + (l.added ? l.price : l.price * l.amount).toFixed(2) + '">';
+      var rm = '<button class="x" type="button" data-p1-rm="' + l.id + '" aria-label="Remove line">×</button>';
+      if (l.added) {
+        h += '<div class="pline"><div class="top2"><div class="p1-field" style="flex:1;min-width:160px"><label for="p1-ld-' + l.id + '">Description</label>' +
+          '<input id="p1-ld-' + l.id + '" type="text" data-p1-desc="' + l.id + '" value="' + esc(l.desc) + '" placeholder="Transport, Verpackung und Versand" autocomplete="off"></div>' +
+          price + rm + '</div></div>';
+        continue;
+      }
+      h += '<div class="pline"><div class="top2"><div class="d">' + esc(l.pos + " " + l.desc) + '<small>' + esc(l.amount + " " + (l.unit || "")) + '</small></div>' +
+        price + rm + '</div></div>';
+    }
+    if (!state.lines.length) h = '<div class="empty">No order lines yet.</div>';
+    box.innerHTML = h;
+    document.getElementById("p1-alts").innerHTML = esc(ALTS.length + " alternatives in this offer, not included");
+  }
+
+  function renderCheck() {
+    var box = document.getElementById("p1-check");
+    var d = diff();
+    if (!differs()) {
+      box.innerHTML = '<div class="p1-check p1-ok"><div class="row"><span class="chip cat">Matches the quote</span><span class="muted" style="font-size:13px">' + esc(money(PRINTED)) + ' net, as printed</span></div></div>';
+      return;
+    }
+    box.innerHTML = '<div class="p1-check"><div class="row"><span class="chip warn">' + esc(money(Math.abs(d)) + (d > 0 ? " short" : " over")) + '</span>' +
+      '<span style="font-size:13px">Quote says ' + esc(money(PRINTED)) + ' net, lines add up to ' + esc(money(linesNet())) + '</span></div></div>';
+  }
+
+  function renderFields() {
+    for (var k in LABELS) {
+      var wrap = root.querySelector('[data-p1-f="' + k + '"]');
+      var flag = root.querySelector('[data-p1-flag="' + k + '"]');
+      var need = !state.fields[k].trim();
+      wrap.className = "p1-field" + (need ? " p1-need" : "");
+      flag.style.display = need ? "" : "none";
+    }
+  }
+
+  function renderFoot() {
+    document.getElementById("p1-sum").textContent = money(linesNet());
+    var n = empties();
+    document.getElementById("p1-left").textContent = n ? n + (n === 1 ? " field empty" : " fields empty") : "All fields filled";
+    document.getElementById("p1-err").textContent = state.err;
+    var b = document.getElementById("p1-submit");
+    if (!state.lines.length) b.setAttribute("disabled", ""); else b.removeAttribute("disabled");
+    var done = document.getElementById("p1-done");
+    if (!state.done) { done.innerHTML = ""; return; }
+    var gaps = [];
+    for (var k in LABELS) if (!state.fields[k].trim()) gaps.push(LABELS[k]);
+    done.innerHTML = '<div class="p1-done"><b>Request created.</b> Total ' + esc(money(linesNet())) + ' net. ' +
+      (differs() ? "Total differs from the quote, so it never auto-approves." : "Matches the quote, normal approval rules apply.") +
+      (gaps.length ? " Left empty: " + esc(gaps.join(", ")) + "." : "") + '</div>';
+  }
+
+  function renderAll() {
+    renderLines();
+    renderCheck();
+    renderFields();
+    renderFoot();
+  }
+
+  function find(id) {
+    for (var i = 0; i < state.lines.length; i++) if (state.lines[i].id === id) return state.lines[i];
+    return null;
+  }
+
+  function reset() {
+    state = fresh();
+    document.getElementById("p1-f-title").value = state.fields.title;
+    document.getElementById("p1-f-vendor").value = state.fields.vendor;
+    document.getElementById("p1-f-vat").value = state.fields.vat;
+    renderAll();
+  }
+
+  root.addEventListener("input", function (e) {
+    var t = e.target;
+    state.done = false;
+    state.err = "";
+    if (t.id === "p1-f-title") state.fields.title = t.value;
+    else if (t.id === "p1-f-vendor") state.fields.vendor = t.value;
+    else if (t.id === "p1-f-vat") state.fields.vat = t.value;
+    else if (t.getAttribute("data-p1-desc")) {
+      var l = find(+t.getAttribute("data-p1-desc"));
+      if (l) l.desc = t.value;
+    } else if (t.getAttribute("data-p1-price")) {
+      var p = find(+t.getAttribute("data-p1-price"));
+      if (p) {
+        var v = parseFloat(t.value);
+        v = isNaN(v) ? 0 : v;
+        p.price = p.added ? v : v / (p.amount || 1);
+        renderCheck();
+      }
+    } else return;
+    renderFields();
+    renderFoot();
+  });
+
+  root.addEventListener("click", function (e) {
+    var t = e.target.closest ? e.target.closest("button") : null;
+    if (!t || !root.contains(t)) return;
+    if (t.id === "p1-reset") { reset(); return; }
+    state.done = false;
+    state.err = "";
+    if (t.getAttribute("data-p1-rm")) {
+      var id = +t.getAttribute("data-p1-rm");
+      state.lines = state.lines.filter(function (x) { return x.id !== id; });
+      renderAll();
+    } else if (t.id === "p1-add") {
+      var nl = { id: state.nextId++, added: true, desc: "", price: 0 };
+      state.lines.push(nl);
+      renderAll();
+      var inp = document.getElementById("p1-ld-" + nl.id);
+      if (inp) inp.focus();
+    } else if (t.id === "p1-submit") {
+      var req = requiredEmpty();
+      if (req.length) state.err = req.join(", ") + (req.length === 1 ? " is required." : " are required.");
+      else state.done = true;
+      renderFoot();
+    }
+  });
+
+  reset();
+})();</script>
+
+<section class="prob" id="p2">
+  <div class="prob-head"><span class="kicker">PROBLEM 2</span><h2 class="prob-title">Negotiated Prices</h2><p class="sub">Suggest Acme's catalogue articles on a request</p></div>
+  <div class="flow"><a href="#try"><span class="badge">▶</span>Try it</a><a href="#add"><span class="badge">2.1</span>Add a line</a><a href="#match"><span class="badge">2.2</span>Show the match</a><a href="#sure"><span class="badge">2.3</span>How sure</a><a href="#pdf"><span class="badge">2.4</span>After a PDF</a><a href="#keep"><span class="badge">2.5</span>Keep own price</a><a href="#approve" class="is-later"><span class="badge">2.6</span>Approver</a><a href="#later" class="is-later"><span class="badge">2.7</span>Later</a><a href="#strict"><span class="badge">S</span>Strict proposal</a></div>
+
+<div class="open now"><h3>Build now</h3><ul><li>2.1 Search-first add box.</li><li>2.2 "Did you mean" with a teal Switch, plus Undo.</li><li>2.3 Sure match or nothing.</li><li>2.4 One "Switch all" bar after a PDF.</li><li>2.5 Keeping your own price is silent. No-match lines are logged, no UI.</li><li>Later: 2.6 approver flag, 2.7, and the strict proposal.</li></ul></div>
+  <h2 id="try"><span class="badge">▶</span>Try it</h2>
+  <div class="proto">
+    <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Articles</span></div>
+    <div class="in">
+      <div class="ui">
+        <div class="ui-title">Order Lines <button class="btn ghost" id="pdf-btn" type="button">Upload offer.pdf</button></div>
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" type="text" placeholder="Add item" autocomplete="off" aria-label="Add item">
+          <div class="drop" id="drop" hidden></div>
+        </div>
+        <div id="sum"></div>
+        <div id="lines" class="tiers"></div>
+      </div>
+      <div class="total"><span>Total Cost</span><b id="total">€0.00</b></div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:10px;font-size:13px;color:var(--muted)">
+    <span>Try</span>
+    <button class="chip out" type="button" data-try="toner schwarz">toner schwarz</button>
+    <button class="chip out" type="button" data-try="monitor 1440p">monitor 1440p</button>
+    <button class="chip out" type="button" data-try="handschuhe nitril">handschuhe nitril</button>
+    <button class="chip out" type="button" data-try="kabelbinder">kabelbinder</button>
+  </div>
+
+  <h2 id="add"><span class="badge">2.1</span>Add a line</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Search first</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="inp focus">toner sch<span class="caret"></span></div>
+          <div class="drop">
+            <div class="drow hl"><div class="d"><div>Toner cartridge black, high-yield</div><div class="s">Lindqvist Supply</div></div><span class="num">€186.00</span></div>
+            <div class="drow"><div class="d"><div>Toner cartridge cyan</div><div class="s">Lindqvist Supply</div></div><span class="num">€177.00</span></div>
+            <div class="drow free"><div class="d"><div>+ “toner sch”</div></div></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Type, then suggest</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines <span class="btn ghost">+ Add Line</span></div>
+          <div class="inp">Toner schwarz XL</div>
+          <div class="row"><div class="inp" style="flex:1">4</div><div class="inp" style="flex:1">€60.00</div></div>
+          <div class="row"><span class="chip cat">Catalog <span class="inner">€186.00</span></span><span class="btn teal">Use</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Autocomplete in line</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines <span class="btn ghost">+ Add Line</span></div>
+          <div class="inp focus">Toner sch<span class="caret"></span><span class="ph">warz, high-yield</span></div>
+          <div class="row"><div class="inp" style="flex:1"><span class="ph">Qty</span></div><div class="inp" style="flex:1"><span class="ph">Price</span></div></div>
+          <div class="muted" style="font-size:11px">Tab ⇥</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 id="match"><span class="badge">2.2</span>Show the match</h2>
+  <div class="opts">
+    <div class="opt">
+      <div class="opt-head"><span class="letter">A</span><h3>One chip</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="num">€960.00</span></div>
+        <div class="row"><span class="chip cat">Catalog <span class="inner">€186.00</span></span><span class="more">+2</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">B</span><h3>Price swap</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line">
+          <div class="d">Toner schwarz XL<small>4 pcs</small></div>
+          <span class="num"><span class="strike">€240.00</span> €186.00</span>
+        </div>
+        <div class="row"><span class="muted" style="font-size:12px">Did you mean</span><span class="chip cat">Toner cartridge black, Lindqvist</span><span class="spacer"></span><span class="btn teal">Switch, −€216</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Auto switch</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line">
+          <div class="d">Toner cartridge black, high-yield<small>4 × €186.00</small></div>
+          <span class="chip cat">Catalog</span>
+        </div>
+        <div class="row"><span class="muted" style="font-size:12px">Was “Toner schwarz XL”, €240.00</span><span class="spacer"></span><span class="btn ghost">Undo</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 id="sure"><span class="badge">2.3</span>How sure</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Sure or nothing</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in tiers">
+        <div class="tier"><span class="t">Sure</span><div class="row"><span class="num"><span class="strike">€240</span> €186</span><span class="btn teal">Switch</span></div></div>
+        <div class="tier"><span class="t">None</span><div class="row"><span class="muted">—</span></div></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Meter</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in tiers">
+        <div class="tier"><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i></span><div class="row"><span class="chip cat">€186.00</span><span class="btn teal">Switch</span></div></div>
+        <div class="tier"><span class="meter"><i class="on"></i><i class="on"></i><i></i></span><div class="row"><span class="chip cat">€8.56</span><span class="btn ghost">Switch</span></div></div>
+        <div class="tier"><span class="meter"><i class="on"></i><i></i><i></i></span><div class="row"><span class="chip cat">€13.95</span><span class="btn ghost">Switch</span></div></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Percent</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in tiers">
+        <div class="tier"><span class="num">94%</span><div class="row"><span class="chip cat">€186.00</span><span class="btn teal">Switch</span></div></div>
+        <div class="tier"><span class="num">61%</span><div class="row"><span class="chip cat">€8.56</span><span class="btn ghost">Switch</span></div></div>
+        <div class="tier"><span class="num">32%</span><div class="row"><span class="chip cat">€13.95</span><span class="btn ghost">Switch</span></div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 id="pdf"><span class="badge">2.4</span>After a PDF</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>One bar</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="sumbar"><span class="grow"><b>2 of 3</b> in catalog</span><span class="btn teal">Switch all, −€244</span></div>
+        <div class="line"><div class="d">Toner schwarz XL</div><span class="chip cat">€186.00</span></div>
+        <div class="line"><div class="d">Kopierpapier A4 recycling</div><span class="chip cat">€8.56</span></div>
+        <div class="line"><div class="d">USB-C Kabel 2 m</div></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Side by side</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="row muted" style="font-size:11px"><span class="spacer"></span><span style="width:66px;text-align:right">Offer</span><span style="width:66px;text-align:right">Catalog</span></div>
+        <div class="line"><div class="d">Toner schwarz XL</div><span class="num" style="width:58px;text-align:right">€240</span><span class="chip cat" style="width:62px;justify-content:flex-end">€186</span></div>
+        <div class="line"><div class="d">Kopierpapier A4</div><span class="num" style="width:58px;text-align:right">€11.20</span><span class="chip cat" style="width:62px;justify-content:flex-end">€8.56</span></div>
+        <div class="line"><div class="d">USB-C Kabel 2 m</div><span class="num" style="width:58px;text-align:right">€9.90</span><span class="muted" style="width:62px;text-align:right">—</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Review step</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui" style="align-items:center;text-align:center;gap:6px">
+          <span class="muted" style="font-size:11px">1 / 2</span>
+          <b>Toner schwarz XL</b>
+          <span class="num"><span class="strike">€240.00</span> €186.00</span>
+          <span class="muted" style="font-size:11px">Toner cartridge black, high-yield</span>
+          <div class="row"><span class="btn ghost">Keep</span><span class="btn teal">Switch</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 id="keep"><span class="badge">2.5</span>Keep own price</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>Silent</h3><span class="pick">Pick</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="num">€960.00</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Tag only</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="chip off">Off-catalog</span></div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>One-tap reason</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="chip warn">+€216</span></div>
+        <div class="row"><span class="chip out">Urgent</span><span class="chip out">Other spec</span><span class="chip out">Out of stock</span><span class="chip out">Other</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 id="approve" data-later><span class="badge">2.6</span>Approver</h2>
+  <div class="opts">
+    <div class="opt chosen">
+      <div class="opt-head"><span class="letter">A</span><h3>One line flag</h3><span class="pick is-later">Later</span></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="row"><b style="font-size:15px">Printer toner</b></div>
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div><span class="chip warn">+€216 vs catalog</span></div>
+          <div class="line"><div class="d">Copy paper A4 recycled<small>20 × €8.56</small></div></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">B</span><h3>Header only</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="row"><b style="font-size:15px">Printer toner</b><span class="chip warn">1 off-catalog</span></div>
+        <div class="ui">
+          <div class="ui-title">Order Lines</div>
+          <div class="line"><div class="d">Toner schwarz XL<small>4 × €240.00</small></div></div>
+          <div class="line"><div class="d">Copy paper A4 recycled<small>20 × €8.56</small></div></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="letter">C</span><h3>Approvals list</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <div class="line"><div class="d">Printer toner<small>€1,131.20</small></div><span class="chip warn">+€216</span></div>
+          <div class="line"><div class="d">Monitors IT<small>€925.00</small></div><span class="chip cat">Catalog</span></div>
+          <div class="line"><div class="d">Lab gloves<small>€440.00</small></div><span class="chip cat">Catalog</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 id="later" data-later><span class="badge">2.7</span>Later</h2>
+  <div class="later">
+    <div class="opt">
+      <div class="opt-head"><h3>Catalog use</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="ui">
+          <span class="muted" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700">Catalog use</span>
+          <div class="row"><b style="font-size:26px;color:var(--ink)">64%</b><span class="chip cat">+22 pts</span></div>
+          <span class="muted" style="font-size:12px">€4,180 saved this month</span>
+        </div>
+      </div></div>
+    </div>
+    <div class="opt">
+      <div class="opt-head"><h3>Better offer elsewhere</h3></div>
+      <div class="screen"><div class="bar">Lio</div><div class="in">
+        <div class="line"><div class="d">24-inch monitor 1440p IPS<small>Aurora Solutions</small></div><span class="num">€248.00</span></div>
+        <div class="row"><span class="chip cat">Vertex <span class="inner">€185.00</span></span><span class="btn ghost">Switch</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="open contract">
+    <h3 style="color:var(--accent);margin-bottom:6px">Contract</h3>
+    <ul>
+      <li>Suggest, while typing or after a PDF: one sure match or nothing.</li>
+    </ul>
+<pre>GET /articles/suggest?q=Toner%20schwarz%20XL
+{ "match": null | {
+    "article_number": "LIN-00862",
+    "description": "Toner cartridge black, high-yield",
+    "supplier_name": "Lindqvist Supply B.V.",
+    "unit": "piece",
+    "unit_price": 186.00 } }
+
+POST /requests, per line, stored in RequestActivity.detail
+{ "catalog": { "status": "switched" | "ignored" | "no_match" | "picked",
+               "article_number": "LIN-00862" | null,
+               "offer_price": 240.00 | null,
+               "catalog_price": 186.00 | null } }
+
+GET /requests/{id}, per line, for the approver flag
+{ "catalog_delta": 216.00 | null }</pre>
+  </div>
+  <div class="open">
+    <h3 style="color:var(--accent);margin-bottom:6px">Open</h3>
+    <ul>
+      <li>Catalog item from another supplier: change vendor, or split the request?</li>
+      <li>Store <code>article_id</code> on the line? Needed for steps 6 and 7.</li>
+      <li>No catalogue match: no UI, the line goes through as is. Logged as "no match" in <code>RequestActivity.detail</code> for a later catalogue-gaps report.</li>
+      <li>Ask Acme: roughly how much spend is off-catalogue, and do they want to grow the catalogue from it?</li>
+    </ul>
+  </div>
+
+  <section class="alt">
+    <span class="tag">Second proposal, not planned</span>
+    <h2 id="strict"><span class="badge">S</span>Strict proposal</h2>
+    <ul>
+      <li>For if Acme makes catalogue use a rule, not a nudge. Not what we plan to build.</li>
+      <li>Same rules as above: sure match or nothing, "Did you mean", teal Switch, Undo, no match stays silent.</li>
+      <li>Adds one check at Submit: if any line still has a catalogue match, a pop-up lists them all at once.</li>
+      <li>Keeping your own price needs a one-tap reason. The approver sees it next to "+€216 vs catalog".</li>
+    </ul>
+    <div class="proto">
+      <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Articles</span></div>
+      <div class="in">
+        <div class="ui">
+          <div class="ui-title">Order Lines <span class="muted" style="font-weight:400;font-size:12px">from offer.pdf</span></div>
+          <div id="s-lines" class="tiers"></div>
+        </div>
+        <div class="total"><span>Total Cost</span><b id="s-total">€0.00</b></div>
+        <div class="row"><span class="spacer"></span><button class="btn" type="button" id="s-submit" style="padding:7px 16px;font-size:13px">Submit request</button></div>
+        <div id="s-done"></div>
+      </div>
+    </div>
+    <dialog class="modal" id="s-dlg" aria-labelledby="s-dlg-title"></dialog>
+  </section>
+<script>
+(function () {
+  var CATALOG = [
+    ["LIN-00862", "Toner cartridge black, high-yield", 186.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00863", "Toner cartridge cyan", 177.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00850", "Toner cartridge magenta", 131.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00856", "Toner cartridge yellow", 67.00, "piece", "Lindqvist Supply B.V."],
+    ["LIN-00854", "Copy paper A4 recycled 80 g", 8.56, "pack", "Lindqvist Supply B.V."],
+    ["LIN-00851", "Copy paper A3 80 g, 500 sheets", 8.98, "pack", "Lindqvist Supply B.V."],
+    ["VER-00370", "24-inch monitor 1440p IPS", 185.00, "piece", "Vertex Solutions GmbH"],
+    ["AUR-00408", "24-inch monitor 1440p IPS", 248.00, "piece", "Aurora Solutions AG"],
+    ["RHE-00007", "24-inch monitor 1440p IPS", 325.00, "piece", "Rheinwerk Systems GmbH"],
+    ["LUM-00442", "24-inch monitor height-adjustable 1440p", 151.00, "piece", "Lumen Solutions SE"],
+    ["LUM-00435", "24-inch monitor 4K USB-C", 135.00, "piece", "Lumen Solutions SE"],
+    ["AUR-00402", "Business laptop 15\" Ryzen 7 / 16 GB / 512 GB", 1229.00, "piece", "Aurora Solutions AG"],
+    ["LUM-00440", "Business laptop 14\" i7 / 32 GB / 1 TB SSD", 1130.00, "piece", "Lumen Solutions SE"],
+    ["LIN-00833", "Safety gloves nitrile-coated", 13.95, "pack", "Lindqvist Technik Ltd"],
+    ["OST-00810", "Safety gloves nitrile-coated", 44.30, "pack", "Osterhaus Technik GmbH & Co. KG"],
+    ["LIN-00841", "Safety gloves cut-resistant level C", 39.34, "pack", "Lindqvist Technik Ltd"],
+    ["KRA-00660", "Lab consumables nitrile lab gloves", 88.00, "pack", "Kranz Labs AG"],
+    ["MER-00297", "Adhesive tape paper eco 50 mm", 14.77, "pack", "Meridian Packaging GmbH & Co. KG"],
+    ["MER-00303", "Void fill paper cushioning", 16.80, "pack", "Meridian Packaging GmbH & Co. KG"]
+  ].map(function (r) { return { no: r[0], desc: r[1], price: r[2], unit: r[3], sup: r[4] }; });
+
+  var SYN = { schwarz: "black", kopierpapier: "copy paper", papier: "paper", handschuhe: "gloves", handschuh: "gloves", nitril: "nitrile", bildschirm: "monitor", "klebeband": "adhesive tape", recycling: "recycled", gelb: "yellow", blau: "cyan", xl: "high-yield", "4k": "4k" };
+
+  function toks(s) {
+    var out = [];
+    s.toLowerCase().replace(/[^a-z0-9äöüß\-\s]/g, " ").split(/\s+/).forEach(function (w) {
+      if (!w) return;
+      (SYN[w] || w).split(" ").forEach(function (x) { out.push(x); });
+    });
+    return out;
+  }
+  function score(q, a) {
+    var qt = toks(q); if (!qt.length) return 0;
+    var at = toks(a.desc), hit = 0;
+    qt.forEach(function (t) { if (at.some(function (w) { return w === t || (t.length >= 3 && w.indexOf(t) === 0); })) hit++; });
+    return hit / qt.length;
+  }
+  function find(q) {
+    var res = CATALOG.map(function (a) { return { a: a, s: score(q, a) }; }).filter(function (r) { return r.s >= 0.5; });
+    res.sort(function (x, y) { return y.s - x.s || x.a.price - y.a.price; });
+    var groups = [], seen = {};
+    res.forEach(function (r) {
+      if (seen[r.a.desc]) { seen[r.a.desc].others.push(r.a); return; }
+      var g = { best: r.a, s: r.s, others: [] }; seen[r.a.desc] = g; groups.push(g);
+    });
+    return groups;
+  }
+  function tier(s, q) { return s >= 0.99 && toks(q).length >= 2 ? "sure" : s >= 0.5 ? "maybe" : "none"; }
+  function eur(n) { return "€" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function short(s) { return s.replace(/ (GmbH & Co\. KG|GmbH|B\.V\.|AG|SE|Ltd|S\.A\.)$/, ""); }
+
+  var lines = [], open = {}, active = 0;
+  var q = document.getElementById("q"), drop = document.getElementById("drop");
+
+  function renderDrop() {
+    var v = q.value.trim();
+    if (!v) { drop.hidden = true; return; }
+    var gs = find(v).slice(0, 5), html = "";
+    gs.forEach(function (g, i) {
+      html += '<div class="drow' + (i === active ? " hl" : "") + '" data-add="' + g.best.no + '"><div class="d"><div>' + esc(g.best.desc) + '</div><div class="s">' + esc(short(g.best.sup)) +
+        (g.others.length ? ' <button class="more" type="button" data-expand="' + g.best.no + '">+' + g.others.length + "</button>" : "") + '</div></div><span class="num">' + eur(g.best.price) + " <small>/ " + g.best.unit + "</small></span></div>";
+      if (open[g.best.no]) g.others.forEach(function (o) {
+        html += '<div class="drow" data-add="' + o.no + '" style="padding-left:24px"><div class="d"><div class="s">' + esc(short(o.sup)) + '</div></div><span class="num" style="font-weight:400">' + eur(o.price) + "</span></div>";
+      });
+    });
+    html += '<div class="drow free' + (active === gs.length ? " hl" : "") + '" data-free="1"><div class="d"><div>+ “' + esc(v) + '”</div></div></div>';
+    drop.innerHTML = html; drop.hidden = false; drop._n = gs.length; drop._gs = gs;
+  }
+
+  function addArticle(no) {
+    var a = CATALOG.filter(function (x) { return x.no === no; })[0];
+    lines.push({ desc: a.desc, qty: 1, price: a.price, art: a, sup: a.sup });
+    q.value = ""; active = 0; open = {}; renderDrop(); render();
+  }
+  function addFree(text, price, qty) {
+    var g = find(text)[0], m = g && tier(g.s, text) === "sure" ? { art: g.best, t: "sure" } : null;
+    lines.push({ desc: text, qty: qty || 1, price: price || 0, art: null, match: m, state: m ? "offer" : "none" });
+  }
+
+  function render() {
+    var box = document.getElementById("lines"), html = "";
+    if (!lines.length) html = '<div class="empty">No lines yet</div>';
+    lines.forEach(function (l, i) {
+      var right, below = "";
+      if (l.art) {
+        right = '<span class="chip cat">Catalog</span>';
+        if (l.orig) below = '<div class="row"><span class="chip off">Was ' + esc(l.orig.desc) + ' <span class="inner">' + eur(l.orig.price) + '</span></span><span class="spacer"></span><button class="btn ghost" type="button" data-undo="' + i + '">Undo</button></div>';
+      }
+      else if (l.match && l.match.t === "sure" && l.state === "offer") {
+        var save = (l.price - l.match.art.price) * l.qty;
+        right = '<span class="num">' + (l.price ? '<span class="strike">' + eur(l.price) + "</span> " : "") + eur(l.match.art.price) + "</span>";
+        below = '<div class="row"><span class="muted" style="font-size:12px">Did you mean</span><span class="chip cat">' + esc(l.match.art.desc) + ", " + esc(short(l.match.art.sup)) + '</span><span class="spacer"></span><button class="btn teal" type="button" data-switch="' + i + '">Switch' + (save > 0 ? ", −" + eur(save) : "") + "</button></div>";
+      } else right = '<span class="num">' + (l.price ? eur(l.price) : "") + "</span>";
+      var unitPrice = l.art ? l.art.price : l.price;
+      html += '<div class="pline"><div class="top2"><div class="d">' + esc(l.desc) + "<small>" + (unitPrice ? eur(unitPrice) + (l.art ? " / " + l.art.unit + ", " + esc(short(l.sup)) : "") : "&nbsp;") + "</small></div>" +
+        '<span class="qty"><button type="button" data-dec="' + i + '" aria-label="Less">−</button><span>' + l.qty + '</span><button type="button" data-inc="' + i + '" aria-label="More">+</button></span>' + right +
+        '<button class="x" type="button" data-del="' + i + '" aria-label="Remove">×</button></div>' + below + "</div>";
+    });
+    box.innerHTML = html;
+
+    var open2 = lines.filter(function (l) { return !l.art && l.match && l.match.t === "sure" && l.state === "offer"; });
+    var matched = lines.filter(function (l) { return l.art || (l.match && l.state !== "none"); }).length;
+    var sum = document.getElementById("sum");
+    if (open2.length > 1) {
+      var s = open2.reduce(function (t, l) { return t + Math.max(0, (l.price - l.match.art.price) * l.qty); }, 0);
+      sum.innerHTML = '<div class="sumbar"><span class="grow"><b>' + matched + " of " + lines.length + '</b> in catalog</span><button class="btn teal" type="button" id="all">Switch all, −' + eur(s) + "</button></div>";
+    } else sum.innerHTML = "";
+
+    var tot = lines.reduce(function (t, l) { return t + (l.art ? l.art.price : l.price) * l.qty; }, 0);
+    document.getElementById("total").textContent = eur(tot);
+  }
+
+  function sw(i) { var l = lines[i]; l.orig = { desc: l.desc, price: l.price, sup: l.sup, state: l.state }; l.art = l.match.art; l.sup = l.art.sup; l.desc = l.art.desc; l.state = "done"; }
+  function undo(i) { var l = lines[i], o = l.orig; l.art = null; l.desc = o.desc; l.price = o.price; l.sup = o.sup; l.state = o.state; l.orig = null; }
+
+  q.addEventListener("input", function () { active = 0; open = {}; renderDrop(); });
+  q.addEventListener("keydown", function (e) {
+    if (drop.hidden) return;
+    if (e.key === "ArrowDown") { active = Math.min(active + 1, drop._n); renderDrop(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { active = Math.max(active - 1, 0); renderDrop(); e.preventDefault(); }
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      if (active < drop._n) addArticle(drop._gs[active].best.no);
+      else { addFree(q.value.trim()); q.value = ""; renderDrop(); render(); }
+    } else if (e.key === "Escape") { drop.hidden = true; }
+  });
+  drop.addEventListener("mousedown", function (e) {
+    e.preventDefault();
+    var ex = e.target.closest("[data-expand]");
+    if (ex) { open[ex.dataset.expand] = !open[ex.dataset.expand]; renderDrop(); return; }
+    var r = e.target.closest(".drow"); if (!r) return;
+    if (r.dataset.add) addArticle(r.dataset.add);
+    else { addFree(q.value.trim()); q.value = ""; renderDrop(); render(); }
+  });
+  q.addEventListener("blur", function () { setTimeout(function () { drop.hidden = true; }, 120); });
+  q.addEventListener("focus", renderDrop);
+
+  document.getElementById("lines").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var d = b.dataset;
+    if (d.inc) lines[+d.inc].qty++;
+    else if (d.dec) lines[+d.dec].qty = Math.max(1, lines[+d.dec].qty - 1);
+    else if (d.del) lines.splice(+d.del, 1);
+    else if (d.switch) sw(+d.switch);
+    else if (d.undo) undo(+d.undo);
+    render();
+  });
+  document.getElementById("sum").addEventListener("click", function (e) {
+    if (!e.target.closest("#all")) return;
+    lines.forEach(function (l, i) { if (!l.art && l.match && l.match.t === "sure" && l.state === "offer") sw(i); });
+    render();
+  });
+  document.getElementById("pdf-btn").addEventListener("click", function () {
+    lines = [];
+    addFree("Toner schwarz XL", 240.00, 4);
+    addFree("Kopierpapier A4 recycling", 11.20, 20);
+    addFree("USB-C Kabel 2 m", 9.90, 6);
+    render();
+  });
+  document.querySelectorAll("[data-try]").forEach(function (b) {
+    b.addEventListener("click", function () { q.value = b.dataset.try; q.focus(); active = 0; open = {}; renderDrop(); });
+  });
+
+  addFree("Toner schwarz XL", 240.00, 4);
+  render();
+  window.P2 = { find: find, tier: tier, eur: eur, esc: esc, short: short };
+})();
+
+(function () {
+  var P = window.P2, eur = P.eur, esc = P.esc, short = P.short;
+  var lines = [], keeping = false, reason = null;
+  var box = document.getElementById("s-lines"), dlg = document.getElementById("s-dlg"), done = document.getElementById("s-done");
+
+  function add(text, price, qty) {
+    var g = P.find(text)[0], m = g && P.tier(g.s, text) === "sure" ? g.best : null;
+    lines.push({ desc: text, price: price, qty: qty, match: m, art: null });
+  }
+  function reset() {
+    lines = []; keeping = false; reason = null; done.innerHTML = "";
+    add("Toner schwarz XL", 240.00, 4);
+    add("Kopierpapier A4 recycling", 11.20, 20);
+    add("USB-C Kabel 2 m", 9.90, 6);
+    render();
+  }
+  function pending() { return lines.filter(function (l) { return l.match && !l.art; }); }
+  function save(l) { return Math.max(0, (l.price - l.match.price) * l.qty); }
+  function extra() { return pending().reduce(function (t, l) { return t + save(l); }, 0); }
+
+  function lineHtml(l, i) {
+    var a = l.art, right, below = "";
+    if (a) {
+      right = '<span class="chip cat">Catalog</span>';
+      below = '<div class="row"><span class="chip off">Was ' + esc(l.desc) + ' <span class="inner">' + eur(l.price) + '</span></span><span class="spacer"></span><button class="btn ghost" type="button" data-undo="' + i + '">Undo</button></div>';
+    } else if (l.match) {
+      right = '<span class="num"><span class="strike">' + eur(l.price) + "</span> " + eur(l.match.price) + "</span>";
+      below = '<div class="row"><span class="muted" style="font-size:12px">Did you mean</span><span class="chip cat">' + esc(l.match.desc) + ", " + esc(short(l.match.sup)) + '</span><span class="spacer"></span><button class="btn teal" type="button" data-sw="' + i + '">Switch, −' + eur(save(l)) + "</button></div>";
+    } else right = '<span class="num">' + eur(l.price) + "</span>";
+    var unit = a ? a.price : l.price;
+    return '<div class="pline"><div class="top2"><div class="d">' + esc(a ? a.desc : l.desc) + "<small>" + l.qty + " × " + eur(unit) + (a ? ", " + esc(short(a.sup)) : "") + "</small></div>" + right + "</div>" + below + "</div>";
+  }
+
+  function render() {
+    box.innerHTML = lines.map(lineHtml).join("");
+    document.getElementById("s-total").textContent = eur(lines.reduce(function (t, l) { return t + (l.art ? l.art.price : l.price) * l.qty; }, 0));
+    if (dlg.open) renderDlg();
+  }
+
+  function renderDlg() {
+    var p = pending(), html = "";
+    if (!p.length) keeping = false;
+    html += '<div class="m-head"><h3 id="s-dlg-title">' + (p.length ? "Use the catalogue price?" : "All on catalogue prices") + '</h3><button class="x" type="button" data-act="close" aria-label="Close">×</button></div>';
+    html += '<p class="m-text">' + (p.length ? p.length + (p.length > 1 ? " lines are" : " line is") + " in Acme's catalogue at a negotiated price." : "Every line with a catalogue match now uses it.") + "</p>";
+    html += '<div class="m-body">' + lines.map(function (l, i) { return l.match ? lineHtml(l, i) : ""; }).join("") + "</div>";
+    if (keeping) {
+      html += '<div class="m-ask"><b>Why keep your price?</b><div class="reasons">' + ["Urgent", "Other spec", "Out of stock", "Other"].map(function (r) {
+        return '<button type="button" data-r="' + r + '"' + (reason === r ? ' class="on"' : "") + ">" + r + "</button>";
+      }).join("") + '</div><span class="muted" style="font-size:12px">Your approver sees this next to +' + eur(extra()) + " vs catalog.</span></div>";
+    }
+    html += '<div class="m-foot">';
+    if (!p.length) html += '<button class="btn teal" type="button" data-act="submit">Submit request</button>';
+    else if (!keeping) html += '<button class="btn ghost" type="button" data-act="keep">Keep my prices</button><button class="btn teal" type="button" data-act="all">Switch all and submit, −' + eur(extra()) + "</button>";
+    else html += '<button class="btn ghost" type="button" data-act="back">Back</button><button class="btn" type="button" data-act="submit"' + (reason ? "" : " disabled") + ">Submit at my price</button>";
+    html += "</div>";
+    dlg.innerHTML = html;
+  }
+
+  function submit() {
+    var p = pending(), on = lines.filter(function (l) { return l.art; }).length;
+    var msg = "<b>Submitted.</b> " + on + " on catalogue";
+    if (p.length) msg += ", " + p.length + " at own price (" + esc(reason) + "). Approver sees +" + eur(extra()) + " vs catalog.";
+    else msg += ".";
+    if (dlg.open) dlg.close();
+    done.innerHTML = '<div class="sumbar"><span class="grow">' + msg + '</span><button class="btn ghost" type="button" data-act="reset">Start over</button></div>';
+  }
+
+  function onClick(e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var d = b.dataset;
+    if (d.sw) lines[+d.sw].art = lines[+d.sw].match;
+    else if (d.undo) lines[+d.undo].art = null;
+    else if (d.r) reason = d.r;
+    else if (d.act === "keep") keeping = true;
+    else if (d.act === "back") { keeping = false; reason = null; }
+    else if (d.act === "close") { dlg.close(); return; }
+    else if (d.act === "all") { pending().forEach(function (l) { l.art = l.match; }); render(); submit(); return; }
+    else if (d.act === "submit") { submit(); return; }
+    else if (d.act === "reset") { reset(); return; }
+    else return;
+    render();
+  }
+
+  box.addEventListener("click", onClick);
+  dlg.addEventListener("click", onClick);
+  done.addEventListener("click", onClick);
+  dlg.addEventListener("close", function () { keeping = false; reason = null; });
+  document.getElementById("s-submit").addEventListener("click", function () {
+    done.innerHTML = "";
+    if (pending().length) { dlg.showModal(); renderDlg(); } else submit();
+  });
+
+  reset();
+})();
+</script>
+</section>
+
+<section class="prob" id="p3">
+<style>
+.p3-ic { width: 13px; height: 13px; flex: none; color: var(--muted); }
+.p3-lock { background: #f8f9fa; }
+.p3-lock .spacer { min-width: 4px; }
+.p3-in { border: 1px solid #d6d9de; border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 14px; color: var(--ink); background: #fff; min-width: 0; outline: none; }
+.p3-in:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+select.p3-in { cursor: pointer; }
+.p3-desc { flex: 1 1 160px; }
+.p3-qty { width: 64px; }
+.p3-price { width: 92px; }
+.p3-err { border: 1px solid #f0d9b0; background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 9px 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.p3-err b { color: var(--warn); }
+.p3-tab { background: none; border: 0; color: #fff; font: inherit; cursor: pointer; padding: 2px 10px; border-radius: 999px; }
+.p3-tab[hidden] { display: none; }
+.p3-n { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.p3-form { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--accent); border-radius: 10px; background: #fff; }
+.p3-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ink); }
+.p3-test { display: flex; gap: 8px; flex-wrap: wrap; }
+.p3-test .p3-in:first-child { flex: 1 1 180px; }
+.p3-test .p3-in:last-child { width: 130px; }
+.p3-small { font-size: 12px; }
+.p3-sw { width: 30px; height: 18px; border-radius: 999px; background: #d6d9de; display: inline-flex; align-items: center; padding: 2px; flex: none; }
+.p3-sw i { width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+.p3-sw.on { background: var(--accent); justify-content: flex-end; }
+.p3-tbl { display: grid; grid-template-columns: 14px 1.3fr 1fr 44px; gap: 6px; align-items: center; font-size: 11px; }
+.p3-tbl .h { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 9px; }
+#p3 .chip { white-space: normal; }
+.p3-cap { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.p3-staff { border-top: 1px dashed #d6d9de; padding-top: 6px; }
+.p3-note { font-size: 12px; color: var(--muted); }
+</style>
+
+<div class="prob-head"><span class="kicker">PROBLEM 3</span><h2 class="prob-title">Commodity Groups</h2><p class="sub">Acme's categories don't match its books</p></div>
+  <div class="flow"><a href="#p3-auto"><span class="badge">3.1</span>Group set automatically</a><a href="#p3-override" class="is-later"><span class="badge">3.2</span>Override by buyer or admin</a><a href="#p3-corrected"><span class="badge">3.3</span>When a save disagrees</a><a href="#p3-unsure" class="is-later"><span class="badge">3.4</span>Model not sure</a><a href="#p3-mixed" class="is-later"><span class="badge">3.5</span>Lines hit different rules</a><a href="#p3-admin" class="is-later"><span class="badge">3.6</span>Rules screen for admins</a><a href="#p3-try"><span class="badge">▶</span>Try it</a></div>
+
+<div class="open now"><h3>Build now</h3><ul><li>3.1 The group is set automatically. Requesters see no rules; buyers and admins see which rule set it.</li><li>3.3 When a save sends another group, the server corrects it quietly and logs the change.</li><li>Rules are saved through the settings API for now, no screen.</li><li>Later: 3.2 override, 3.4 model not sure, 3.5 several rules flag, 3.6 rules screen. The prototype still shows them to buyers and admins.</li></ul></div>
+
+<h2 id="p3-auto"><span class="badge">3.1</span>Group set automatically</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Locked field, rule for staff only</h3><span class="pick">Pick</span></div>
+    <span class="p3-cap">Requester</span>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip cat">Set automatically</span></div>
+        <div class="inp p3-lock"><svg class="p3-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Electrical Engineering</div>
+        <span class="muted" style="font-size:11px">Set by Acme for this item. Not right? Ask a buyer.</span>
+      </div>
+    </div></div>
+    <span class="p3-cap">Buyer and admin</span>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip cat">Set automatically</span></div>
+        <div class="inp p3-lock"><svg class="p3-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Electrical Engineering</div>
+        <span class="muted p3-staff" style="font-size:11px">Acme rule 1, "kabelbinder" in "Kabelbinder 200 mm". Booked under Electrical Engineering in Acme's ledger.</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Plain value, rule in the log</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="num">€480.00</span></div>
+      <div class="sumbar"><span class="grow">Commodity Group: <b>Electrical Engineering</b></span><span class="muted" style="font-size:11px">Set automatically</span></div>
+    </div></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer, Activity</span></div><div class="in">
+      <div class="line"><div class="d">Group set to Electrical Engineering<small>Acme rule 1, "kabelbinder"</small></div></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Hidden from requesters</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="num">€480.00</span></div>
+      <div class="total"><span>Total Cost</span><b>€480.00</b></div>
+    </div></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer, Approvals</span></div><div class="in">
+      <div class="line"><div class="d">Cable ties, Lena Vogt<small>€480.00</small></div><span class="chip cat">Electrical Engineering</span><span class="chip off">Rule 1</span></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">Why: the field stays where people expect it and the lock with "Set automatically" says it is decided, with no new idea to learn; buyers and admins, who own the rules, get one small line under the field saying which rule and why.</p>
+
+<h2 id="p3-override" data-later><span class="badge">3.2</span>Override by buyer or admin</h2>
+<div class="opts">
+  <div class="opt">
+    <div class="opt-head"><span class="letter">A</span><h3>Change in place</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">Changing</span></div>
+        <div class="inp focus">IT Hardware<span class="spacer"></span><span class="muted">▾</span></div>
+        <span class="muted" style="font-size:11px">Rule 1 says Electrical Engineering. Why change it?</span>
+        <div class="row"><span class="chip out">Other budget</span><span class="chip out">Rule is wrong here</span><span class="chip out">Acme asked</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Unlock switch</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="row" style="font-weight:400;font-size:11px;gap:6px">Override rule <span class="p3-sw on"><i></i></span></span></div>
+        <div class="inp">IT Hardware<span class="spacer"></span><span class="muted">▾</span></div>
+        <div class="inp"><span class="ph">Reason (logged)</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">C</span><h3>Change button, dialog</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="ui" style="box-shadow:0 10px 26px rgba(17,19,23,.14)">
+        <div class="ui-title">Change the group <span class="muted">×</span></div>
+        <span class="muted" style="font-size:11px">Acme rule 1 puts "Kabelbinder 200 mm" in Electrical Engineering. Your change, name and reason are logged.</span>
+        <div class="inp">IT Hardware<span class="spacer"></span><span class="muted">▾</span></div>
+        <div class="inp">Cable ties for the server racks, IT budget</div>
+        <div class="row"><span class="spacer"></span><span class="btn ghost">Cancel</span><span class="btn teal">Change group</span></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: an override should be rare and on purpose; a dialog makes the reason part of the action and never leaves a half-unlocked field behind.</p>
+
+<h2 id="p3-corrected"><span class="badge">3.3</span>When a save disagrees</h2>
+<p class="muted" style="font-size:13px;margin:0 0 10px">An agent or an old tab sends Fasteners and Fixings. The server saves Electrical Engineering, returns <code>corrected: true</code> and logs the change. No error.</p>
+<div class="opts">
+  <div class="opt">
+    <div class="opt-head"><span class="letter">A</span><h3>Nothing, just the right group</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="sumbar"><span class="grow"><b>Saved.</b></span></div>
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="chip cat">Electrical Engineering</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">B</span><h3>Quiet note for everyone</h3><span class="pick">Pick</span></div>
+    <span class="p3-cap">Requester</span>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="sumbar"><span class="grow"><b>Saved.</b></span></div>
+      <span class="p3-note">Commodity group set automatically to Electrical Engineering.</span>
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>40 × €12.00</small></div><span class="chip cat">Electrical Engineering</span></div>
+    </div></div>
+    <span class="p3-cap">Buyer and admin</span>
+    <div class="screen"><div class="bar">Lio<span>Buyer</span></div><div class="in">
+      <div class="sumbar"><span class="grow"><b>Saved.</b></span></div>
+      <span class="p3-note">Commodity group set automatically to Electrical Engineering.</span>
+      <span class="p3-note p3-staff">Sent Fasteners and Fixings, corrected by Acme rule 1. Logged.</span>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Note for buyers and admins only</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Buyer, Activity</span></div><div class="in">
+      <div class="line"><div class="d">Group corrected to Electrical Engineering<small>Sent Fasteners and Fixings, Acme rule 1</small></div><span class="chip warn">Corrected</span></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">Why: whoever sent the other group learns it did not stick, in one calm line with no rule words and nothing to fix; buyers and admins also see which rule, and the activity log keeps the from and to. Saying nothing would leave an old-tab user thinking their group was saved.</p>
+
+<h2 id="p3-unsure" data-later><span class="badge">3.4</span>Model not sure</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Three choices</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">Pick one</span></div>
+        <span class="muted" style="font-size:11px">Not sure which fits "USB-C Adapter".</span>
+        <div class="row"><span class="chip out">IT Accessories</span><span class="chip out">Electrical Components</span><span class="chip out">Office Supplies</span></div>
+        <div class="inp"><span class="ph">Other group</span><span class="spacer"></span><span class="muted">▾</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Best guess, check it</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">Check</span></div>
+        <div class="inp">IT Accessories<span class="spacer"></span><span class="muted">▾</span></div>
+        <span class="muted" style="font-size:11px">Suggested. Change it if it's wrong.</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Percent list</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requester</span></div><div class="in tiers">
+      <div class="tier"><span class="num">55%</span><div class="row"><span class="chip cat">IT Accessories</span></div></div>
+      <div class="tier"><span class="num">30%</span><div class="row"><span class="chip cat">Electrical Components</span></div></div>
+      <div class="tier"><span class="num">8%</span><div class="row"><span class="chip cat">Office Supplies</span></div></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: same as prices, sure or nothing; a prefilled guess gets saved unread, and percentages ask people to judge the model instead of the item.</p>
+
+<h2 id="p3-mixed" data-later><span class="badge">3.5</span>Lines hit different rules</h2>
+<div class="opts">
+  <div class="opt">
+    <div class="opt-head"><span class="letter">A</span><h3>Flag on the field</h3></div>
+    <span class="p3-cap">Buyer and admin view</span>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Group <span class="chip warn">2 rules</span></div>
+        <div class="inp p3-lock">Electrical Engineering</div>
+        <span class="muted" style="font-size:11px">Biggest line decides.</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">B</span><h3>One bar, chips per line</h3><span class="pick is-later">Later</span></div>
+    <span class="p3-cap">Buyer and admin view</span>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="p3-err"><span><b>2 Acme rules hit.</b> One group per request, so the biggest line decides: Electrical Engineering.</span></div>
+      <div class="line"><div class="d">Kabelbinder 200 mm<small>€480.00</small></div><span class="chip cat">Rule 1, used</span></div>
+      <div class="line"><div class="d">Toner schwarz XL<small>€186.00</small></div><span class="chip off">Rule 2, IT Hardware, not used</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Offer a split</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="sumbar"><span class="grow">These lines belong in <b>2 groups</b>.</span><span class="btn teal">Split into 2 requests</span></div>
+      <div class="line"><div class="d">Kabelbinder 200 mm</div><span class="chip cat">Electrical Engineering</span></div>
+      <div class="line"><div class="d">Toner schwarz XL</div><span class="chip cat">IT Hardware</span></div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: it says what happened and which line lost, in the same place as the lines; splitting would change approvals and goes beyond the agreed one group per request.</p>
+
+<h2 id="p3-admin" data-later><span class="badge">3.6</span>Rules screen for admins</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Ordered cards, test on top</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Rules</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Commodity Rules <span class="btn teal">+ Add rule</span></div>
+        <div class="inp">Tonerkartusche<span class="spacer"></span><span class="muted">€186</span></div>
+        <span class="chip cat" style="align-self:flex-start">Rule 2 fits: IT Hardware</span>
+        <div class="pline"><div class="top2"><span class="p3-n">1</span><div class="d">kabelbinder, cable tie</div><span class="chip cat">Electrical Engineering</span></div></div>
+        <div class="pline"><div class="top2"><span class="p3-n">2</span><div class="d">toner, druckerpatrone</div><span class="chip cat">IT Hardware</span></div><div class="row"><span class="spacer"></span><span class="btn ghost">↑</span><span class="btn ghost">↓</span><span class="btn ghost">Edit</span></div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Table with drag</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Rules</span></div><div class="in">
+      <div class="ui">
+        <div class="p3-tbl">
+          <span></span><span class="h">Keywords</span><span class="h">Group</span><span class="h">Max</span>
+          <span class="muted">⋮</span><span>kabelbinder, cable tie</span><span>Electrical Eng.</span><span class="muted">none</span>
+          <span class="muted">⋮</span><span>toner, druckerpatrone</span><span>IT Hardware</span><span class="muted">none</span>
+          <span class="muted">⋮</span><span>abo, subscription</span><span>Office Supplies</span><span>€500</span>
+        </div>
+      </div>
+      <div class="ui"><span class="muted" style="font-size:11px">Test panel opens on the right</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Sentence builder</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Rules</span></div><div class="in">
+      <div class="ui" style="font-size:12px">
+        <div class="row">If a line says <span class="chip out">kabelbinder</span><span class="chip out">cable tie</span></div>
+        <div class="row">put it in <span class="chip cat">Electrical Engineering</span></div>
+        <div class="row">up to <span class="chip out">any amount</span></div>
+        <div class="row">because <span class="chip out">ledger code 4710</span></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: order decides when two rules fit, so numbered cards with up and down show it and work on a phone; the test box answers "what happens to this line" before anyone saves.</p>
+
+<h2 id="p3-try"><span class="badge">▶</span>Try it</h2>
+<div class="row" style="margin:0 0 10px;font-size:13px;color:var(--muted)">
+  <span>View as</span>
+  <div class="reasons" id="p3-roles"><button type="button" data-role="requester" class="on">Requester</button><button type="button" data-role="buyer">Buyer</button><button type="button" data-role="admin">Admin</button></div>
+</div>
+<div class="proto">
+  <div class="bar"><span>Lio</span><span class="dim">Requests</span><button class="p3-tab on" type="button" data-view="form">New Request</button><span class="dim">Approvals</span><button class="p3-tab" type="button" data-view="rules" id="p3-rtab" hidden>Rules</button></div>
+  <div class="in" id="p3-form-view">
+    <div class="ui">
+      <div class="ui-title">Order Lines <button class="btn ghost" type="button" id="p3-addline">+ Add line</button></div>
+      <div id="p3-flag"></div>
+      <div id="p3-lines" class="tiers"></div>
+    </div>
+    <div class="ui" id="p3-gp"></div>
+    <div class="total"><span>Total Cost</span><b id="p3-total">€0.00</b></div>
+    <div class="row"><button class="more" type="button" id="p3-force" hidden>Send another group, like an agent or an old tab</button><span class="spacer"></span><button class="btn" type="button" id="p3-save" style="padding:7px 16px;font-size:13px">Save request</button></div>
+    <div id="p3-out"></div>
+  </div>
+  <div class="in" id="p3-rules-view" hidden>
+    <div class="ui">
+      <div class="ui-title">Commodity Rules <button class="btn teal" type="button" id="p3-radd">+ Add rule</button></div>
+      <span class="muted p3-small">Checked top to bottom on every line, on every save. The first rule that fits wins. Lines no rule fits go to the model.</span>
+      <div class="p3-test"><input class="p3-in" id="p3-tq" type="text" placeholder="Test a line, e.g. Tonerkartusche" aria-label="Test a line" autocomplete="off"><input class="p3-in" id="p3-ta" type="text" inputmode="decimal" placeholder="Line total €" aria-label="Line total in euro"></div>
+      <div id="p3-tres"></div>
+      <div id="p3-rlist" class="tiers"></div>
+    </div>
+  </div>
+</div>
+<div class="row" style="margin-top:10px;font-size:13px;color:var(--muted)">
+  <span>Add</span>
+  <button class="chip out" type="button" data-p3try="0">Kabelbinder 200 mm</button>
+  <button class="chip out" type="button" data-p3try="1">Toner schwarz XL</button>
+  <button class="chip out" type="button" data-p3try="2">Adobe Acrobat Abo</button>
+  <button class="chip out" type="button" data-p3try="3">USB-C Adapter</button>
+  <button class="chip out" type="button" data-p3try="4">Laptop 14 Zoll</button>
+  <button class="chip off" type="button" id="p3-reset">Start over</button>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">As Requester the group is just set automatically. Tap "Send another group" to see a save corrected quietly. Switch to Buyer or Admin to see which rule set it: add Toner to see two rules hit, raise the Abo quantity past €500 and the model takes over, clear the lines and add USB-C Adapter for a low-confidence pick. Buyer can override, Admin can edit rules.</p>
+<dialog class="modal" id="p3-dlg" aria-labelledby="p3-dlg-title"></dialog>
+
+<div class="open">
+  <h3 style="color:var(--accent);margin-bottom:6px">Contract</h3>
+  <ul>
+    <li><b>Rule</b>: <code>{ id: string (server-set), keywords: string[] (non-blank, EN or DE), commodity_group_id: int, reason: string (default ""), max_amount: decimal string | null (EUR, line total, inclusive), updated_by: { id: uuid, name: string }, updated_at: datetime }</code>.</li>
+    <li><b>Rules list</b>: <code>GET /organizations/me/settings</code> returns <code>commodity_rules: Rule[]</code> in match order. <code>PATCH /organizations/me/settings</code> with <code>{ commodity_rules: [...] }</code> (admin only, merges other keys) replaces the list; array order is the new order; the server sets <code>id</code> for new rules and <code>updated_by/updated_at</code> for changed ones. Errors: 422 <code>{ detail: [{ loc, msg }] }</code> for blank keywords or unknown group; 403 for non-admins.</li>
+    <li><b>Live categorise</b>: <code>POST /categorise</code> with <code>{ lines: [{ id: uuid, description: string, quantity: number, unit_price: decimal string }], rules?: Rule[] }</code> (<code>rules</code> only from admins, to test an unsaved list) returns <code>Categorisation</code>. No save. The form calls it debounced on line edits; the rules test box calls it with one line.</li>
+    <li><b>Per line</b>: <code>{ line_id: uuid, line_total: decimal string, group_id: int | null, source: "rule" | "model" | "none", rule_id: string | null, matched_keyword: string | null, rule_used: bool, skipped_rules: [{ rule_id, why: "over_max_amount" }], confidence: number | null (0 to 1, model only), suggestions: [{ group_id: int, name: string, confidence: number }] (top 3, model only) }</code>.</li>
+    <li><b>Request level</b> (in <code>Categorisation</code> and on request detail as <code>commodity</code>): <code>{ group_id: int | null, source: "rule" | "model" | "person" | "override", rule_id: string | null, decided_by_line: uuid | null, locked: bool, needs_person: bool, can_override: bool (from role), conflict: { rule_ids: string[], winner_rule_id: string, winner_line: uuid } | null, override: { from_group_id: int, to_group_id: int, reason: string, by: { id, name, role }, at: datetime } | null }</code>. <code>needs_person</code> when the top confidence is under the threshold (server constant, proposed 0.7). Rule fields are returned to every role; the UI shows them only to buyers and admins and tells requesters "Set automatically".</li>
+    <li><b>Save payload</b> (create and edit) adds: <code>commodity_group_id: int</code>, <code>commodity_source: "rule" | "model" | "person"</code>, <code>commodity_override: { group_id: int, reason: string } | null</code> (buyers and admins, later). On every create and edit the server re-runs the rules; when a rule fits, it saves the rule's group whatever the client sent.</li>
+    <li><b>Save response</b>: the request with <code>commodity: { group_id: int, source: "rule" | "model" | "person", rule_id: string | null, corrected: bool }</code> (<code>source: "override"</code> once 3.2 ships). <code>rule_id</code> is filled for every role; <code>corrected</code> is true when the server changed the group the client sent.</li>
+    <li><b>No rule error</b>: a group that disagrees with a rule is corrected, never rejected, for requesters and agents alike; an override sent by a requester is ignored the same way. Remaining errors, shape <code>{ detail: { code, message } }</code>: <code>group_required</code> (422, model not sure and nobody picked) and, with 3.2, <code>override_reason_required</code> (422).</li>
+    <li><b>Activity</b>: on create or edit, <code>RequestActivity.detail.categorisation = { lines: per-line objects above, request: request-level object above }</code>. When the server corrected the group it also logs <code>RequestActivity.detail.commodity_correction = { from_group_id: int, to_group_id: int, rule_id: string }</code>. Feeds the problem 4 flags <code>group_rule_overridden</code> and <code>group_low_confidence</code>.</li>
+    <li><b>Groups</b>: the existing <code>GET /commodity-groups</code> list <code>{ id: int, name: string, category: string }</code> for the "Other group" picker and the rules form.</li>
+  </ul>
+</div>
+
+<script>(function(){
+  var GROUPS = [
+    [11, "Electrical Engineering"], [29, "IT Hardware"], [40, "Office Supplies"], [204, "Toner Cartridges"],
+    [118, "Fasteners and Fixings"], [31, "Software Licenses"], [52, "Office Furniture"], [61, "Electrical Components"],
+    [73, "IT Accessories"], [88, "Personal Protective Equipment"], [95, "Facility Services"]
+  ];
+  var MODEL = [
+    [["kabelbinder", "cable tie"], [[118, .88], [61, .07], [11, .03]]],
+    [["toner", "druckerpatrone", "cartridge"], [[204, .93], [29, .04], [40, .02]]],
+    [["abo", "subscription", "lizenz", "license", "software", "adobe", "saas"], [[31, .91], [40, .05], [73, .02]]],
+    [["laptop", "notebook", "monitor", "bildschirm"], [[29, .94], [73, .04], [52, .01]]],
+    [["stuhl", "chair", "tisch", "desk"], [[52, .9], [40, .06], [95, .02]]],
+    [["handschuh", "glove"], [[88, .89], [95, .06], [40, .03]]],
+    [["papier", "paper", "ordner", "stift", "pen"], [[40, .92], [204, .04], [52, .02]]],
+    [["adapter", "usb", "steckdose", "kabel", "cable"], [[73, .55], [61, .3], [40, .08]]]
+  ];
+  var FALLBACK = [[40, .34], [95, .28], [73, .17]];
+  var SURE = 0.7;
+  var TRY = [["Kabelbinder 200 mm", 40, 12], ["Toner schwarz XL", 1, 186], ["Adobe Acrobat Abo", 12, 19.99], ["USB-C Adapter", 3, 24.9], ["Laptop 14 Zoll", 1, 1130]];
+  var ROLES = { requester: "Requester", buyer: "Buyer", admin: "Admin" };
+  var NAMES = { requester: "Lena Vogt", buyer: "Tom Berger", admin: "Jana Weber" };
+  var LOCK = '<svg class="p3-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  var role, view, rules, lines, nextLine, nextRule, ovr, pick, picking, saved, fix, editing, formErr;
+
+  function staff() { return role !== "requester"; }
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function eur(n) { return "€" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function gname(id) { for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i][0] === id) return GROUPS[i][1]; return "Group " + id; }
+  function num(v) { var n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? 0 : n; }
+  function norm(s) {
+    return String(s).toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+      .normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function hit(text, kw) {
+    var t = norm(text), k = norm(kw);
+    if (!k || !t) return false;
+    if (k.indexOf(" ") >= 0) return (" " + t).indexOf(" " + k) >= 0;
+    return t.split(" ").some(function (w) { return w.indexOf(k) === 0 || (w.length > k.length && w.slice(-k.length) === k); });
+  }
+  function matchKw(rule, text) { for (var i = 0; i < rule.keywords.length; i++) if (hit(text, rule.keywords[i])) return rule.keywords[i]; return null; }
+  function ruleFor(text, total) {
+    var skipped = [];
+    for (var i = 0; i < rules.length; i++) {
+      var r = rules[i], kw = matchKw(r, text);
+      if (!kw) continue;
+      if (r.max !== null && total > r.max) { skipped.push(r); continue; }
+      return { rule: r, kw: kw, skipped: skipped };
+    }
+    return { rule: null, skipped: skipped };
+  }
+  function model(text) {
+    for (var i = 0; i < MODEL.length; i++) if (MODEL[i][0].some(function (k) { return hit(text, k); })) return MODEL[i][1];
+    return FALLBACK;
+  }
+  function rno(r) { return rules.indexOf(r) + 1; }
+
+  function catLine(l) {
+    var total = l.qty * l.price, rf = ruleFor(l.desc, total);
+    if (rf.rule) return { src: "rule", rule: rf.rule, kw: rf.kw, group: rf.rule.group, total: total };
+    if (!norm(l.desc)) return { src: "none", total: total };
+    var m = model(l.desc);
+    return { src: "model", group: m[0][0], conf: m[0][1], top: m, total: total, skipped: rf.skipped };
+  }
+  function decide() {
+    var cs = lines.map(catLine), ri = [], i;
+    cs.forEach(function (c, j) { if (c.src === "rule") ri.push(j); });
+    if (ri.length) {
+      var w = ri.reduce(function (a, b) { return cs[b].total > cs[a].total ? b : a; });
+      var gs = {}; ri.forEach(function (j) { gs[cs[j].group] = 1; });
+      var d = { cs: cs, src: "rule", line: w, rule: cs[w].rule, kw: cs[w].kw, group: cs[w].group, conflict: Object.keys(gs).length > 1 };
+      return d;
+    }
+    var mi = -1;
+    for (i = 0; i < cs.length; i++) if (cs[i].src === "model" && (mi < 0 || cs[i].total > cs[mi].total)) mi = i;
+    if (mi < 0) return { cs: cs, src: "none" };
+    return { cs: cs, src: "model", line: mi, group: cs[mi].group, conf: cs[mi].conf, top: cs[mi].top, sure: cs[mi].conf >= SURE };
+  }
+  function keyOf(d) { return norm(lines[d.line].desc); }
+  function finalGroup(d) {
+    if (d.src === "rule") return ovr ? { group: ovr.group, src: "override" } : { group: d.group, src: "rule" };
+    if (d.src === "model") {
+      if (pick) return { group: pick.group, src: "person" };
+      if (d.sure) return { group: d.group, src: "model" };
+      return { group: null, src: "person" };
+    }
+    return { group: null, src: "none" };
+  }
+
+  function lineHtml(l, i) {
+    return '<div class="pline"><div class="top2">' +
+      '<input class="p3-in p3-desc" type="text" data-f="desc" data-i="' + i + '" value="' + esc(l.desc) + '" placeholder="Description" aria-label="Description" autocomplete="off">' +
+      '<input class="p3-in p3-qty" type="text" inputmode="numeric" data-f="qty" data-i="' + i + '" value="' + l.qty + '" aria-label="Quantity">' +
+      '<input class="p3-in p3-price" type="text" inputmode="decimal" data-f="price" data-i="' + i + '" value="' + l.price.toFixed(2) + '" aria-label="Unit price in euro">' +
+      '<span class="num" data-tot="' + i + '"></span>' +
+      '<button class="x" type="button" data-del="' + i + '" aria-label="Remove">×</button></div>' +
+      '<div class="row" data-chip="' + i + '"></div></div>';
+  }
+  function buildLines() {
+    var box = document.getElementById("p3-lines");
+    box.innerHTML = lines.length ? lines.map(lineHtml).join("") : '<div class="empty">No lines yet</div>';
+    update();
+  }
+
+  function chipFor(d, c, i) {
+    if (c.src === "rule") {
+      if (!staff()) return d.src === "rule" && i === d.line && !ovr ? '<span class="chip cat">' + LOCK.replace('class="p3-ic"', 'class="p3-ic" style="color:var(--accent)"') + esc(gname(c.group)) + "</span>" : "";
+      var n = rno(c.rule);
+      if (d.src === "rule" && i !== d.line && c.group !== d.group) return '<span class="chip off">Rule ' + n + ", " + esc(gname(c.group)) + ", not used</span>";
+      return '<span class="chip cat">' + LOCK.replace('class="p3-ic"', 'class="p3-ic" style="color:var(--accent)"') + "Rule " + n + ", " + esc(gname(c.group)) + (d.conflict && i === d.line ? ", used" : "") + "</span>";
+    }
+    if (c.src === "model") {
+      var s = c.conf >= SURE ? '<span class="chip off">Model, ' + esc(gname(c.group)) + "</span>" : '<span class="chip warn">Model not sure</span>';
+      if (staff() && c.skipped && c.skipped.length) s += '<span class="muted p3-small">Rule ' + rno(c.skipped[0]) + " skipped, over " + eur(c.skipped[0].max) + "</span>";
+      return s;
+    }
+    return "";
+  }
+
+  function groupHtml(d) {
+    var f = finalGroup(d), h = '<div class="ui-title">Commodity Group';
+    var staff = role !== "requester";
+    if (d.src === "none") return h + '</div><div class="inp"><span class="ph">Add a line to get a group</span></div>';
+    if (d.src === "rule") {
+      var n = rno(d.rule), lineDesc = lines[d.line].desc;
+      if (ovr) {
+        h += staff ? ' <span class="chip warn">Override</span></div>' : ' <span class="chip off">Set by a buyer</span></div>';
+        h += '<div class="inp p3-lock">' + LOCK + esc(gname(ovr.group)) + '<span class="spacer"></span>' + (staff ? '<button class="btn ghost" type="button" data-act="undo-ovr">Undo override</button>' : "") + "</div>";
+        h += staff ? '<span class="muted p3-small">Changed from ' + esc(gname(d.group)) + " by " + esc(ovr.by) + ". Reason: " + esc(ovr.reason) + ". Logged.</span>" : '<span class="muted p3-small">Changed by ' + esc(ovr.by) + ".</span>";
+        return h;
+      }
+      h += ' <span class="chip cat">Set automatically</span></div>';
+      h += '<div class="inp p3-lock">' + LOCK + esc(gname(d.group)) + '<span class="spacer"></span>' + (staff ? '<button class="btn ghost" type="button" data-act="ovr">Change</button>' : "") + "</div>";
+      h += staff ? '<span class="muted p3-small p3-staff">Acme rule ' + n + ', "' + esc(d.kw) + '" in "' + esc(lineDesc) + '".' + (d.rule.reason ? " " + esc(d.rule.reason) + "." : "") + "</span>" : '<span class="muted p3-small">Set by Acme for this item. Not right? Ask a buyer.</span>';
+      return h;
+    }
+    var desc = lines[d.line].desc;
+    if (d.sure && !picking && !pick) {
+      h += ' <span class="chip off">Suggested</span></div>';
+      h += '<div class="inp">' + esc(gname(d.group)) + '<span class="spacer"></span><button class="more" type="button" data-act="picking">Change</button></div>';
+      h += '<span class="muted p3-small">From "' + esc(desc) + '".</span>';
+      return h;
+    }
+    h += f.group ? ' <span class="chip off">Picked by you</span></div>' : ' <span class="chip warn">Pick one</span></div>';
+    if (f.group) h += '<div class="inp">' + esc(gname(f.group)) + "</div>";
+    h += '<span class="muted p3-small">' + (d.sure ? 'Pick a group for "' : 'Not sure which fits "') + esc(desc) + '".</span>';
+    h += '<div class="reasons">' + d.top.map(function (t) { return '<button type="button" data-pick="' + t[0] + '"' + (f.group === t[0] ? ' class="on"' : "") + ">" + esc(gname(t[0])) + "</button>"; }).join("") + "</div>";
+    h += '<select class="p3-in" id="p3-other" aria-label="Other group"><option value="">Other group</option>' + GROUPS.map(function (g) { return '<option value="' + g[0] + '"' + (f.group === g[0] && !d.top.some(function (t) { return t[0] === g[0]; }) ? " selected" : "") + ">" + esc(g[1]) + "</option>"; }).join("") + "</select>";
+    if (formErr) h += '<div class="p3-err"><span><b>Not saved.</b> ' + esc(formErr) + "</span></div>";
+    return h;
+  }
+
+  function outHtml() {
+    if (!saved) return "";
+    var h = '<div class="sumbar"><span class="grow"><b>Saved.</b> ' + saved + '</span><button class="btn ghost" type="button" data-act="again">Keep editing</button></div>';
+    if (fix) {
+      h += '<div class="p3-note" style="margin-top:6px">Commodity group set automatically to ' + esc(gname(fix.group)) + ".</div>";
+      if (staff()) h += '<div class="p3-note p3-staff" style="margin-top:6px">Sent ' + esc(gname(fix.sent)) + ", corrected by Acme rule " + rno(fix.rule) + ". Logged.</div>";
+    }
+    return h;
+  }
+
+  function update() {
+    var d = decide();
+    if (ovr && (d.src !== "rule" || d.rule.id !== ovr.rule)) ovr = null;
+    if (pick && (d.src !== "model" || pick.key !== keyOf(d))) pick = null;
+    if (d.src !== "model") picking = false;
+    lines.forEach(function (l, i) {
+      var c = document.querySelector('#p3-lines [data-chip="' + i + '"]'), t = document.querySelector('#p3-lines [data-tot="' + i + '"]');
+      if (c) c.innerHTML = chipFor(d, d.cs[i], i);
+      if (t) t.textContent = eur(l.qty * l.price);
+    });
+    var flag = document.getElementById("p3-flag");
+    if (staff() && d.src === "rule" && d.conflict) {
+      var nr = {}; d.cs.forEach(function (c) { if (c.src === "rule") nr[c.rule.id] = 1; });
+      flag.innerHTML = '<div class="p3-err"><span><b>' + Object.keys(nr).length + ' Acme rules hit.</b> One group per request, so the biggest line decides: "' + esc(lines[d.line].desc) + '", ' + eur(d.cs[d.line].total) + ", " + esc(gname(d.group)) + ". Flagged for the buyer.</span></div>";
+    } else flag.innerHTML = "";
+    document.getElementById("p3-gp").innerHTML = groupHtml(d);
+    document.getElementById("p3-total").textContent = eur(lines.reduce(function (s, l) { return s + l.qty * l.price; }, 0));
+    document.getElementById("p3-force").hidden = !(d.src === "rule" && !ovr && !saved);
+    document.getElementById("p3-out").innerHTML = outHtml();
+    if (view === "rules") testLine();
+  }
+  function touch() { saved = null; fix = null; formErr = null; }
+
+  function save() {
+    var d = decide(), f = finalGroup(d);
+    formErr = null; fix = null;
+    if (d.src === "none") { saved = null; document.getElementById("p3-out").innerHTML = '<div class="p3-err"><span><b>Not saved.</b> Add a line first.</span></div>'; return; }
+    if (!f.group) { formErr = "Pick a group, the model was not sure."; saved = null; update(); return; }
+    var msg = "Group " + esc(gname(f.group)) + ", ";
+    if (f.src === "rule") msg += staff() ? "set by Acme rule " + rno(d.rule) + "." : "set automatically.";
+    else if (f.src === "override" && !staff()) msg += "set by " + esc(ovr.by) + ".";
+    else if (f.src === "override") msg += "override by " + esc(ovr.by) + ' from rule ' + rno(d.rule) + ', reason "' + esc(ovr.reason) + '". Logged.';
+    else if (f.src === "model") msg += "suggested by the model.";
+    else msg += "picked by " + esc(NAMES[role]) + ". Logged with the top 3 suggestions.";
+    if (staff() && d.src === "rule" && d.conflict) msg += " Flagged: lines hit different rules.";
+    saved = msg; update();
+  }
+  function force() {
+    var d = decide(); if (d.src !== "rule" || ovr) return;
+    var m = model(lines[d.line].desc), alt = m[0][0] === d.group ? m[1][0] : m[0][0];
+    save();
+    fix = { group: d.group, sent: alt, rule: d.rule };
+    update();
+  }
+
+  function renderDlg() {
+    var d = decide(); if (d.src !== "rule") return;
+    var h = '<div class="m-head"><h3 id="p3-dlg-title">Change the group</h3><button class="x" type="button" data-act="close" aria-label="Close">×</button></div>';
+    h += '<p class="m-text">Acme rule ' + rno(d.rule) + ' puts "' + esc(lines[d.line].desc) + '" in ' + esc(gname(d.group)) + ". Your change, name and reason are logged on the request.</p>";
+    h += '<div class="m-body"><select class="p3-in" id="p3-dg" aria-label="New group"><option value="">Choose a group</option>' + GROUPS.filter(function (g) { return g[0] !== d.group; }).map(function (g) { return '<option value="' + g[0] + '">' + esc(g[1]) + "</option>"; }).join("") + "</select>";
+    h += '<div class="reasons"><button type="button" data-q="Used for another budget">Used for another budget</button><button type="button" data-q="Rule is wrong for this item">Rule is wrong for this item</button><button type="button" data-q="Acme finance asked for it">Acme finance asked for it</button></div>';
+    h += '<input class="p3-in" id="p3-dr" type="text" placeholder="Reason, required" aria-label="Reason" autocomplete="off"></div>';
+    h += '<div class="m-foot"><button class="btn ghost" type="button" data-act="close">Cancel</button><button class="btn teal" type="button" data-act="apply" disabled>Change group</button></div>';
+    dlg.innerHTML = h;
+  }
+  function dlgReady() {
+    var g = document.getElementById("p3-dg"), r = document.getElementById("p3-dr"), b = dlg.querySelector('[data-act="apply"]');
+    if (b) b.disabled = !(g.value && r.value.trim());
+  }
+
+  function ruleCard(r, i) {
+    if (editing === r.id) return formHtml(r);
+    var h = '<div class="pline"><div class="top2"><span class="p3-n">' + (i + 1) + '</span><div class="d"><div class="row">' + r.keywords.map(function (k) { return '<span class="chip out">' + esc(k) + "</span>"; }).join("") + "</div></div></div>";
+    h += '<div class="row"><span class="muted">→</span><span class="chip cat">' + esc(gname(r.group)) + "</span>" + (r.max !== null ? '<span class="chip off">Up to ' + eur(r.max) + " per line</span>" : "") + "</div>";
+    if (r.reason) h += '<span class="muted p3-small">' + esc(r.reason) + "</span>";
+    h += '<div class="row"><span class="muted p3-small">' + esc(r.by) + ", " + esc(r.at) + '</span><span class="spacer"></span>';
+    h += '<button class="btn ghost" type="button" data-up="' + i + '" aria-label="Move up"' + (i === 0 ? " disabled" : "") + ">↑</button>";
+    h += '<button class="btn ghost" type="button" data-down="' + i + '" aria-label="Move down"' + (i === rules.length - 1 ? " disabled" : "") + ">↓</button>";
+    h += '<button class="btn ghost" type="button" data-edit="' + esc(r.id) + '">Edit</button><button class="btn ghost" type="button" data-rdel="' + i + '">Delete</button></div></div>';
+    return h;
+  }
+  function formHtml(r) {
+    var h = '<div class="p3-form" data-form="' + esc(r ? r.id : "new") + '"><b style="font-size:13px">' + (r ? "Edit rule " + rno(r) : "New rule, added at the bottom") + "</b>";
+    h += '<label>Keywords, comma separated, EN or DE<input class="p3-in" data-k="kw" type="text" value="' + esc(r ? r.keywords.join(", ") : "") + '" autocomplete="off"></label>';
+    h += '<label>Group<select class="p3-in" data-k="group"><option value="">Choose a group</option>' + GROUPS.map(function (g) { return '<option value="' + g[0] + '"' + (r && r.group === g[0] ? " selected" : "") + ">" + esc(g[1]) + "</option>"; }).join("") + "</select></label>";
+    h += '<label>Reason, shown to buyers and admins<input class="p3-in" data-k="reason" type="text" value="' + esc(r ? r.reason : "") + '" autocomplete="off"></label>';
+    h += '<label>Only up to this line total in €, optional<input class="p3-in" data-k="max" type="text" inputmode="decimal" value="' + (r && r.max !== null ? r.max : "") + '"></label>';
+    h += '<div class="row"><span class="muted p3-small" data-k="err"></span><span class="spacer"></span><button class="btn ghost" type="button" data-act="rcancel">Cancel</button><button class="btn teal" type="button" data-act="rsave">Save rule</button></div></div>';
+    return h;
+  }
+  function renderRules() {
+    var h = editing === "new" ? formHtml(null) : "";
+    h += rules.length ? rules.map(ruleCard).join("") : '<div class="empty">No rules. Every line goes to the model.</div>';
+    document.getElementById("p3-rlist").innerHTML = h;
+    testLine();
+  }
+  function saveRule(form) {
+    var get = function (k) { return form.querySelector('[data-k="' + k + '"]'); };
+    var kws = get("kw").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    var g = parseInt(get("group").value, 10), mx = get("max").value.trim();
+    var err = !kws.length ? "Add at least one keyword." : !g ? "Choose a group." : mx && !(num(mx) > 0) ? "Max must be a number above 0." : "";
+    if (err) { get("err").textContent = err; get("err").style.color = "var(--warn)"; return; }
+    var id = form.dataset.form, r;
+    if (id === "new") { r = { id: "r" + (nextRule++) }; rules.push(r); }
+    else r = rules.filter(function (x) { return x.id === id; })[0];
+    r.keywords = kws; r.group = g; r.reason = get("reason").value.trim(); r.max = mx ? num(mx) : null;
+    r.by = NAMES[role]; r.at = "just now";
+    editing = null; touch(); renderRules(); update();
+  }
+  function testLine() {
+    var q = document.getElementById("p3-tq").value, a = document.getElementById("p3-ta").value, out = document.getElementById("p3-tres");
+    if (!norm(q)) { out.innerHTML = '<span class="muted p3-small">Type a line to see which rule fits.</span>'; return; }
+    var total = a.trim() ? num(a) : 0, rf = ruleFor(q, total), h = "";
+    rf.skipped.forEach(function (r) { h += '<span class="chip off">Rule ' + rno(r) + " skipped, over " + eur(r.max) + "</span>"; });
+    if (rf.rule) h += '<span class="chip cat">Rule ' + rno(rf.rule) + ' fits, "' + esc(rf.kw) + '": ' + esc(gname(rf.rule.group)) + ", locked</span>";
+    else {
+      var m = model(q);
+      h += m[0][1] >= SURE ? '<span class="chip off">No rule fits. Model picks ' + esc(gname(m[0][0])) + "</span>" : '<span class="chip warn">No rule fits. Model not sure, a person picks</span>';
+    }
+    out.innerHTML = '<div class="row">' + h + "</div>";
+  }
+
+  function setRole(r) {
+    role = r;
+    document.querySelectorAll("#p3-roles button").forEach(function (b) { b.classList.toggle("on", b.dataset.role === r); });
+    document.getElementById("p3-rtab").hidden = r !== "admin";
+    if (r !== "admin" && view === "rules") setView("form");
+    saved = null; fix = null; formErr = null;
+    update();
+  }
+  function setView(v) {
+    view = v;
+    document.querySelectorAll("#p3 .p3-tab").forEach(function (b) { b.classList.toggle("on", b.dataset.view === v); });
+    document.getElementById("p3-form-view").hidden = v !== "form";
+    document.getElementById("p3-rules-view").hidden = v !== "rules";
+    if (v === "rules") renderRules(); else buildLines();
+  }
+  function reset() {
+    rules = [
+      { id: "r1", keywords: ["kabelbinder", "cable tie"], group: 11, reason: "Booked under Electrical Engineering in Acme's ledger", max: null, by: "Jana Weber", at: "9 Nov" },
+      { id: "r2", keywords: ["toner", "druckerpatrone", "printer cartridge"], group: 29, reason: "Printer supplies come out of the IT budget", max: null, by: "Jana Weber", at: "9 Nov" },
+      { id: "r3", keywords: ["abo", "abonnement", "subscription", "saas"], group: 40, reason: "Small software is office spend at Acme", max: 500, by: "Jana Weber", at: "9 Nov" }
+    ];
+    nextRule = 4; nextLine = 0; lines = []; ovr = null; pick = null; picking = false; editing = null;
+    touch();
+    addLine(0);
+  }
+  function addLine(t) { var x = TRY[t]; lines.push({ id: nextLine++, desc: x[0], qty: x[1], price: x[2] }); }
+
+  var dlg = document.getElementById("p3-dlg");
+
+  document.getElementById("p3-roles").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) setRole(b.dataset.role); });
+  document.querySelectorAll("#p3 .p3-tab").forEach(function (b) { b.addEventListener("click", function () { setView(b.dataset.view); }); });
+
+  var lb = document.getElementById("p3-lines");
+  lb.addEventListener("input", function (e) {
+    var t = e.target, i = t.dataset.i; if (i === undefined) return;
+    var l = lines[+i], f = t.dataset.f;
+    if (f === "desc") l.desc = t.value; else if (f === "qty") l.qty = Math.max(0, Math.round(num(t.value))); else l.price = Math.max(0, num(t.value));
+    touch(); update();
+  });
+  lb.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-del]"); if (!b) return;
+    lines.splice(+b.dataset.del, 1); touch(); buildLines();
+  });
+  document.getElementById("p3-addline").addEventListener("click", function () {
+    lines.push({ id: nextLine++, desc: "", qty: 1, price: 0 }); touch(); buildLines();
+    var ins = lb.querySelectorAll(".p3-desc"); if (ins.length) ins[ins.length - 1].focus();
+  });
+
+  var gp = document.getElementById("p3-gp");
+  gp.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var d = decide(), a = b.dataset.act;
+    if (b.dataset.pick) { pick = { key: keyOf(d), group: +b.dataset.pick }; formErr = null; saved = null; }
+    else if (a === "ovr") { renderDlg(); dlg.showModal(); return; }
+    else if (a === "undo-ovr") { ovr = null; saved = null; }
+    else if (a === "picking") picking = true;
+    else return;
+    update();
+  });
+  gp.addEventListener("change", function (e) {
+    if (e.target.id !== "p3-other" || !e.target.value) return;
+    var d = decide(); pick = { key: keyOf(d), group: +e.target.value }; formErr = null; saved = null; update();
+  });
+
+  dlg.addEventListener("input", dlgReady);
+  dlg.addEventListener("change", dlgReady);
+  dlg.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.q) { document.getElementById("p3-dr").value = b.dataset.q; dlg.querySelectorAll("[data-q]").forEach(function (x) { x.classList.toggle("on", x === b); }); dlgReady(); return; }
+    if (b.dataset.act === "close") { dlg.close(); return; }
+    if (b.dataset.act === "apply" && !b.disabled) {
+      var d = decide();
+      ovr = { rule: d.rule.id, group: +document.getElementById("p3-dg").value, reason: document.getElementById("p3-dr").value.trim(), by: NAMES[role] + ", " + ROLES[role] };
+      touch(); dlg.close(); update();
+    }
+  });
+
+  document.getElementById("p3-save").addEventListener("click", save);
+  document.getElementById("p3-force").addEventListener("click", force);
+  document.getElementById("p3-out").addEventListener("click", function (e) { if (e.target.closest('[data-act="again"]')) { saved = null; update(); } });
+  document.querySelectorAll("#p3 [data-p3try]").forEach(function (b) {
+    b.addEventListener("click", function () { addLine(+b.dataset.p3try); touch(); if (view !== "form") setView("form"); else buildLines(); });
+  });
+  document.getElementById("p3-reset").addEventListener("click", function () { reset(); setView("form"); });
+
+  document.getElementById("p3-radd").addEventListener("click", function () { editing = "new"; renderRules(); var f = document.querySelector('#p3-rlist [data-k="kw"]'); if (f) f.focus(); });
+  document.getElementById("p3-tq").addEventListener("input", testLine);
+  document.getElementById("p3-ta").addEventListener("input", testLine);
+  document.getElementById("p3-rlist").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b || b.disabled) return;
+    var d = b.dataset, t;
+    if (d.up) { t = rules[+d.up]; rules[+d.up] = rules[+d.up - 1]; rules[+d.up - 1] = t; touch(); }
+    else if (d.down) { t = rules[+d.down]; rules[+d.down] = rules[+d.down + 1]; rules[+d.down + 1] = t; touch(); }
+    else if (d.edit) editing = d.edit;
+    else if (d.rdel) { rules.splice(+d.rdel, 1); touch(); }
+    else if (d.act === "rcancel") editing = null;
+    else if (d.act === "rsave") { saveRule(b.closest(".p3-form")); return; }
+    else return;
+    renderRules(); update();
+  });
+
+  role = "requester"; view = "form";
+  reset();
+  setView("form");
+})();</script>
+</section>
+
+<section class="prob" id="p4">
+<style>
+.badge.p4-b { width: auto; padding: 0 7px; border-radius: 999px; }
+.p4-track { height: 8px; border-radius: 999px; background: #e6e8eb; overflow: hidden; }
+.p4-track i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.p4-box { flex: none; width: 14px; height: 14px; border-radius: 4px; border: 1px solid #c4c8ce; background: #fff; display: inline-grid; place-items: center; font-size: 9px; color: #fff; }
+.p4-box.on { background: var(--accent); border-color: var(--accent); }
+.p4-box.lock { background: var(--muted); border-color: var(--muted); }
+.p4-banner { border-radius: 10px; padding: 10px 12px; border: 1px solid #c7e1e5; background: var(--accent-soft); color: var(--ink); font-size: 13px; }
+.p4-banner.warn { background: var(--warn-soft); border-color: #f0d9b0; }
+.p4-banner.plain { background: #f8f9fa; border-color: #e6e8eb; }
+.p4-banner ul { margin: 6px 0 0; }
+.p4-banner li { margin: 3px 0; }
+.p4-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); }
+.p4-check input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; flex: none; }
+.p4-check.locked { color: var(--muted); }
+.p4-price { width: 96px; border: 1px solid #d6d9de; border-radius: 8px; padding: 4px 8px; font: inherit; font-size: 13px; color: var(--ink); background: #fff; text-align: right; outline: none; }
+.p4-price:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.p4-click { cursor: pointer; border: 1px solid transparent; }
+.p4-click:hover { border-color: #d6d9de; }
+.p4-click.p4-sel { border-color: var(--accent); background: var(--accent-soft); }
+.p4-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+.p4-sims { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 14px; }
+</style>
+
+<div class="prob-head"><span class="kicker">PROBLEM 4, BONUS</span><h2 class="prob-title">Approval Limit</h2><p class="sub">No buyer sign-off under €2,000</p></div>
+  <div class="flow"><a href="#p4-before" class="is-later"><span class="badge">4.1</span>Before submit</a><a href="#p4-lists"><span class="badge">4.2</span>Auto-approved in the lists</a><a href="#p4-detail" class="is-later"><span class="badge">4.3</span>Request detail</a><a href="#p4-admin" class="is-later"><span class="badge">4.4</span>Admin setting</a><a href="#p4-try"><span class="badge">▶</span>Try it</a></div>
+
+<div class="open now"><h3>Build now</h3><ul><li>Optional bonus, only if time is left.</li><li>4.2 An "Auto" chip next to the real status in the lists.</li><li>Later: 4.1 hint before submit (needs a preview endpoint), 4.3 reason banner, 4.4 admin settings card. The prototype still shows them.</li></ul></div>
+
+<h2 id="p4-before" data-later><span class="badge p4-b">4.1</span>Before submit</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Line under the total</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="total"><span>Net total</span><b>€1,585.60</b></div>
+      <div class="row"><span class="chip cat">Auto-approves</span><span class="muted" style="font-size:12px">Under the €2,000 limit, no buyer needed</span></div>
+      <div class="total" style="margin-top:6px"><span>Net total</span><b>€1,585.60</b></div>
+      <div class="row"><span class="chip warn">Goes to a buyer</span><span class="muted" style="font-size:12px">PDF total doesn't match the lines</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Limit meter</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval limit <span class="num">€1,585.60 <small>of €2,000</small></span></div>
+        <div class="p4-track"><i style="width:79%"></i></div>
+        <span class="muted" style="font-size:12px">€414.40 left before a buyer signs off</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Tell at submit</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="total"><span>Total Cost</span><b>€1,585.60</b></div>
+      <div class="ui" style="align-items:center;text-align:center;gap:6px">
+        <b>Request submitted</b>
+        <span class="chip cat">Approved</span>
+        <span class="muted" style="font-size:12px">No buyer needed</span>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: one line next to the total the requester already watches, and it names the reason when something sends it to a buyer.</p>
+
+<h2 id="p4-lists"><span class="badge p4-b">4.2</span>Auto-approved in the lists</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Auto chip</h3><span class="pick">Pick</span></div>
+    <div class="screen"><div class="bar">Lio<span>Requests</span></div><div class="in">
+      <div class="line"><div class="d">Office monitors<small>€1,585.60</small></div><span class="chip cat">Approved</span><span class="chip out">Auto</span></div>
+      <div class="line"><div class="d">Laptops IT<small>€3,410.00</small></div><span class="chip warn">Pending</span></div>
+      <span class="p4-label">Approvals, recently decided</span>
+      <div class="line"><div class="d">Office monitors<small>Lio, under €2,000</small></div><span class="chip cat">Approved</span><span class="chip out">Auto</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Own tab</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Approvals</span></div><div class="in">
+      <div class="row"><span class="chip off">Pending 3</span><span class="chip cat">Auto-approved 12</span><span class="chip off">Decided</span></div>
+      <div class="line"><div class="d">Office monitors<small>€1,585.60</small></div><span class="btn ghost">Undo</span></div>
+      <div class="line"><div class="d">Lab gloves<small>€440.00</small></div><span class="btn ghost">Undo</span></div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Same as manual</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Requests</span></div><div class="in">
+      <div class="line"><div class="d">Office monitors<small>€1,585.60</small></div><span class="chip cat">Approved</span></div>
+      <div class="line"><div class="d">Laptops IT<small>€3,410.00</small></div><span class="chip warn">Pending</span></div>
+      <span class="muted" style="font-size:12px">Buyers never see auto-approved requests</span>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">Why: the status stays the real "Approved", and a small Auto chip lets a buyer spot what skipped them without a new tab to check.</p>
+
+<h2 id="p4-detail" data-later><span class="badge p4-b">4.3</span>Request detail</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Reason banner</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="row"><b style="font-size:15px">Office monitors</b><span class="chip warn">Pending</span></div>
+      <div class="p4-banner warn"><b>Sent to a buyer, though under €2,000</b>
+        <ul><li>PDF total €1,640.00 doesn't match the lines, €1,585.60</li></ul>
+      </div>
+      <div class="p4-banner"><b>Auto-approved by Lio.</b> Net €1,585.60 is under the €2,000 limit.</div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Activity only</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Activity</div>
+        <div class="line"><div class="d">Lio approved this<small>Under the €2,000 limit, 10 Nov, 14:02</small></div></div>
+        <div class="line"><div class="d">Anna Weber created this<small>10 Nov, 14:02</small></div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>Checklist</h3></div>
+    <div class="screen"><div class="bar">Lio</div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval checks</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Net under €2,000</div>
+        <div class="p4-check"><span class="p4-box"></span>Totals match the PDF</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Group rule kept</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Group picked with high confidence</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: one sentence answers "why" without reading a checklist; the same reasons also go into the Activity log for the record.</p>
+
+<h2 id="p4-admin" data-later><span class="badge p4-b">4.4</span>Admin setting</h2>
+<div class="opts">
+  <div class="opt chosen">
+    <div class="opt-head"><span class="letter">A</span><h3>Card in Settings</h3><span class="pick is-later">Later</span></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Settings</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval</div>
+        <span class="muted" style="font-size:12px">Approve without a buyer below (net)</span>
+        <div class="inp">€ 2,000.00</div>
+        <span class="p4-label">Always send to a buyer when</span>
+        <div class="p4-check locked"><span class="p4-box lock">✓</span>Totals don't match the PDF</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>A group rule was overridden</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>The group was a low-confidence pick</div>
+        <div class="p4-check"><span class="p4-box"></span>A cheaper catalogue match was ignored</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">B</span><h3>Limit per group</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Settings</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Approval limits</div>
+        <div class="line"><div class="d">Default</div><span class="num">€2,000</span></div>
+        <div class="line"><div class="d">IT Hardware</div><span class="num">€1,000</span></div>
+        <div class="line"><div class="d">Office Supplies</div><span class="num">€500</span></div>
+        <span class="btn ghost" style="align-self:flex-start">+ Add group</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><span class="letter">C</span><h3>On or off</h3></div>
+    <div class="screen"><div class="bar">Lio<span>Organization, Settings</span></div><div class="in">
+      <div class="ui">
+        <div class="ui-title">Request Settings</div>
+        <div class="p4-check"><span class="p4-box on">✓</span>Skip buyer sign-off under €2,000</div>
+        <div class="p4-check"><span class="p4-box"></span>Require VAT ID</div>
+        <div class="p4-check"><span class="p4-box"></span>Require Department</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0">If built later: one number and a short list Acme can tune, next to the Request Settings admins already use; totals mismatch is locked on because it was decided.</p>
+
+<h2 id="p4-try"><span class="badge">▶</span>Try it</h2>
+<div class="proto">
+  <div class="bar"><span>Lio</span><span class="dim">Requests</span><span class="on">New Request</span><span class="dim">Approvals</span><span class="dim">Organization</span></div>
+  <div class="in">
+    <div class="ui">
+      <div class="ui-title">Order Lines <button class="btn ghost" type="button" id="p4-add">+ Add laptop</button></div>
+      <div id="p4-lines" class="tiers"></div>
+    </div>
+    <div class="total"><span>Net total</span><b id="p4-total">€0.00</b></div>
+    <div class="row" id="p4-hint"></div>
+    <div class="ui">
+      <span class="p4-label">Simulate</span>
+      <div class="p4-sims">
+        <label class="p4-check"><input type="checkbox" data-sim="totals_mismatch">PDF total doesn't match the lines</label>
+        <label class="p4-check"><input type="checkbox" data-sim="group_rule_overridden">Group rule overridden</label>
+        <label class="p4-check"><input type="checkbox" data-sim="group_low_confidence">Group picked with low confidence</label>
+        <label class="p4-check"><input type="checkbox" data-sim="cheaper_catalog_ignored">Cheaper catalogue match ignored</label>
+      </div>
+    </div>
+    <div class="row"><span class="spacer"></span><button class="btn" type="button" id="p4-submit" style="padding:7px 16px;font-size:13px">Submit request</button></div>
+
+    <div class="ui">
+      <div class="ui-title">Requests <span class="muted" style="font-weight:400;font-size:12px">Click one</span></div>
+      <div id="p4-list" class="tiers"></div>
+    </div>
+    <div class="ui" id="p4-view"></div>
+
+    <div class="ui">
+      <div class="ui-title">Organization, Settings</div>
+      <span class="p4-label">Approval</span>
+      <label class="muted" style="font-size:12px" for="p4-limit">Approve without a buyer below (net, empty for no limit)</label>
+      <div class="row"><span class="muted">€</span><input class="p4-price" id="p4-limit" type="text" inputmode="decimal" value="2000" style="width:120px;text-align:left"></div>
+      <span class="p4-label">Always send to a buyer when</span>
+      <label class="p4-check locked"><input type="checkbox" checked disabled>Totals don't match the PDF</label>
+      <label class="p4-check"><input type="checkbox" data-chk="group_rule_overridden" checked>A group rule was overridden</label>
+      <label class="p4-check"><input type="checkbox" data-chk="group_low_confidence" checked>The group was a low-confidence pick</label>
+      <label class="p4-check"><input type="checkbox" data-chk="cheaper_catalog_ignored">A cheaper catalogue match was ignored</label>
+      <span class="muted" style="font-size:12px">Changes apply to new requests. Past decisions stay as they were.</span>
+    </div>
+  </div>
+</div>
+
+<div class="open">
+  <h3 style="color:var(--accent);margin-bottom:6px">Contract</h3>
+  <ul>
+    <li><b>Request responses</b> (list, detail) add <code>approval</code>: <code>{ decision: "auto_approved" | "needs_buyer", decided_by: "system" | "user", decided_at: datetime | null, net_total: decimal string, limit: decimal string | null, reasons: Reason[] }</code>.</li>
+    <li><b>Reason</b>: <code>{ code: string, message: string, line_id: uuid | null }</code>. Codes: <code>under_limit</code>, <code>over_limit</code>, <code>no_limit</code>, <code>no_total</code>, <code>totals_mismatch</code>, <code>group_rule_overridden</code>, <code>group_low_confidence</code>, <code>cheaper_catalog_ignored</code>, <code>edited_over_limit</code>. The last three group codes are proposals.</li>
+    <li><b>Statuses stay as they are</b>: <code>approval_status</code> is <code>pending | approved | rejected</code>, <code>status</code> is <code>open | in_progress | closed</code>. Auto-approval sets <code>approved</code>, <code>approved_by: null</code>, <code>approval.decided_by: "system"</code>.</li>
+    <li><b>Before submit</b>: <code>POST /requests/approval-check</code> takes the draft (lines, commodity group, flags) and returns the same <code>approval</code> object without saving. Save recomputes it; the preview is a hint only.</li>
+    <li><b>Setting</b>: <code>organizations.settings.approval = { auto_approve_below: number | null, always_to_buyer: { group_rule_overridden: bool, group_low_confidence: bool, cheaper_catalog_ignored: bool } }</code>. Net EUR, strictly below. <code>null</code> means no limit. Totals mismatch is not a setting, always on. Read and PATCH (merge) through the existing org settings endpoint, admin only.</li>
+    <li><b>Activity</b>: one <code>RequestActivity</code> on create or edit, <code>action: "auto_approved" | "sent_to_buyer"</code>, <code>detail: { net_total, limit, reasons }</code>.</li>
+  </ul>
+</div>
+
+<script>(function(){
+  function eur(n) { return "€" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function eurL(n) { return eur(n).replace(/\.00$/, ""); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function num(v) { var n = parseFloat(String(v).replace(/[€\s]/g, "").replace(",", ".")); return isFinite(n) ? n : NaN; }
+
+  var lines = [
+    { desc: "Business laptop 14\" i7, 32 GB", qty: 1, price: 1130 },
+    { desc: "24-inch monitor 1440p IPS", qty: 2, price: 185 },
+    { desc: "Copy paper A4 recycled 80 g", qty: 10, price: 8.56 }
+  ];
+  var sims = { totals_mismatch: false, group_rule_overridden: false, group_low_confidence: false, cheaper_catalog_ignored: false };
+  var settings = { limit: 2000, checks: { group_rule_overridden: true, group_low_confidence: true, cheaper_catalog_ignored: false } };
+  var requests = [], selected = null, seq = 0;
+
+  var MSG = {
+    group_rule_overridden: "The commodity group rule was overridden",
+    group_low_confidence: "The commodity group was picked with low confidence",
+    cheaper_catalog_ignored: "A line kept its price over a cheaper catalogue match"
+  };
+
+  function net() {
+    var t = 0;
+    lines.forEach(function (l) { t += Math.round(l.qty * (isFinite(l.price) ? l.price : 0) * 100); });
+    return t / 100;
+  }
+
+  function decide(total, s) {
+    var lim = settings.limit, blockers = [];
+    if (!(lim > 0)) return { auto: false, limit: null, total: total, under: false, reasons: [{ code: "no_limit", message: "No limit is set, every request goes to a buyer" }] };
+    if (total <= 0) return { auto: false, limit: lim, total: total, under: false, reasons: [{ code: "no_total", message: "No total yet" }] };
+    if (total >= lim) return { auto: false, limit: lim, total: total, under: false, reasons: [{ code: "over_limit", message: "Net " + eur(total) + " is at or over the " + eurL(lim) + " limit" }] };
+    if (s.totals_mismatch) blockers.push({ code: "totals_mismatch", message: "PDF total " + eur(total + 54.4) + " doesn't match the lines, " + eur(total) });
+    Object.keys(MSG).forEach(function (k) { if (s[k] && settings.checks[k]) blockers.push({ code: k, message: MSG[k] }); });
+    if (blockers.length) return { auto: false, limit: lim, total: total, under: true, reasons: blockers };
+    return { auto: true, limit: lim, total: total, under: true, reasons: [{ code: "under_limit", message: "Net " + eur(total) + " is under the " + eurL(lim) + " limit" }] };
+  }
+
+  var linesEl = document.getElementById("p4-lines");
+  var totalEl = document.getElementById("p4-total");
+  var hintEl = document.getElementById("p4-hint");
+  var listEl = document.getElementById("p4-list");
+  var viewEl = document.getElementById("p4-view");
+
+  function renderLines() {
+    var html = "";
+    lines.forEach(function (l, i) {
+      html += '<div class="pline"><div class="top2">' +
+        '<div class="d">' + esc(l.desc) + '<small>' + l.qty + ' × ' + (isFinite(l.price) ? eur(l.price) : "no price") + '</small></div>' +
+        '<span class="qty"><button type="button" data-q="' + i + '" data-d="-1" aria-label="Less">−</button><span>' + l.qty + '</span><button type="button" data-q="' + i + '" data-d="1" aria-label="More">+</button></span>' +
+        '<input class="p4-price" type="text" inputmode="decimal" data-p="' + i + '" value="' + esc(l.price.toFixed(2)) + '" aria-label="Unit price">' +
+        '<button class="x" type="button" data-rm="' + i + '" aria-label="Remove">×</button>' +
+        '</div></div>';
+    });
+    linesEl.innerHTML = html || '<div class="empty">No lines</div>';
+  }
+
+  function renderTotal() {
+    var t = net(), d = decide(t, sims);
+    totalEl.textContent = eur(t);
+    linesEl.querySelectorAll("[data-p]").forEach(function (inp) {
+      var l = lines[+inp.getAttribute("data-p")], sm = inp.parentNode.querySelector(".d small");
+      if (sm) sm.textContent = l.qty + " × " + (isFinite(l.price) ? eur(l.price) : "no price");
+    });
+    var chip, text;
+    if (d.auto) { chip = '<span class="chip cat">Auto-approves</span>'; text = "Under the " + eurL(d.limit) + " limit, no buyer needed"; }
+    else {
+      chip = '<span class="chip warn">Goes to a buyer</span>';
+      text = d.reasons.length > 1 ? d.reasons[0].message + ", and " + (d.reasons.length - 1) + " more" : d.reasons[0].message;
+    }
+    hintEl.innerHTML = chip + '<span class="muted" style="font-size:12px">' + esc(text) + '</span>';
+  }
+
+  function titleFor() {
+    seq++;
+    var first = lines[0] ? lines[0].desc.split(",")[0] : "Request";
+    return first + " #" + seq;
+  }
+
+  function renderList() {
+    if (!requests.length) { listEl.innerHTML = '<div class="empty">No requests yet</div>'; return; }
+    var html = "";
+    requests.forEach(function (r) {
+      var d = r.decision;
+      html += '<div class="line p4-click' + (selected === r.id ? " p4-sel" : "") + '" data-r="' + r.id + '" role="button" tabindex="0">' +
+        '<div class="d">' + esc(r.title) + '<small>' + esc(eur(d.total)) + '</small></div>' +
+        (d.auto ? '<span class="chip cat">Approved</span><span class="chip out">Auto</span>' : '<span class="chip warn">Pending</span>') +
+        '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  function renderView() {
+    var r = null;
+    requests.forEach(function (x) { if (x.id === selected) r = x; });
+    if (!r) { viewEl.innerHTML = '<div class="ui-title">Request detail</div><div class="empty">Click a request above</div>'; return; }
+    var d = r.decision, head = '<div class="row"><b style="font-size:15px;color:var(--ink)">' + esc(r.title) + '</b>' +
+      (d.auto ? '<span class="chip cat">Approved</span><span class="chip out">Auto</span>' : '<span class="chip warn">Pending</span>') + '</div>', body;
+    if (d.auto) body = '<div class="p4-banner"><b>Auto-approved by Lio.</b> ' + esc(d.reasons[0].message) + '.</div>';
+    else if (d.under) {
+      body = '<div class="p4-banner warn"><b>Sent to a buyer, though under ' + esc(eurL(d.limit)) + '</b><ul>';
+      d.reasons.forEach(function (x) { body += '<li>' + esc(x.message) + '</li>'; });
+      body += '</ul></div>';
+    } else body = '<div class="p4-banner plain"><b>Waiting for a buyer.</b> ' + esc(d.reasons[0].message) + '.</div>';
+    var act = '<span class="p4-label">Activity</span><div class="line"><div class="d">' +
+      (d.auto ? "Lio approved this" : "Lio sent this to a buyer") + '<small>' + esc(d.reasons.map(function (x) { return x.code; }).join(", ")) + '</small></div></div>';
+    viewEl.innerHTML = head + body + act;
+  }
+
+  function addRequest(title, total, s) {
+    var r = { id: "r" + (requests.length + 1), title: title, decision: decide(total, s) };
+    requests.unshift(r);
+    return r;
+  }
+
+  linesEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    if (b.hasAttribute("data-q")) {
+      var l = lines[+b.getAttribute("data-q")];
+      l.qty = Math.max(1, l.qty + +b.getAttribute("data-d"));
+    } else if (b.hasAttribute("data-rm")) {
+      lines.splice(+b.getAttribute("data-rm"), 1);
+    } else return;
+    renderLines(); renderTotal();
+  });
+  linesEl.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t.hasAttribute("data-p")) return;
+    var v = num(t.value);
+    lines[+t.getAttribute("data-p")].price = isFinite(v) && v >= 0 ? v : 0;
+    renderTotal();
+  });
+  linesEl.addEventListener("change", function (e) {
+    if (e.target.hasAttribute("data-p")) renderLines();
+  });
+
+  document.getElementById("p4-add").addEventListener("click", function () {
+    lines.push({ desc: "Business laptop 15\" Ryzen 7, 16 GB", qty: 1, price: 1229 });
+    renderLines(); renderTotal();
+  });
+
+  document.querySelectorAll("#p4 [data-sim]").forEach(function (c) {
+    c.addEventListener("change", function () { sims[c.getAttribute("data-sim")] = c.checked; renderTotal(); });
+  });
+  document.querySelectorAll("#p4 [data-chk]").forEach(function (c) {
+    c.addEventListener("change", function () { settings.checks[c.getAttribute("data-chk")] = c.checked; renderTotal(); });
+  });
+  document.getElementById("p4-limit").addEventListener("input", function (e) {
+    var v = num(e.target.value);
+    settings.limit = e.target.value.trim() === "" || !isFinite(v) ? null : v;
+    renderTotal();
+  });
+
+  document.getElementById("p4-submit").addEventListener("click", function () {
+    if (!lines.length) return;
+    var copy = {};
+    Object.keys(sims).forEach(function (k) { copy[k] = sims[k]; });
+    var r = addRequest(titleFor(), net(), copy);
+    selected = r.id;
+    renderList(); renderView();
+  });
+
+  function pick(e) {
+    var row = e.target.closest("[data-r]");
+    if (!row) return;
+    selected = row.getAttribute("data-r");
+    renderList(); renderView();
+  }
+  listEl.addEventListener("click", pick);
+  listEl.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(e); } });
+
+  addRequest("Lab gloves", 440, { totals_mismatch: false });
+  addRequest("Laptops IT", 3410, { totals_mismatch: false });
+  addRequest("Printer toner", 1131.2, { totals_mismatch: true, group_rule_overridden: true });
+
+  renderLines(); renderTotal(); renderList(); renderView();
+})();</script>
+</section>
+
+  <footer><span>Lio screens. Three options per step, one pick. Frontend built against each contract, backend apart.</span><span>Lio FDE case study</span></footer>
+</main>

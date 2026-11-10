@@ -1,0 +1,567 @@
+<title>Lio PDF Extraction</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Style: copied from playbook.html (brief PDF look). */
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --body: #1f2328;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #f5f6f8;
+  --accent: #136f7d;
+  --dark: #111317;
+  --sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 820px; margin: 0 auto; padding: 40px max(16px, env(safe-area-inset-right, 0px)) 96px max(16px, env(safe-area-inset-left, 0px)); }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid var(--accent); }
+.logo { display: flex; align-items: center; gap: 6px; font-size: 20px; color: var(--ink); letter-spacing: -.01em; }
+.logo svg { height: 26px; width: auto; display: block; }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+
+h1 { font-size: clamp(34px, 6vw, 44px); line-height: 1.1; font-weight: 700; color: var(--ink); margin: 36px 0 4px; letter-spacing: -.02em; }
+.sub { font-size: 21px; color: var(--muted); font-weight: 300; margin: 0; }
+h2 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 48px 0 14px; }
+h3 { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0; }
+p { margin: 0 0 12px; }
+b { color: var(--ink); }
+
+ul { margin: 0; padding-left: 22px; list-style: none; }
+li { position: relative; margin: 6px 0; }
+li::before { content: ""; position: absolute; left: -15px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+
+code { font-family: var(--mono); font-size: .84em; background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 3px; }
+.panel { background: var(--panel); border-radius: 6px; padding: 18px 22px; margin: 12px 0; }
+.note { color: var(--faint); }
+a { color: var(--accent); font-weight: 700; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.card { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 14px 0; }
+.card.bonus { border-left-color: var(--dark); }
+.card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.badge { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.bonus .badge { background: var(--dark); }
+.quote { border-left: 3px solid var(--line); padding-left: 14px; color: #4b5563; font-style: italic; margin: 0 0 12px; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin: 0 0 4px; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th { background: var(--dark); color: #fff; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 12px 16px; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n { width: 40px; font-weight: 700; color: var(--accent); }
+td.t { width: 70px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+th.t { text-align: right; }
+tfoot td { color: var(--muted); border-bottom: 0; }
+
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 32px; }
+.cols > div { min-width: 0; }
+.cols h3 { margin-top: 10px; }
+
+footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--faint); }
+
+@media (max-width: 600px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .card, .panel { padding: 16px; }
+  th, td { padding: 10px; }
+}
+pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.55; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; margin: 12px 0; overflow-x: auto; white-space: pre; color: var(--body); }
+pre mark { background: #fde68a; color: var(--ink); padding: 0 2px; border-radius: 2px; }
+.status { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.status.no { color: #b42318; }
+.status.wait { color: var(--accent); }
+.nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 18px 0 0; font-size: 14px; }
+.nav .here { color: var(--ink); font-weight: 700; }
+</style>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="logo"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">PROBLEM 1</span>
+  </div>
+
+  <h1>PDF Extraction</h1>
+  <p class="sub">Why Acme's quotes come out wrong, empty, or crash</p>
+  <div class="nav"><a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5">All problems ↗</a><a href="https://claude.ai/artifact/2WE1vvNYGuj9t99Z37f6w5">Playbook ↗</a><a href="https://claude.ai/artifact/2wyQCsPwmHWkDDEDTkAdz4">App Map ↗</a><span class="here">Problem 1</span><a href="https://claude.ai/artifact/Md6pmuSKugrVPTqJ8VfJxC">Problem 2 ↗</a><a href="https://claude.ai/artifact/GREGtJRcVsswTD8zhvEWgK">Problem 3 ↗</a><a href="https://claude.ai/artifact/JuwhuY7yNAAWq8Bw7jP6kq">Bonus ↗</a></div>
+
+  <h2>Acme said</h2>
+  <p class="quote">"The extracted data is often wrong. Fields come out incorrect or empty, and sometimes the upload errors out completely."</p>
+
+  <h2>Do we have evals?</h2>
+  <p><span class="status ok">Yes, run after every fix</span></p>
+  <ul>
+    <li>5 quotes, each with a hand-made answer key.</li>
+    <li>Runs the <b>real pipeline</b> and the <b>real OpenAI API</b>. Nothing mocked.</li>
+    <li>3 runs per quote, 3 setups, 45 live calls.</li>
+    <li>Every run is logged in full: input, raw model reply, app result, score.</li>
+    <li>The scorer has its own tests: 11 pass, no network.</li>
+    <li>11 runs kept since the checked keys, one per fix or test. Results under "Fixes, in order".</li>
+    <li>Answer key checked against the PDFs by Adrian, 10 Nov. 3 fixes made.</li>
+  </ul>
+
+  <h2>How it works today</h2>
+  <table>
+    <thead><tr><th>#</th><th>Step</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Browser uploads the PDF.</td><td><code>POST /pdf/parse</code></td></tr>
+      <tr><td class="n">2</td><td><code>pypdf</code> pulls plain text. No layout. No OCR.</td><td><code>services/pdf.py</code></td></tr>
+      <tr><td class="n">3</td><td>Text goes back to the browser.</td><td>frontend</td></tr>
+      <tr><td class="n">4</td><td>Browser sends the text to the AI step.</td><td><code>POST /extraction</code></td></tr>
+      <tr><td class="n">5</td><td>One OpenAI call. <code>gpt-4o-mini</code> (now pinned to <code>gpt-4o-mini-2024-07-18</code>), temperature 0.3 (now 0, see below).</td><td><code>services/extraction.py</code></td></tr>
+      <tr><td class="n">6</td><td>JSON is checked by Pydantic. Empty fields are listed.</td><td><code>schemas/extraction.py</code></td></tr>
+      <tr><td class="n">7</td><td>The form fills in.</td><td><code>new-request/page.tsx</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>The prompt, word for word</h2>
+  <p class="label">System message</p>
+<pre>You are a data extraction and classification specialist. Always respond with valid JSON only, no markdown or code blocks. Extract all information accurately from German business documents and classify into the appropriate commodity group based on the full context of the offer.</pre>
+  <p class="label">User message</p>
+<pre>You are a data extraction and classification specialist. Extract procurement/vendor offer information from the following German document text AND classify it into the appropriate commodity group.
+
+Document Text:
+<mark>{pdf_text}</mark>
+
+Please extract the following information:
+1. Title/Short Description (A brief summary of what this procurement is for - e.g., "Office Equipment Purchase", "Software Licenses", etc.)
+2. Vendor Name (Lieferant/Anbieter/Firma/Company name)
+3. VAT ID (Umsatzsteuer-Identifikationsnummer/VAT ID/USt-IdNr/Tax ID)
+4. Department/Customer (Abteilung/Kunde/Offered to/Customer name)
+5. Order Lines/Items (All line items with):
+   - Position Description (Bezeichnung/Product/Item/Artikel)
+   - Unit Price (Einzelpreis/Unit Price/Preis/Price per unit)
+   - Amount (Menge/Quantity/Anzahl)
+   - Unit (Einheit/Unit/ME - e.g., "licenses", "pieces", "Stück", "items")
+   - Total Price (Gesamtpreis/Total/Gesamt)
+6. Total Cost (Gesamtsumme/Total Cost/Total Offer Cost)
+7. Commodity Group Classification - Select the SINGLE most appropriate commodity group from the list below
+
+Available Commodity Groups (ID | Category | Name):
+<mark>{commodity_groups_list}</mark>
+
+IMPORTANT INSTRUCTIONS:
+- For the title, create a SHORT (2-5 words) description based on the main items being purchased
+- Extract ALL line items, even if there are many
+- For unit prices and totals, extract only the numeric value (remove currency symbols)
+- For the unit field, translate German terms to English (e.g., "Stück" -&gt; "pieces", "Lizenzen" -&gt; "licenses")
+- Be careful with German number formatting (e.g., "1.438,00" = 1438.00)
+- For classification, consider the PRIMARY nature and purpose of the items:
+  * Branded office decor/furniture → Office Equipment (15)
+  * Traditional promotional items (brochures, giveaways, banners) → Promotional Materials (43)
+  * Software/IT products → Software (31) or IT Services (30)
+  * If genuinely uncertain, set commodityGroupId to null
+
+Return ONLY valid JSON in this exact format (no markdown, no code blocks):
+{
+  "title": "Short description of procurement",
+  "vendorName": "Company Name",
+  "vatId": "DE123456789",
+  "department": "Department Name",
+  "orderLines": [
+    {
+      "positionDescription": "Item description",
+      "unitPrice": 150.00,
+      "amount": 10,
+      "unit": "licenses",
+      "totalPrice": 1500.00
+    }
+  ],
+  "totalCost": 1500.00,
+  "commodityGroupId": 15,
+  "commodityGroupName": "Office Equipment"
+}</pre>
+  <p class="note">Highlighted parts are filled in at run time. The group list is 2,000 lines, about 108,000 characters.</p>
+
+  <h2>The eval</h2>
+  <table>
+    <thead><tr><th>Part</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Answer keys, one per quote</td><td><code>backend/evals/extraction/cases/</code></td></tr>
+      <tr><td>Scorer, no network</td><td><code>evals/extraction/score.py</code></td></tr>
+      <tr><td>Runner, live OpenAI</td><td><code>evals/extraction/run.py</code></td></tr>
+      <tr><td>Scorer tests</td><td><code>tests/test_eval_score.py</code></td></tr>
+      <tr><td>Results and logs</td><td><code>evals/extraction/results/</code></td></tr>
+      <tr><td>How to run</td><td><code>evals/extraction/README.md</code></td></tr>
+    </tbody>
+  </table>
+  <p class="label">What the key says is right</p>
+  <ul>
+    <li><b>Total</b> is the net cost Acme pays: items plus shipping and fees, before VAT.</li>
+    <li><b>Shipping and fees are lines</b>, so the lines add up to the total.</li>
+    <li><b>Alternatives are not lines.</b> Neither are headings with no price.</li>
+    <li><b>VAT ID</b>: same letters and digits. No VAT ID on the quote means empty is right.</li>
+    <li><b>Vendor</b>: the company that sent the quote. Umlauts and case ignored.</li>
+    <li>Numbers: equal to the cent.</li>
+    <li>Title, department and group: logged, not scored.</li>
+  </ul>
+  <p class="label">Three setups, to split the causes</p>
+  <ul>
+    <li><b>Baseline:</b> the app as it is. <code>gpt-4o-mini</code>, <code>pypdf</code> text.</li>
+    <li><b>Bigger model:</b> <code>gpt-4.1</code>, same text. Is it the model?</li>
+    <li><b>Better text:</b> <code>gpt-4o-mini</code>, layout text from <code>pdftotext</code>. Is it the input?</li>
+  </ul>
+
+  <h2>Results</h2>
+  <table>
+    <thead><tr><th>Metric</th><th class="t">Baseline</th><th class="t">gpt-4.1</th><th class="t">Layout text</th></tr></thead>
+    <tbody>
+      <tr><td>Upload crashes, user gets nothing</td><td class="t">6/15</td><td class="t">6/15</td><td class="t">6/15</td></tr>
+      <tr><td>Crashes where the model's answer was fine to use</td><td class="t">6/6</td><td class="t">6/6</td><td class="t">5/6</td></tr>
+      <tr><td><b>Quotes fully right</b></td><td class="t"><b>0/15</b></td><td class="t"><b>0/15</b></td><td class="t"><b>0/15</b></td></tr>
+      <tr><td>Vendor right</td><td class="t">9/15</td><td class="t">9/15</td><td class="t">3/15</td></tr>
+      <tr><td>VAT ID right</td><td class="t">9/15</td><td class="t">9/15</td><td class="t">9/15</td></tr>
+      <tr><td>Total is the net cost</td><td class="t">0/15</td><td class="t">0/15</td><td class="t">0/15</td></tr>
+      <tr><td>Total is the gross (with VAT)</td><td class="t">7/9</td><td class="t">9/9</td><td class="t">5/9</td></tr>
+      <tr><td>Item lines found, when no crash</td><td class="t">12/12</td><td class="t">12/12</td><td class="t">12/12</td></tr>
+      <tr><td>Numbers right on found lines</td><td class="t">100%</td><td class="t">100%</td><td class="t">100%</td></tr>
+      <tr><td>Shipping and fees found</td><td class="t">3/15</td><td class="t">6/15</td><td class="t">3/15</td></tr>
+      <tr><td>Alternatives bought by mistake</td><td class="t">9</td><td class="t">9</td><td class="t">9</td></tr>
+      <tr><td>Lines add up to the total</td><td class="t">0/15</td><td class="t">0/15</td><td class="t">0/15</td></tr>
+      <tr><td>Seconds per quote</td><td class="t">10.1</td><td class="t">3.4</td><td class="t">9.9</td></tr>
+      <tr><td>Input tokens per quote</td><td class="t">24.8k</td><td class="t">24.8k</td><td class="t">24.7k</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Run 2026-11-10, 13:25 UTC. "Fully right" means every scored field and line right, nothing extra. The earlier one-off check called Apple "fully right"; the key is now stricter (net total, the €10.55 levy as a line).</p>
+
+  <h2>Temperature 0.3 vs 0</h2>
+  <p>Same setup as the baseline (<code>gpt-4o-mini</code>, pypdf text, 3 runs per quote). Only the temperature changed.</p>
+  <table>
+    <thead><tr><th>Metric</th><th class="t">0.3 (baseline)</th><th class="t">0</th></tr></thead>
+    <tbody>
+      <tr><td>Upload crashes</td><td class="t">6/15</td><td class="t">6/15</td></tr>
+      <tr><td><b>Quotes fully right</b></td><td class="t"><b>0/15</b></td><td class="t"><b>0/15</b></td></tr>
+      <tr><td>Vendor right</td><td class="t">9/15</td><td class="t">9/15</td></tr>
+      <tr><td>VAT ID right</td><td class="t">9/15</td><td class="t">9/15</td></tr>
+      <tr><td>Total is the net cost</td><td class="t">0/15</td><td class="t">0/15</td></tr>
+      <tr><td>Item lines found</td><td class="t">12/24</td><td class="t">12/24</td></tr>
+      <tr><td>Shipping and fees found</td><td class="t">3/15</td><td class="t">3/15</td></tr>
+      <tr><td>Alternatives bought by mistake</td><td class="t">9</td><td class="t">9</td></tr>
+      <tr><td><b>Different replies, same quote (of 15 runs)</b></td><td class="t"><b>10 distinct</b></td><td class="t"><b>6 distinct</b></td></tr>
+      <tr><td>Seconds per quote</td><td class="t">10.1</td><td class="t">9.1</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>Scores did not change. Temperature is not a cause of the bad extractions.</li>
+    <li>Replies are steadier. 4 of 5 quotes gave the same reply 3 times out of 3. Apple still varied, but only in fields we don't score.</li>
+    <li>Dream in Green is now wrong the same way every time: total €1,867.26, which is not on the quote. At 0.3 it went back and forth.</li>
+    <li>Temperature 0 is still not fully repeatable on OpenAI. Keep 3 runs per quote.</li>
+  </ul>
+  <div class="card">
+    <p><b>Decision: keep temperature 0.</b></p>
+    <ul>
+      <li>Same quality, fewer surprises for the user.</li>
+      <li>Steadier runs make the evals easier to compare: when a fix changes a score, the fix caused it, not luck.</li>
+      <li>Extraction should give the same answer for the same PDF. Nothing here benefits from variety.</li>
+    </ul>
+  </div>
+  <p class="note">Run 2026-11-10, 14:00 UTC. Logs: <code>results/20261110-140011_baseline-4o-mini-pypdf-temp0/</code>. This is the new baseline for later fixes.</p>
+  <p class="label">Pinned snapshot, same check</p>
+  <ul>
+    <li>Re-run on <code>gpt-4o-mini-2024-07-18</code>. Every scored number is the same as temperature 0 above.</li>
+    <li>Dream in Green gave the gross total 2 of 3 times, not €1,867.26. Not a scored field.</li>
+    <li>The 15 calls came from 4 different OpenAI server builds. That is why temperature 0 still varies. Each run now logs which snapshot and build answered.</li>
+  </ul>
+  <p class="note">Run 2026-11-10, 14:52 UTC. Logs: <code>results/20261110-145213_baseline-pinned-4o-mini-2024-07-18/</code>.</p>
+
+  <h2>Per quote, baseline</h2>
+  <table>
+    <thead><tr><th>Quote</th><th>What the user gets</th></tr></thead>
+    <tbody>
+      <tr><td><b>Apple MBA</b></td><td><ul><li>Right vendor, VAT ID and laptop line.</li><li>Total €1,759.01 is gross.</li><li>€10.55 copyright levy missing.</li></ul></td></tr>
+      <tr><td><b>Dream in Green</b></td><td><ul><li>Alternative logo (€430) counted as bought.</li><li>€215 shipping dropped.</li><li>Unit price €894.08 is before the 20% discount, total €715.26 after. Qty × price does not match.</li><li>Total €1,867.26 in 2 of 3 runs. That number is not on the quote.</li></ul></td></tr>
+      <tr><td><b>Gärtner Gregg</b></td><td><ul><li>Both alternatives counted: €1,926 + €1,685 extra.</li><li>Total €2,092.02 is gross. Lines add up to €5,369.</li></ul></td></tr>
+      <tr><td><b>Hoffmann</b></td><td><ul><li>Crash, 3 of 3. Quote has no VAT ID, model says <code>null</code>, schema rejects it.</li><li>Model's own answer had every line right.</li><li>But its total was €17,230. Real: €17,000 net, €20,230 gross.</li></ul></td></tr>
+      <tr><td><b>styleGREEN</b></td><td><ul><li>Crash, 3 of 3. Same <code>null</code> VAT ID.</li><li>The quote has one: DE271073640. It sits in a footer that is a picture, so the model never saw it.</li><li>Model's own answer: vendor "Lio Technologies GmbH". That is the customer.</li><li>Real vendor (styleGREEN) went into "department".</li></ul></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Run log</h2>
+  <p class="label">Baseline, one line per run</p>
+<pre>13:25:38 apple-mba run 1: wrong in 5.0s total=gross items=1/1 charges=0/1 extras=0
+13:25:42 apple-mba run 2: wrong in 3.4s total=gross items=1/1 charges=0/1 extras=0
+13:25:45 apple-mba run 3: wrong in 3.2s total=gross items=1/1 charges=0/1 extras=0
+13:26:02 dream-in-green run 1: wrong in 17.2s total=other items=2/2 charges=0/1 extras=1
+13:26:18 dream-in-green run 2: wrong in 15.8s total=other items=2/2 charges=0/1 extras=1
+13:26:32 dream-in-green run 3: wrong in 13.9s total=gross items=2/2 charges=0/1 extras=1
+13:26:48 gaertner-gregg run 1: wrong in 15.8s total=gross items=1/1 charges=1/1 extras=2
+13:27:00 gaertner-gregg run 2: wrong in 12.2s total=gross items=1/1 charges=1/1 extras=2
+13:27:08 gaertner-gregg run 3: wrong in 7.7s total=gross items=1/1 charges=1/1 extras=2
+13:27:21 hoffmann run 1: <mark>CRASH</mark> in 13.3s (vatId: Input should be a valid string, input_value=None)
+13:27:35 hoffmann run 2: <mark>CRASH</mark> in 14.0s (vatId: Input should be a valid string, input_value=None)
+13:27:49 hoffmann run 3: <mark>CRASH</mark> in 13.6s (vatId: Input should be a valid string, input_value=None)
+13:27:57 stylegreen run 1: <mark>CRASH</mark> in 8.3s (vatId: Input should be a valid string, input_value=None)
+13:28:01 stylegreen run 2: <mark>CRASH</mark> in 4.1s (vatId: Input should be a valid string, input_value=None)
+13:28:06 stylegreen run 3: <mark>CRASH</mark> in 4.2s (vatId: Input should be a valid string, input_value=None)</pre>
+  <p class="label">Raw model reply, styleGREEN, layout text, run 3</p>
+<pre>  "vendorName": "Lio Technologies GmbH",
+  "vatId": null,
+  "department": "Kunden-Nr.: 57692",
+  ...
+  "totalCost": <mark>1.546.99</mark>,</pre>
+  <p class="note">German number written straight into the JSON. Not valid JSON, so this run crashed a second way. Full logs: <code>results/20261110-132533_*/runs.jsonl</code>.</p>
+
+  <h2>What is really going on</h2>
+  <p>Acme's three complaints map to seven causes. Most are <b>ours, not the model's</b>.</p>
+
+  <div class="card">
+    <div class="head"><span class="badge">1</span><h3>Our schema causes every crash</h3></div>
+    <p class="quote">"sometimes the upload errors out completely"</p>
+    <ul>
+      <li>All 6 baseline crashes: model answers <code>vatId: null</code>, our schema wants text.</li>
+      <li>Hoffmann has no VAT ID. There the model was <b>right</b>.</li>
+      <li>styleGREEN has one, in a footer that is a picture. The model never saw it. See cause 7.</li>
+      <li>In 6 of 6 crashes the reply was usable. We threw it away.</li>
+      <li>Same for every model. A bigger model does not help.</li>
+      <li>This one bug is 40% of uploads on this set.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="badge">2</span><h3>Nobody defined what "right" is</h3></div>
+    <p class="quote">"Fields come out incorrect"</p>
+    <ul>
+      <li>The prompt says "Total (Gesamtsumme)". The model gives the gross, as told.</li>
+      <li>The prompt says "Extract ALL line items". The model adds alternatives, as told. 9 of 9.</li>
+      <li>Shipping in the totals block is not a "line item". So it is dropped.</li>
+      <li>"Department/Customer" gets the customer, a person, or "Kunden-Nr.: 57692".</li>
+      <li>All three setups make the same errors. The model follows a vague spec.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="badge">3</span><h3>The model does not know who the buyer is</h3></div>
+    <ul>
+      <li>styleGREEN prints the customer's address on top, the vendor only in the fine print.</li>
+      <li>Every model picks the customer as the vendor.</li>
+      <li>With layout text, <code>gpt-4o-mini</code> does it on Apple and Dream in Green too. Vendor drops to 3/15.</li>
+      <li>We know the buyer. It is the tenant (Acme). We never tell the model.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="badge">4</span><h3>The model does sums, and nothing checks them</h3></div>
+    <ul>
+      <li>Totals that appear nowhere: €17,230, €1,867.26, €4,099.</li>
+      <li>Lines add up to the total in <b>0 of 27</b> runs that returned data.</li>
+      <li>The code never checks qty × price, or lines against the total.</li>
+      <li>Reading numbers is fine: 100% right on every found line. Adding them is not.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="badge">5</span><h3>JSON only by asking nicely</h3></div>
+    <ul>
+      <li>No <code>response_format</code>. 1 of 45 runs wrote <code>1.546.99</code> and broke the JSON.</li>
+      <li>Rare now. It grows with more and messier quotes.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="badge">6</span><h3>Every call pays for 2,000 groups</h3></div>
+    <ul>
+      <li>About 97% of the 24.8k input tokens are the commodity list.</li>
+      <li>Slow (10 s on mini) and noisy. Belongs to Problem 3.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="badge">7</span><h3>Some of the quote is a picture</h3></div>
+    <p class="quote">"fields are left empty"</p>
+    <ul>
+      <li>Found by Adrian while checking the answer key, 10 Nov.</li>
+      <li>styleGREEN's letterhead and footer are one background picture per page.</li>
+      <li>The footer holds the VAT ID (DE271073640), the legal name and the address.</li>
+      <li><code>pypdf</code> reads only real text. So does <code>pdftotext</code>. Neither returns the footer.</li>
+      <li>OCR on the page reads it right. Checked with <code>tesseract</code>.</li>
+      <li>This also feeds cause 3: the vendor's name and address are in the picture.</li>
+      <li>My first answer key said "no VAT ID". It was written from the text, not the page. Fixed.</li>
+    </ul>
+  </div>
+
+  <p class="label">Ruled out, on these 5 quotes</p>
+  <ul>
+    <li><b>The text layout.</b> Keeping columns (<code>pdftotext</code>) did not help. It made the vendor worse.</li>
+    <li><b>Not ruled out:</b> text that is a picture. No text reader sees it. See cause 7.</li>
+    <li><b>The model size.</b> <code>gpt-4.1</code> made the same errors. It found more shipping lines and was 3× faster.</li>
+    <li><b>German numbers.</b> Read right every time.</li>
+    <li>The config says bigger models were "slower without a real quality gain". Not true for <code>gpt-4.1</code>: same quality here, 3× faster.</li>
+  </ul>
+
+  <h2>Fixes, in order</h2>
+  <p><span class="status ok">6 of 7 built</span> Each one was re-run against the baseline, 15 live calls.</p>
+  <table>
+    <thead><tr><th>#</th><th>Fix</th><th>Measured</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Schema accepts <code>null</code> and missing fields. Shows them as "missing".</td><td>Crashes 6/15 to 0. Vendor and VAT ID 9 to 12/15.</td><td class="r pass">Done <code>6cd66db</code></td></tr>
+      <tr><td class="n">2</td><td>Structured outputs: send the JSON schema to OpenAI.</td><td>No score change. It is a guard against broken JSON.</td><td class="r pass">Done <code>faa7251</code></td></tr>
+      <tr><td class="n">3</td><td>Write the spec into the prompt: net total, charges as lines, skip alternatives.</td><td>Fully right 0 to 6/15. Charges 6 to 15/15. Alternatives bought 9 to 3.</td><td class="r pass">Done <code>a7fc9a3</code></td></tr>
+      <tr><td class="n">4</td><td>Tell the model the buyer's name. Vendor is the sender.</td><td>Vendor 12 to 15/15.</td><td class="r pass">Done <code>dec5111</code></td></tr>
+      <tr><td class="n">5</td><td>Totals added up in code, at extraction and again at every save. Mismatch with the printed total is flagged. A flagged request is never auto-approved.</td><td>Net total 6 to 9/15. Lines add up 6 to 14/15.</td><td class="r pass">Done <code>6929e80</code></td></tr>
+      <tr><td class="n">6</td><td>Classification out of this call (Problem 3). Only once the classifier is live, so no suggestion is lost in between.</td><td>Test run without the list: 25.2k to 2.2k input tokens per quote. Same 6/15 fully right.</td><td class="r todo">Waits on Problem 3</td></tr>
+      <tr><td class="n">7</td><td>Read the text in pictures. Local OCR on every upload, page picture to the model only when needed. Design below.</td><td>VAT ID 12 to 15/15. Fully right 6 to 9/15. styleGREEN right 3 of 3. Costs more: 45.1k tokens and 20 s per quote.</td><td class="r pass">Done <code>97820f2</code></td></tr>
+    </tbody>
+  </table>
+  <p class="label">Also built, not on the first list</p>
+  <ul>
+    <li><b>VAT and gross as their own fields</b> (<code>e494ec2</code>). They stop showing up as order lines.</li>
+    <li><b>Lines plus VAT checked against the gross</b> (<code>db18415</code>). A dropped line shows up as a warning in the form.</li>
+    <li><b>Quantity times price checked per line</b> at save (<code>f4ad0e8</code>). Flagged, never overwritten.</li>
+    <li><b>Extraction snapshot stored</b> on every request made from a PDF (<code>8e56e49</code>).</li>
+    <li><b>Frontend tests</b> with Vitest (<code>18cca15</code>). 8 tests on the new-request form.</li>
+    <li><b>Eval scores more</b> (<code>b2e1b43</code>): VAT amount, gross total, and wrong answers the form says nothing about.</li>
+    <li><b>Totals warning anchored on the gross</b> (<code>c8123ea</code>). styleGREEN had right lines but got two warnings. Now one warning, and none on right quotes. Quotes with mixed VAT rates will still get a false one.</li>
+  </ul>
+
+  <h2>Before and now</h2>
+  <table>
+    <thead><tr><th>Metric</th><th class="t">Before</th><th class="t">Now</th></tr></thead>
+    <tbody>
+      <tr><td>Upload crashes, user gets nothing</td><td class="t">6/15</td><td class="t">0/15</td></tr>
+      <tr><td><b>Quotes fully right</b></td><td class="t"><b>0/15</b></td><td class="t"><b>9/15</b></td></tr>
+      <tr><td>Vendor right</td><td class="t">9/15</td><td class="t">15/15</td></tr>
+      <tr><td>VAT ID right</td><td class="t">9/15</td><td class="t">15/15</td></tr>
+      <tr><td>Total is the net cost</td><td class="t">0/15</td><td class="t">9/15</td></tr>
+      <tr><td>Item lines found</td><td class="t">12/24</td><td class="t">24/24</td></tr>
+      <tr><td>Shipping and fees found</td><td class="t">3/15</td><td class="t">14/15</td></tr>
+      <tr><td>Alternatives bought by mistake</td><td class="t">9</td><td class="t">3</td></tr>
+      <tr><td>Lines add up to the total</td><td class="t">0/15</td><td class="t">14/15</td></tr>
+      <tr><td>Gross total right (new)</td><td class="t">not scored</td><td class="t">15/15</td></tr>
+      <tr><td>VAT amount right (new)</td><td class="t">not scored</td><td class="t">9/15</td></tr>
+      <tr><td><b>Wrong, and the form says nothing (new)</b></td><td class="t">not scored</td><td class="t"><b>0/6</b></td></tr>
+      <tr><td>Right lines, but a warning anyway (new)</td><td class="t">not scored</td><td class="t">0/9</td></tr>
+      <tr><td>Seconds per quote</td><td class="t">10.6</td><td class="t">20.1</td></tr>
+      <tr><td>Input tokens per quote</td><td class="t">24.8k</td><td class="t">45.1k</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Before: <code>results/20261110-151527_baseline-checked-keys/</code>. Now: <code>results/20261110-160109_fix7b-ocr-letterhead-and-footer/</code>, run 2026-11-10, 16:01 UTC. Before fix 7 it took 4.8 s and 25.2k tokens per quote.</p>
+  <p class="label">Per quote, now</p>
+  <ul>
+    <li><b>Gärtner Gregg:</b> fully right, 3 of 3.</li>
+    <li><b>Hoffmann:</b> fully right, 3 of 3.</li>
+    <li><b>styleGREEN:</b> fully right, 3 of 3. The VAT ID is read from the footer picture.</li>
+    <li><b>Dream in Green:</b> wrong, 3 of 3. The alternative logo is still counted as bought, so the total is off.</li>
+    <li><b>Apple MBA:</b> wrong, 3 of 3. The total came out gross twice and net without the €10.55 levy once. It moves between runs.</li>
+    <li>All 6 wrong runs show a warning in the form. None is silent.</li>
+  </ul>
+  <p class="label">Tried and dropped</p>
+  <ul>
+    <li><b>3b, extra prompt lines on VAT and "Alternativ" headings:</b> line fields dropped 103 to 95. Reverted.</li>
+    <li><b>3c, the rules moved after the group list:</b> no gain. Reverted.</li>
+    <li>Both result folders are kept, so the choice can be checked.</li>
+  </ul>
+  <p class="label">Still to do on Problem 1</p>
+  <ul>
+    <li><b>Cost of fix 7, time.</b> Every quote is slower, about 20 s from about 5 s. The builder puts 5 to 7 s on OCR (full page plus strips, 300 dpi) and the rest on a slow OpenAI run. Not checked yet.</li>
+    <li>Alternatives returned apart from the lines, as options to pick. Decided, not built. This is the Dream in Green error.</li>
+    <li>Department from the requester's profile. Decided, not built.</li>
+    <li>Why Apple moves between gross and net.</li>
+    <li>5 quotes is thin. 9/15 means 3 quotes right every time, 2 wrong every time.</li>
+  </ul>
+  <p class="label">Known gap, vendor in the demo</p>
+  <ul>
+    <li>Noted, not fixed now.</li>
+    <li>The app passes the signed-in company as the buyer. 4 of the 5 sample quotes are addressed to Lio Technologies GmbH, not Acme.</li>
+    <li>Signed in as Acme, styleGREEN's vendor comes back as "Lio Technologies GmbH". No warning shows. Eval <code>demo-buyer-acme</code>, 3 of 3, commit <code>e1d940e</code>.</li>
+    <li>In that run: vendor 12/15, fully right 6/15, wrong with no warning 3/9. The 9/15 above holds when the quote names the buyer.</li>
+    <li>Real Acme quotes name Acme, so this is mostly the sample data.</li>
+    <li>Fix later: the vendor is whoever owns the VAT ID and bank details. OCR now reads both from styleGREEN's footer.</li>
+  </ul>
+  <p class="label">Decided 10 Nov, cost of the picture step</p>
+  <ul>
+    <li>Keep sending page pictures when vendor or VAT ID stay empty. Bad data costs more than about a cent per upload.</li>
+    <li>Today only Hoffmann triggers it: 124k tokens per run, from 25k. It has no VAT ID. The other 4 quotes cost the same as before fix 7.</li>
+    <li>Worst case after fix 6 is about 79k tokens (2 page pictures at about 37k each). A normal quote after fix 6 is about 2.2k. Today's call is 24.8k.</li>
+    <li>Ways to cut cost without losing data: fix 6 (group list out), prompt caching (fixed parts first, quote last), fewer picture pages. Each needs an eval run.</li>
+  </ul>
+
+  <div class="card">
+    <div class="head"><span class="badge">7</span><h3>To build: read the text in pictures</h3></div>
+    <p><span class="status ok">Built</span> <code>97820f2</code>. Design agreed with Adrian, 10 Nov.</p>
+    <p class="label">What was built</p>
+    <ul>
+      <li>A new upload route that reads the PDF and runs OCR on every page.</li>
+      <li>Full-page OCR skipped styleGREEN's footer picture. Cropped letterhead and footer strips read it.</li>
+      <li>Page pictures go to the model only when a page has no text, or vendor or VAT ID stay empty. Fired on 3 of 15 runs, all Hoffmann.</li>
+      <li>Two eval runs: without strips 7/15 fully right, with strips 9/15.</li>
+    </ul>
+    <p class="label">Step 1, on every upload, no model cost</p>
+    <ul>
+      <li>Turn each page into a picture and OCR it on our server (<code>tesseract</code>, German).</li>
+      <li>Compare the OCR words with the text <code>pypdf</code> returned.</li>
+      <li>Add only the missed words to the prompt, under their own label ("text found in pictures").</li>
+    </ul>
+    <p class="label">Step 2, only when needed</p>
+    <ul>
+      <li>Send the page picture to the model when a page has no text at all (a scan).</li>
+      <li>Or when vendor or VAT ID still come back empty after step 1.</li>
+      <li>Never for every upload. A page picture costs about as much as the whole call today.</li>
+    </ul>
+    <p class="label">Rules we did not pick</p>
+    <ul>
+      <li><b>"The PDF has a picture":</b> fires on 4 of 5 quotes. Most are just logos.</li>
+      <li><b>Retry only on empty fields:</b> misses confident wrong answers, like the vendor swap.</li>
+    </ul>
+    <p class="label">Eval first</p>
+    <ul>
+      <li>The styleGREEN key now expects <code>DE271073640</code>. Today that fails 3 of 3.</li>
+      <li>Write the failing test before the code.</li>
+      <li>Done when: styleGREEN VAT ID right 3 of 3, no score drops on the other 4 quotes, cost per quote logged before and after.</li>
+      <li>Log per run whether step 1 added text and whether step 2 fired.</li>
+    </ul>
+    <p class="label">Watch out</p>
+    <ul>
+      <li>The backend image needs <code>tesseract</code> with German, and a page renderer (<code>poppler</code>).</li>
+      <li>OCR misreads umlauts ("Héhenkirchen"). It read the VAT ID right.</li>
+      <li>A logo can hold the vendor name. Check that step 1 catches it on styleGREEN.</li>
+      <li>Picture prices here are from memory. Confirm on OpenAI's price page.</li>
+    </ul>
+  </div>
+
+  <h2>Open questions</h2>
+  <ul>
+    <li><b>Answer key: checked by Adrian, 10 Nov.</b> Net total, charges as lines and alternatives left out are confirmed. Side by side with the PDFs: <a href="https://claude.ai/artifact/6kayLmMaciAoHXFrC447r5">Answer keys ↗</a>.</li>
+    <li>styleGREEN VAT ID corrected in the key on 10 Nov. Baseline re-run on the checked keys, 10 Nov 15:15 UTC: every number is the same. Logs: <code>results/20261110-151527_baseline-checked-keys/</code>. This is the "before" for every fix.</li>
+    <li><b>Net or gross?</b> The key says net. It also drives the €2,000 rule (Bonus).</li>
+    <li><b>Shipping and fees as lines?</b> The key says yes.</li>
+    <li>No contact with Acme during the case study. The 5 quotes are the whole set.</li>
+  </ul>
+
+  <h2>Decided 10 Nov</h2>
+  <ul>
+    <li><b>Alternatives are options.</b> The extractor returns them apart from the lines. The requester can pick one. Not counted as bought unless picked.</li>
+    <li><b>Department comes from the requester's profile</b>, not from the PDF.</li>
+    <li><b>Every extraction is stored.</b> A snapshot goes into the request's activity log JSON on create. No schema change. Built, <code>8e56e49</code>.</li>
+    <li><b>Fixes are visible.</b> Snapshot against the saved request shows what the user changed. Each fix is a free label and a future case.</li>
+    <li><b>The model is pinned</b> to <code>gpt-4o-mini-2024-07-18</code>, so scores only move when we change something. Done in Step 0.</li>
+    <li><b>The eval grows by files.</b> A new quote is one new file in <code>cases/</code>. Nothing else changes.</li>
+    <li>What is logged, and how the other evals fit: <a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5#logged">What gets logged ↗</a> and <a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5#checks">Tests and evals ↗</a>.</li>
+  </ul>
+
+  <h2>With more time</h2>
+  <p>A proper eval system with a human in the loop. So the eval grows with real use.</p>
+  <ul>
+    <li><b>Review queue:</b> a human checks the fixes, and they become new cases.</li>
+    <li><b>Version everything:</b> prompt, model, schema, answer key. Every result says which.</li>
+    <li><b>Run it in CI.</b> A change that drops the score does not ship.</li>
+    <li><b>Track it per customer.</b> Acme's real quotes, scans included.</li>
+    <li><b>Spot checks in production:</b> sample live runs for human review each week.</li>
+    <li><b>A reasoning log for every AI decision.</b> For each field: the value, where on the page it came from, and why. Stored with the extraction. When a value is wrong we open the log, see what went wrong, and know what to fix.</li>
+  </ul>
+  <p>The form is the safety net. The extraction does not need to be perfect, so long as the person sees what to check and can fix it. Built now: alternatives shown with "Add as a line", missing prices filled from the line total and marked, a warning on the line that does not add up, the totals warning under the total, department from the profile. Later:</p>
+  <ul>
+    <li><b>The quote next to the form.</b> The PDF beside the fields, so checking a value takes one glance, not a second window.</li>
+    <li><b>Show where each value came from.</b> Click a field, the PDF jumps to the spot and highlights it. Needs the reasoning log above.</li>
+    <li><b>One-tap fixes for a mismatch.</b> "Add the missing €X as a line" or "use the quote's total", instead of finding the line by hand.</li>
+    <li><b>Confidence per field.</b> Mark the values the model was unsure of, so the person checks those first.</li>
+    <li><b>Pick an alternative.</b> Swap a line for one of the quote's options, not only add it.</li>
+    <li><b>Learn from corrections.</b> Every request stores what the extraction returned. Compare it with what was saved, and each correction becomes a new eval case.</li>
+    <li><b>Vendor from the VAT ID and bank details.</b> So a quote addressed to someone else does not swap vendor and buyer.</li>
+  </ul>
+
+  <footer><span>Problem 1 of 4. Fixes 1 to 5 and 7 built. 10 Nov 2026, 17:15.</span><span>Lio FDE case study</span></footer>
+</main>

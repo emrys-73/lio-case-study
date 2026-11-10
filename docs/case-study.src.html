@@ -1,0 +1,583 @@
+<title>Lio Case Study</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+.progress { display: grid; gap: 16px; margin: 12px 0; }
+.prow { min-width: 0; }
+.prow.all { border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; }
+.phead { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; margin-bottom: 6px; }
+.pname { color: var(--ink); font-weight: 700; }
+.pwhat { color: var(--muted); font-weight: 400; }
+.pnum { font-size: 13px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.prow.all .bar { height: 14px; }
+.fill { height: 100%; border-radius: 999px; background: var(--accent); }
+.pleft { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.card h3 { margin: 0; }
+h2[id], details[id] { scroll-margin-top: 16px; }
+.diagram .tag { font-size: 10.5px; font-weight: 700; fill: var(--muted); letter-spacing: .08em; }
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.split > div { min-width: 0; }
+.tools { display: flex; gap: 10px; margin: 0 0 14px; }
+.tools button { font: inherit; font-size: 13px; font-weight: 700; color: var(--accent); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.tools button:hover { border-color: var(--accent); }
+.tools button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details.prob { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; margin: 14px 0; }
+details.prob.bonus { border-left-color: var(--dark); }
+details.prob > summary { list-style: none; cursor: pointer; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding: 16px 22px; }
+details.prob > summary::-webkit-details-marker { display: none; }
+details.prob > summary .what { color: var(--muted); flex: 1 1 220px; min-width: 0; }
+details.prob > summary .toggle { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+details.prob > summary .toggle::after { content: "Show"; }
+details.prob[open] > summary .toggle::after { content: "Hide"; }
+details.prob[open] > summary { border-bottom: 1px solid var(--line); }
+details.prob > .in { padding: 4px 22px 22px; min-width: 0; }
+details.prob > .in h2 { font-size: 18px; margin: 30px 0 10px; }
+details.prob > .in .tablewrap, .tablewrap { overflow-x: auto; }
+.pagelink { font-size: 13px; margin: 16px 0 0; }
+@media (max-width: 600px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+  details.prob > summary { padding: 14px 16px; }
+  details.prob > .in { padding: 4px 16px 16px; }
+}
+</style>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="logo"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">ALL PROBLEMS</span>
+  </div>
+
+  <h1>Acme Case Study</h1>
+  <p class="sub">Four asks, one shared design</p>
+  <div class="nav"><a href="https://claude.ai/artifact/2WE1vvNYGuj9t99Z37f6w5">Playbook ↗</a><a href="https://claude.ai/artifact/2wyQCsPwmHWkDDEDTkAdz4">App Map ↗</a><a href="https://claude.ai/artifact/9dEtpWB8BWE3T43SttFqjN">Screens ↗</a><a href="#progress">Progress</a><a href="#status">Status</a><a href="#flow">Flow</a><a href="#rules">Rules</a><a href="#checks">Checks</a><a href="#decided">Decided</a><a href="#cost">Cost</a><a href="#order">Build order</a><a href="#problems">Problems</a></div>
+
+  <h2 id="progress">Progress</h2>
+  <div class="progress">
+    <div class="prow all">
+      <div class="phead"><span class="pname"><b>Whole case study</b> <span class="pwhat">all four asks plus setup and the PR</span></span><span class="pnum">20 of 29 steps, 69%</span></div>
+      <div class="bar" role="img" aria-label="Whole case study: 20 of 29 steps done"><div class="fill" style="width:69%"></div></div>
+      <p class="pleft">Committed steps only. Nothing is pushed. Status 10 Nov, 18:05.</p>
+    </div>
+    <div class="prow">
+      <div class="phead"><span class="pname"><a href="#problem-1">Problem 1</a> <span class="pwhat">PDF extraction</span></span><span class="pnum">9 of 11 steps, 82%</span></div>
+      <div class="bar" role="img" aria-label="Problem 1: 9 of 11 steps done"><div class="fill" style="width:82%"></div></div>
+      <p class="pleft">Alternatives kept out of the lines and shown under them, department from the profile, committed 17:47 to 18:00. Left: vendor tied to the VAT ID owner (noted, not building now), group list out of the prompt (waits for the classifier).</p>
+    </div>
+    <div class="prow">
+      <div class="phead"><span class="pname"><a href="#problem-2">Problem 2</a> <span class="pwhat">Negotiated prices</span></span><span class="pnum">5 of 5 steps, 100%</span></div>
+      <div class="bar" role="img" aria-label="Problem 2: 5 of 5 steps done"><div class="fill" style="width:100%"></div></div>
+      <p class="pleft">The form now suggests the catalogue article for a line and switches to it in one tap, committed 18:12 in <code>a29abcd</code> and <code>b1cdd25</code>. Search eval: 39 of 40 wordings right, 6 of 10 on a blind set. Left, not counted as steps: the eval answer key needs your check, Acme confirms which supplier wins, suggestions in the edit form, the approver flag.</p>
+    </div>
+    <div class="prow">
+      <div class="phead"><span class="pname"><a href="#problem-3">Problem 3</a> <span class="pwhat">Commodity groups</span></span><span class="pnum">5 of 7 steps, 71%</span></div>
+      <div class="bar" role="img" aria-label="Problem 3: 5 of 7 steps done"><div class="fill" style="width:71%"></div></div>
+      <p class="pleft">Acme's three examples now land in the right group through the form, a PDF and the API, committed 17:46 in <code>4b41554</code> and <code>4335a96</code>. Left: search for groups, classifier with its eval.</p>
+    </div>
+    <div class="prow">
+      <div class="phead"><span class="pname"><a href="#problem-4">Bonus</a> <span class="pwhat">Approval limit</span></span><span class="pnum">0 of 3 steps, 0%</span></div>
+      <div class="bar" role="img" aria-label="Bonus: 0 of 3 steps done"><div class="fill" style="width:0%"></div></div>
+      <p class="pleft">Limit as a setting, the approval rule and an "Auto" label in the lists are built with 43 tests, not committed yet. Left: auto-approval at save and back to pending on edit, which wait for Problem 2 to commit its change to the same file.</p>
+    </div>
+    <div class="prow">
+      <div class="phead"><span class="pname"><a href="#order">Shared</a> <span class="pwhat">Setup, final check, PR</span></span><span class="pnum">1 of 3 steps, 33%</span></div>
+      <div class="bar" role="img" aria-label="Shared: 1 of 3 steps done"><div class="fill" style="width:33%"></div></div>
+      <p class="pleft">Left: end-to-end check on the 5 quotes and Acme's 3 complaints, the PR with the handoff.</p>
+    </div>
+  </div>
+  <ul>
+    <li>A step counts when it is committed with its tests. Steps are not equal in size, so read this as a count, not as time left.</li>
+    <li>Problem 1 scores 12/15 quotes fully right in the eval, up from 9/15, after fixes 8 to 10. Run as an Acme user it scored 6/15 before those fixes, not re-run yet. Detail in <a href="#status">Where we are</a>.</li>
+  </ul>
+
+  <h2 id="asks">The four asks</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>Acme's ask</th><th>Real cause</th><th>Our fix</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td><a href="#problem-1">PDF extraction</a></td><td>Schema crashes on empty fields. The spec is vague. Nobody checks the sums.</td><td>Extractor on its own. Strict output. Totals in code.</td><td>6 of 7 fixes built. Fully right 0/15 to 9/15, or 6/15 run as an Acme user.</td></tr>
+      <tr><td class="n">2</td><td><a href="#problem-2">Negotiated prices</a></td><td>Nothing matches a line to a catalogue article.</td><td>Shared search suggests Acme's articles.</td><td>Not started</td></tr>
+      <tr><td class="n">3</td><td><a href="#problem-3">Commodity groups</a></td><td>Only the model picks. No company rules.</td><td>Typed rules first, then search, then a small classifier.</td><td>Settings, rules and the check at save built. Two of Acme's three groups still need a mapping.</td></tr>
+      <tr><td class="n">★</td><td><a href="#problem-4">Approval limit</a></td><td>No limit exists. The total is trusted from the form.</td><td>Limit as a setting, checked against a total added up in code.</td><td>Bonus, last</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul>
+    <li>Each problem has its full detail in <a href="#problems">Problems</a> below.</li>
+    <li>Everything above that is shared by more than one problem. It is written once, here.</li>
+  </ul>
+
+  <h2 id="status">Where we are</h2>
+  <p><span class="status wait">10 Nov, 17:20</span> Problem 1 and the rules of Problem 3 are built. Nothing is pushed.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Extraction, 15 live runs</th><th class="t">Before</th><th class="t">Now</th></tr></thead>
+    <tbody>
+      <tr><td>Upload crashes</td><td class="t">6/15</td><td class="t">0/15</td></tr>
+      <tr><td><b>Quotes fully right</b></td><td class="t"><b>0/15</b></td><td class="t"><b>9/15</b></td></tr>
+      <tr><td>Vendor right</td><td class="t">9/15</td><td class="t">15/15</td></tr>
+      <tr><td>VAT ID right</td><td class="t">9/15</td><td class="t">15/15</td></tr>
+      <tr><td>Total is the net cost</td><td class="t">0/15</td><td class="t">9/15</td></tr>
+      <tr><td>Shipping and fees found</td><td class="t">3/15</td><td class="t">14/15</td></tr>
+      <tr><td>Alternatives bought by mistake</td><td class="t">9</td><td class="t">3</td></tr>
+      <tr><td>Wrong answers the form says nothing about</td><td class="t">not measured</td><td class="t">0/6</td></tr>
+      <tr><td>Seconds per quote</td><td class="t">10.6</td><td class="t">20.1</td></tr>
+      <tr><td>Input tokens per quote</td><td class="t">24.8k</td><td class="t">45.1k</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="split">
+    <div>
+      <p class="label">Built and committed</p>
+      <ul>
+        <li>Extractor fixes 1 to 4: empty fields, strict output, clear spec, buyer name.</li>
+        <li>Totals added up in code, at extraction and at every save.</li>
+        <li>VAT and gross as their own fields, checked against the lines.</li>
+        <li>Extraction snapshot stored on create.</li>
+        <li>Form warnings, with 8 frontend tests.</li>
+        <li>Eval now scores VAT, gross, silent failures and false alarms.</li>
+        <li>Text in pictures: OCR on every upload, page pictures only when needed.</li>
+        <li>Problem 3, steps 1 to 3: settings, company rules with German and English matching, rules enforced at every save.</li>
+      </ul>
+      <p class="label">Being built now</p>
+      <ul>
+        <li>Problem 3, committed 17:46 in <code>4b41554</code> and <code>4335a96</code>, not pushed:
+          <ul>
+            <li>Acme's three rules are seeded: cable ties, toner, small software.</li>
+            <li><code>POST /categorise</code> tells the form the group while the person types.</li>
+            <li>The form locks the group with "Set automatically". Requesters never see the word "rule", buyers and admins see which rule set it.</li>
+            <li>A corrected save returns <code>corrected: true</code>, logs <code>commodity_correction</code> and shows a quiet note.</li>
+            <li>234 backend tests and 23 frontend tests pass. Acme's three examples pass in German and English through the form, a PDF and the API.</li>
+            <li>Checked by hand as requester and buyer on the new-request form. The corrected note and the detail page are covered by tests only.</li>
+          </ul>
+        </li>
+        <li>Cost breakdown: built, see <a href="#cost">What it costs</a>. Not committed yet.</li>
+        <li>The screens page for all four problems, by another agent.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="label">Not started</p>
+      <ul>
+        <li>Search for commodity groups. The catalogue search and its eval are done.</li>
+        <li>Classifier and its eval. So the group list is still in the extractor prompt.</li>
+        <li>Approval limit.</li>
+        <li>Alternatives as options to pick. Department from the profile.</li>
+        <li>End-to-end check and the PR.</li>
+      </ul>
+    </div>
+  </div>
+  <ul>
+    <li>Detail and every run: <a href="#problem-1">Problem 1</a>, "Fixes, in order".</li>
+  </ul>
+
+  <h2 id="flow">One flow for every request</h2>
+  <p><span class="status ok">Agreed 10 Nov</span></p>
+  <div class="diagram">
+<svg viewBox="0 0 780 640" role="img" aria-label="Flow of a request from its source through extraction, rules, search, the form, the save gate and the activity log"><defs>
+<marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#111111"/></marker></defs>
+<g fill="#fff" stroke="#111111" stroke-width="1.2">
+<rect x="20" y="10" width="200" height="46" rx="6"/><rect x="290" y="10" width="200" height="46" rx="6"/><rect x="560" y="10" width="200" height="46" rx="6"/>
+<rect x="20" y="170" width="740" height="46" rx="6"/>
+<rect x="20" y="250" width="200" height="46" rx="6"/><rect x="290" y="250" width="200" height="46" rx="6"/><rect x="560" y="250" width="200" height="46" rx="6"/>
+<rect x="400" y="330" width="160" height="46" rx="6"/>
+<rect x="20" y="410" width="740" height="46" rx="6"/>
+<rect x="20" y="490" width="740" height="46" rx="6" fill="#f5f6f8"/>
+<rect x="20" y="570" width="740" height="46" rx="6"/>
+</g>
+<g fill="#fff" stroke="#136f7d" stroke-width="2">
+<rect x="20" y="90" width="200" height="46" rx="6"/><rect x="230" y="330" width="160" height="46" rx="6"/>
+</g>
+<g stroke="#111111" stroke-width="1.3" marker-end="url(#fa)">
+<line x1="120" y1="56" x2="120" y2="88"/><line x1="120" y1="136" x2="120" y2="168"/>
+<line x1="390" y1="56" x2="390" y2="168"/><line x1="660" y1="56" x2="660" y2="168"/>
+<line x1="120" y1="216" x2="120" y2="248"/><line x1="390" y1="216" x2="390" y2="248"/><line x1="660" y1="216" x2="660" y2="248"/>
+<line x1="220" y1="273" x2="288" y2="273"/>
+<line x1="330" y1="296" x2="330" y2="328"/><line x1="460" y1="296" x2="460" y2="328"/>
+<line x1="120" y1="296" x2="120" y2="408"/><line x1="310" y1="376" x2="310" y2="408"/><line x1="480" y1="376" x2="480" y2="408"/><line x1="660" y1="296" x2="660" y2="408"/>
+<line x1="390" y1="456" x2="390" y2="488"/><line x1="390" y1="536" x2="390" y2="568"/>
+</g>
+<text class="hd" x="120" y="30" text-anchor="middle">PDF quote</text><text class="hs" x="120" y="46" text-anchor="middle">uploaded</text>
+<text class="hd" x="390" y="30" text-anchor="middle">Typed request</text><text class="hs" x="390" y="46" text-anchor="middle">no PDF</text>
+<text class="hd" x="660" y="30" text-anchor="middle">Agent or API</text><text class="hs" x="660" y="46" text-anchor="middle">no form</text>
+<text class="hd" x="120" y="110" text-anchor="middle" style="fill:#136f7d">Extractor (AI)</text><text class="hs" x="120" y="126" text-anchor="middle">fields and lines, no group list</text>
+<text class="tag" x="212" y="104" text-anchor="end">P1</text>
+<text class="hd" x="390" y="190" text-anchor="middle">Lines + company</text><text class="hs" x="390" y="206" text-anchor="middle">every source ends up here, with the company from the login</text>
+<text class="hd" x="120" y="270" text-anchor="middle">Rules</text><text class="hs" x="120" y="286" text-anchor="middle">company rules, list order</text>
+<text class="tag" x="212" y="264" text-anchor="end">P3</text>
+<text class="msg" x="254" y="266" text-anchor="middle" style="font-size:11px">no hit</text>
+<text class="hd" x="390" y="270" text-anchor="middle">Shared search</text><text class="hs" x="390" y="286" text-anchor="middle">short list, in code</text>
+<text class="tag" x="482" y="264" text-anchor="end">P2 P3</text>
+<text class="hd" x="660" y="270" text-anchor="middle">Totals</text><text class="hs" x="660" y="286" text-anchor="middle">added up in code</text>
+<text class="tag" x="752" y="264" text-anchor="end">P1 ★</text>
+<text class="hd" x="310" y="350" text-anchor="middle" style="fill:#136f7d">Classifier (AI)</text><text class="hs" x="310" y="366" text-anchor="middle">1 of about 15 groups</text>
+<text class="hd" x="480" y="350" text-anchor="middle">Article suggestions</text><text class="hs" x="480" y="366" text-anchor="middle">negotiated price</text>
+<text class="msg" x="128" y="356" style="font-size:11px">hit: locked</text>
+<text class="hd" x="390" y="430" text-anchor="middle">Form or API reply</text><text class="hs" x="390" y="446" text-anchor="middle">pre-filled, and says why: rule, model or person</text>
+<text class="hd" x="390" y="510" text-anchor="middle">Save gate, on the server, every create and edit</text><text class="hs" x="390" y="526" text-anchor="middle">totals again, rules again, buyer or admin override, approval limit</text>
+<text class="tag" x="752" y="504" text-anchor="end">P1 P3 ★</text>
+<text class="hd" x="390" y="590" text-anchor="middle">Activity log (JSON)</text><text class="hs" x="390" y="606" text-anchor="middle">extraction snapshot, group source and rule ID, picked article, override, auto-approval</text>
+</svg>
+  </div>
+  <ul>
+    <li><b>Teal boxes are AI.</b> Everything else is plain code.</li>
+    <li><b>Only a PDF needs the extractor.</b> Typed and agent requests join at the lines.</li>
+    <li><b>The save gate is the only place every request passes.</b> So every hard rule is enforced there, not in the form.</li>
+    <li><b>Each box is tested alone.</b> A wrong result points at one box, not "the AI".</li>
+    <li>The step-by-step version with every call is in <a href="#problem-3">Problem 3</a>.</li>
+  </ul>
+
+  <h2 id="pieces">Shared pieces</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Piece</th><th>Kind</th><th>Used by</th><th>If it fails</th></tr></thead>
+    <tbody>
+      <tr><td><b>Extractor</b></td><td>AI</td><td>1</td><td>Error shown. The user types the request by hand.</td></tr>
+      <tr><td><b>Rules</b></td><td>Code</td><td>3</td><td>Can't fail on its own. No rules means no hit.</td></tr>
+      <tr><td><b>Shared search</b></td><td>Code</td><td>2, 3</td><td>No API key or no embeddings: falls back to word match.</td></tr>
+      <tr><td><b>Classifier</b></td><td>AI</td><td>3</td><td>Group stays empty. A person picks. The upload still works.</td></tr>
+      <tr><td><b>Totals</b></td><td>Code</td><td>1, ★</td><td>Sums that don't match are flagged. Never auto-approved.</td></tr>
+      <tr><td><b>Save gate</b></td><td>Code</td><td>1, 3, ★</td><td>A wrong group is replaced by the rule group. Bad data is rejected with a clear message.</td></tr>
+      <tr><td><b>Org settings</b></td><td>Code</td><td>3, ★</td><td>Bad data is skipped on read, rejected on write.</td></tr>
+      <tr><td><b>Activity log</b></td><td>Code</td><td>All</td><td>Written in the same transaction as the save.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="label">What "the split adds failure modes" means</p>
+  <ul>
+    <li>Today one call does everything. It works or it doesn't.</li>
+    <li>After the split there are three steps that can fail: extractor, search, classifier.</li>
+    <li>So each one needs a soft landing. That is the last column above.</li>
+    <li>A failed step never blocks the upload or the save.</li>
+  </ul>
+
+  <h2 id="rules">Rules and settings</h2>
+  <p><span class="status ok">Agreed 10 Nov</span> Shape below is the one source. Problem 3 builds it.</p>
+<pre>organizations.settings   (JSON, one per company, no schema change)
+{
+  "required_fields": ["vat_id"],
+  "commodity_rules": [
+    {
+      "id": "r_7f3a",                       <mark>set by the server, never changes</mark>
+      "keywords": ["cable tie", "kabelbinder"],
+      "commodity_group_id": 11,             <mark>must exist</mark>
+      "reason": "Acme books cable ties under Electrical Engineering",
+      "max_amount": null,                   <mark>optional, for "small" software</mark>
+      "updated_by": "admin@acme.com",
+      "updated_at": "2026-11-10T14:00:00Z"
+    }
+  ],
+  "approval_limit": 2000                    <mark>bonus, net, strictly below, null = no limit</mark>
+}</pre>
+  <div class="split">
+    <div>
+      <p class="label">Reading and writing</p>
+      <ul>
+        <li><b>Writes are strict.</b> Unknown keys, empty keywords or a group that doesn't exist: rejected (422).</li>
+        <li><b>Reads are tolerant.</b> An unknown key or a dead rule is skipped and logged. The page never breaks.</li>
+        <li><b>Saves merge.</b> Saving required fields keeps the rules.</li>
+        <li><b>One reader.</b> Every part of the code calls <code>load_settings(org)</code>.</li>
+        <li>Admins only. The server stamps who and when on each rule.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="label">How a rule hits</p>
+      <ul>
+        <li>Checked line by line, top of the list first. <b>First hit wins.</b></li>
+        <li><code>max_amount</code> set: only lines at or under that total.</li>
+        <li>Lines hit different rules: the highest-value line decides. Flagged.</li>
+        <li>A hit locks the group. The classifier never runs.</li>
+        <li>A buyer or admin can override. Logged with the rule ID.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="label">Keyword matching, German and English</p>
+  <ul>
+    <li>A rule lists its words in both languages. No translation step.</li>
+    <li>Both sides are cleaned the same way: lower case, <code>ä ö ü ß</code> become <code>ae oe ue ss</code>, hyphens and punctuation become spaces.</li>
+    <li>A one-word keyword hits a word that <b>starts or ends</b> with it. So <code>toner</code> hits "Tonerkartusche" and "Druckertoner".</li>
+    <li>A keyword of several words must appear in that order. Each word may run longer, so <code>cable tie</code> hits "cable ties".</li>
+    <li>Keywords under 4 letters must match the whole word.</li>
+    <li>Near misses are tests: "Kabeltrommel", "printer" and "ERP licence" must hit nothing.</li>
+    <li>More languages later: add keywords, or a new cleaning step. The rule shape stays.</li>
+  </ul>
+
+  <h2 id="search">Shared search</h2>
+  <p><span class="status wait">Eval first</span> One function for two lists.</p>
+  <ul>
+    <li><b>Job:</b> text in, a short list out. Groups for Problem 3, Acme's articles for Problem 2.</li>
+    <li><b>Goal:</b> the right answer is somewhere in the list. Picking the one is the next step's job.</li>
+    <li><b>Groups:</b> 2,000 rows are 380 real names with size and tier copies. Search the 380.</li>
+    <li><b>Articles:</b> 1,920, only the signed-in company's.</li>
+    <li><b>Catch:</b> quotes are German, the lists are English. Plain word match will miss.</li>
+  </ul>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Option</th><th>How</th><th>Good</th><th>Weak</th></tr></thead>
+    <tbody>
+      <tr><td class="n">A</td><td>Word match</td><td>No key, no cost, same answer every run</td><td>German to English</td></tr>
+      <tr><td class="n">B</td><td>Embeddings, made once, kept in memory</td><td>Handles German to English</td><td>Needs a key to build</td></tr>
+      <tr><td class="n">C</td><td>No search: model picks a category, then a group</td><td>No search code</td><td>A wrong category can't be undone. No use for articles.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul>
+    <li><b>Our pick: B with A merged in.</b> A is also the fallback with no key.</li>
+    <li><b>Decided by numbers:</b> about 30 labelled lines, score "right answer in the top 15" for A, B and C.</li>
+    <li>Skipping the classifier when the search is very sure: only if the eval shows the top hit is reliably right.</li>
+  </ul>
+
+  <h2 id="logged">What gets logged</h2>
+  <p><span class="status ok">Agreed 10 Nov</span> All in the activity log's <code>detail</code> JSON. No schema change.</p>
+<pre>action: "created"
+{
+  "source": "pdf",                                        <mark>pdf, manual or agent</mark>
+  "extraction": { ...exactly what the extractor returned... },
+  "totals": { "computed": 1438.00, "printed": 1438.00, "match": true },
+  "group": { "id": 11, "source": "rule", "rule_id": "r_7f3a", "suggested_id": 11 },
+  "articles": [ { "line": 1, "article_number": "LIN-00862", "unit_price": 186.0 } ]
+}
+
+action: "group_overridden"
+{ "rule_id": "r_7f3a", "from": 11, "to": 31, "by_role": "buyer" }
+
+action: "auto_approved"
+{ "limit": 2000, "computed_total": 1438.00 }</pre>
+  <ul>
+    <li><b>Snapshot against saved request</b> shows every fix the user made. Each fix is a future eval case.</li>
+    <li><b>Group source</b> is always one of rule, model or person.</li>
+    <li><b>Picked articles</b> let Acme count how often negotiated prices are used.</li>
+    <li>Field names are a proposal. They are fixed when the first test is written.</li>
+  </ul>
+
+  <h2 id="checks">Tests and evals</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>What</th><th>Kind</th><th>Checked by</th><th>Runs</th><th>Exists?</th></tr></thead>
+    <tbody>
+      <tr><td>Settings, rules, matching</td><td>Code</td><td>Backend tests, no key</td><td>Every change</td><td><b>14 tests</b>, more to add</td></tr>
+      <tr><td>Save gate, totals, override, limit</td><td>Code</td><td>Backend tests, no key</td><td>Every change</td><td><b>Totals: 19 tests.</b> Rule check, override, limit: no</td></tr>
+      <tr><td>Shared search</td><td>Code</td><td>Right answer in the top 15</td><td>When search changes</td><td>No</td></tr>
+      <tr><td>Extractor</td><td>AI</td><td>Live eval, 5 quotes, 3 runs each</td><td>Before any AI change</td><td><b>Yes.</b> Run after every fix, 11 runs kept</td></tr>
+      <tr><td>Classifier</td><td>AI</td><td>Live eval: Acme's 3 rules, near misses, hints</td><td>Before any AI change</td><td>No</td></tr>
+      <tr><td>End to end</td><td>Both</td><td>5 quotes plus Acme's 3 complaints, typed path too</td><td>Before the PR</td><td>No</td></tr>
+      <tr><td>The form</td><td>Code</td><td>Vitest with Testing Library</td><td>Every change</td><td><b>8 tests</b></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="split">
+    <div>
+      <p class="label">Built to grow</p>
+      <ul>
+        <li>One folder per eval. One file per case.</li>
+        <li>A new quote or line is one new file. No code changes.</li>
+        <li>Every result is saved with the prompt, the model and the date.</li>
+        <li>The model is pinned to a dated snapshot.</li>
+        <li>Stored snapshots and overrides become new cases.</li>
+        <li>5 quotes is thin. The evals show what broke on known cases, not that production is safe.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="label">Frontend tests to add</p>
+      <ul>
+        <li>An extraction fills the form, empty fields shown as missing. <b>Done.</b></li>
+        <li>A rule hit shows "Set by rule". A requester can't change it.</li>
+        <li>A totals mismatch shows a warning. <b>Done.</b></li>
+        <li>Saving required fields on the Organization page keeps the rules.</li>
+      </ul>
+    </div>
+  </div>
+<pre>backend/evals/
+  extraction/       cases/  run.py  score.py  results/    <mark>exists</mark>
+  search/           cases/  ...                           <mark>to build, groups and articles</mark>
+  categorisation/   cases/  ...                           <mark>to build</mark></pre>
+  <ul>
+    <li><b>Development setup:</b> the backend container has a volume mount, so tests always run the code on disk. Done in Step 0, commit <code>0562301</code>.</li>
+  </ul>
+
+  <h2 id="decided">Decided</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Decision</th><th>Touches</th></tr></thead>
+    <tbody>
+      <tr><td>Split the one prompt: extractor, rules, search, classifier.</td><td>1, 3</td></tr>
+      <tr><td>Rules beat the model and are enforced at every save.</td><td>3</td></tr>
+      <tr><td>Only a buyer or admin can override a rule hit. Logged.</td><td>3</td></tr>
+      <tr><td>Rules carry an ID, who and when, and an optional <code>max_amount</code>.</td><td>3</td></tr>
+      <tr><td>Two rules on one line: list order wins. Different lines: highest value wins.</td><td>3</td></tr>
+      <tr><td>Keywords work in German and English.</td><td>3</td></tr>
+      <tr><td>Settings: tolerant reads, strict writes, saves merge.</td><td>3, ★</td></tr>
+      <tr><td>Totals are added up in code. A mismatch never auto-approves.</td><td>1, ★</td></tr>
+      <tr><td>Every extraction snapshot is stored in the activity log.</td><td>1</td></tr>
+      <tr><td>The picked catalogue article is stored in the activity log.</td><td>2</td></tr>
+      <tr><td>VAT and the gross total are their own fields. Lines plus VAT are checked against the gross.</td><td>1</td></tr>
+      <tr><td>Alternatives are offered as options, not counted as bought. Department comes from the requester's profile.</td><td>1</td></tr>
+      <tr><td>Frontend tests use Vitest with Testing Library.</td><td>All</td></tr>
+      <tr><td>No database schema changes. New data goes into existing JSON.</td><td>All</td></tr>
+      <tr><td>Structured outputs for both model calls. Prompt hints kept by name, as hints.</td><td>1, 3</td></tr>
+      <tr><td>One group per request.</td><td>3</td></tr>
+      <tr><td>Check with Acme before any new group or schema change. Both are shared by every company, and patching the product customer by customer isn't sustainable. Until then: toner to Hardware (29), small software to Office Equipment (15), "small" is a line up to €500. All three are settings.</td><td>3</td></tr>
+      <tr><td>Approval limit on the net total, strictly below €2,000. Exactly €2,000 still needs a buyer.</td><td>★</td></tr>
+      <tr><td>The limit is a company setting, <code>approval_limit</code>. No screen for it yet.</td><td>★</td></tr>
+      <tr><td>Volume mount for development. A few frontend tests.</td><td>All</td></tr>
+      <tr><td>One step at a time, one commit per step. No code comments. The why goes in the commit and the PR.</td><td>All</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="open">Still open</h2>
+  <div class="split">
+    <div>
+      <p class="label">For Acme</p>
+      <ul>
+        <li>What is "small" software? We set €500 per line as a placeholder in <code>max_amount</code>.</li>
+        <li>"IT Hardware" and "Office Supplies" don't exist. We use Hardware (29) and Office Equipment (15) until Acme confirms. The list is shared by every company.</li>
+        <li>"Subscription" and "Abo" also catch non-software subscriptions under €500, like a magazine. Needs Acme's real wording.</li>
+        <li>Off-catalogue buying: nudge or block?</li>
+        <li>More quotes, the ones that failed for them.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="label">For us</p>
+      <ul>
+        <li>Search: A, B or C, after the eval.</li>
+        <li>Who manages the rules: Acme's admin (needs a screen) or us through the API?</li>
+        <li>Apple and Dream in Green are still wrong 3 of 3. The form warns, but the cause is open.</li>
+        <li><b>Cost of the pictures fix.</b> Only Hoffmann costs more: 124k tokens per run, from 25k, because a page picture is sent when no VAT ID is found. The other 4 quotes cost the same as before. Decided 10 Nov: keep sending it, bad data costs more. Priced in <a href="#cost">What it costs</a>.</li>
+        <li><b>Known gap, vendor in the demo.</b> Signed in as Acme, styleGREEN's vendor comes back as "Lio Technologies GmbH" with no warning, because the sample quotes are addressed to Lio, not Acme. Noted, not fixed now. Detail in <a href="#problem-1">Problem 1</a>.</li>
+        <li>Every quote is slower, about 20 s from about 5 s. The builder puts 5 to 7 s on OCR and the rest on a slow OpenAI run. Not checked yet.</li>
+        <li><b>Known gap, closing.</b> Any member can close a request before approval. Decided 10 Nov: its own fix, not part of the bonus. Not built.</li>
+        <li>Splitting one order into small ones to stay under the limit. Not solved. Flag it to Acme.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 id="cost">What it costs</h2>
+  <p><span class="status ok">Measured 10 Nov</span> Model cost per quote, read from the eval runs. Prices checked on OpenAI's pricing page the same day.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Extraction</th><th class="t">Fully right</th><th class="t">Per quote</th><th class="t">Per 1,000</th><th class="t">Seconds</th></tr></thead>
+    <tbody>
+      <tr><td>Before the fixes</td><td class="t">0/15</td><td class="t">$0.0039</td><td class="t">$3.86</td><td class="t">10.6</td></tr>
+      <tr><td>Fixes 1 to 4, totals in code</td><td class="t">6/15</td><td class="t">$0.0039</td><td class="t">$3.91</td><td class="t">4.8</td></tr>
+      <tr><td><b>Now: plus text in pictures</b></td><td class="t"><b>9/15</b></td><td class="t"><b>$0.0069</b></td><td class="t"><b>$6.92</b></td><td class="t">20.1</td></tr>
+      <tr><td>Planned: group list out, classifier added</td><td class="t">same, est.</td><td class="t">$0.0029</td><td class="t">$2.90</td><td class="t">-</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">1,000 quotes is an example volume. Acme's real volume is unknown. Planned is estimated: it takes the measured run, removes the group list from every call and adds a classifier call on every quote (worst case, no rule hits). A run without the list already scored the same.</p>
+  <div class="split">
+    <div>
+      <p class="label">Where the money goes now</p>
+      <ul>
+        <li><b>The group list.</b> 23,030 tokens in every call. 61% of all input tokens now, 92% before the pictures fix.</li>
+        <li><b>Hoffmann's picture call.</b> 2 page pictures plus the whole prompt again, group list included. 124k tokens, about $0.019 per upload. 5 times any other quote.</li>
+        <li>That call can't find anything. Hoffmann has no VAT ID, so the field stays empty and the call fires every time.</li>
+        <li><b>Pictures are expensive on gpt-4o-mini.</b> One A4 page is 36,835 tokens. On gpt-4.1-mini the same page is 3,475.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="label">What the money bought</p>
+      <ul>
+        <li>Fixes 1 to 4: 0 to 6 fully right, for the same cost.</li>
+        <li>Text in pictures: 3 more fully right, for $0.003 more per quote. About $0.015 per extra right quote.</li>
+        <li>Every option below costs $0.59 to $11 per 1,000 quotes. One wrong request a person has to fix costs more than that.</li>
+        <li>So we choose by accuracy and wait time first, cost second.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="label">Cheaper, more to build</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Option, on top of planned</th><th class="t">Per quote</th><th class="t">vs planned</th><th>Build</th><th>What we'd get</th></tr></thead>
+    <tbody>
+      <tr><td>No picture call when OCR found nothing new</td><td class="t">$0.0006</td><td class="t">-80%</td><td>Not building</td><td><b>Rejected by Adrian, 10 Nov.</b> Bad data costs more than about a cent per upload. Kept here so the trade-off stays visible.</td></tr>
+      <tr><td>Picture call on gpt-4.1-mini, pictures only</td><td class="t">$0.0012</td><td class="t">-59%</td><td>A second model and a short prompt</td><td>Same trigger. Must prove it reads footers as well.</td></tr>
+      <tr><td>Whole extraction on gpt-5.6-luna</td><td class="t">$0.0012</td><td class="t">-59%</td><td>Model swap and a full eval</td><td>Never run on our quotes.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="label">Dearer, maybe better</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Option, on top of planned</th><th class="t">Per quote</th><th class="t">vs planned</th><th>Build</th><th>What we'd get</th></tr></thead>
+    <tbody>
+      <tr><td>Every page as a picture, on gpt-4.1-mini</td><td class="t">$0.0039</td><td class="t">+34%</td><td>Model swap, pictures always in</td><td>Layout and pictures read on every quote. Costs what we paid before the fixes.</td></tr>
+      <tr><td>gpt-4.1 again when the code checks fail</td><td class="t">$0.0046</td><td class="t">+57%</td><td>A second call, checks as the trigger</td><td>Would fire on 4 of 15 runs today. On the old prompt gpt-4.1 made the same mistakes.</td></tr>
+      <tr><td>gpt-4.1 for every quote</td><td class="t">$0.0085</td><td class="t">+193%</td><td>Model swap</td><td>Old prompt: same mistakes, 3x faster.</td></tr>
+      <tr><td>Every page as a picture, on gpt-4o-mini</td><td class="t">$0.0105</td><td class="t">+263%</td><td>Pictures always in</td><td>Same idea as above at 3 times the cost. Mini pictures are expensive.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="label">Our pick</p>
+  <ul>
+    <li><b>Next: fix 6, the group list out of the prompt,</b> about 25k to 2k tokens per normal upload. Then prompt caching (fixed parts first, quote last). Both keep the picture call. Each needs an eval run.</li>
+    <li><b>Then step 7</b> takes the group list out with the classifier. Already planned.</li>
+    <li><b>Worth an eval, not a build yet:</b> every page as a picture on gpt-4.1-mini. Same cost as before the fixes, and it might fix the layout errors on Apple and Dream in Green.</li>
+    <li><b>Stopgap if step 7 slips:</b> put the group list first in the prompt so OpenAI caches it. $0.0069 to about $0.0048 per quote. Only saves when quotes arrive within minutes of each other.</li>
+    <li><b>Not a fit:</b> OpenAI's Batch API halves prices but answers within 24 hours. An upload needs seconds.</li>
+    <li><b>Not in the price:</b> OCR runs on our server, about 7 s per quote. It costs wait time, not tokens.</li>
+  </ul>
+  <p class="label">How it's worked out</p>
+  <ul>
+    <li>Engine in <code>backend/evals/cost/</code>: <code>prices.json</code>, <code>scenarios.json</code>, <code>engine.py</code>, <code>report.py</code>. 21 tests, no network.</li>
+    <li>Every price names its source and the day it was checked. gpt-4o-mini is $0.15 in and $0.60 out per million tokens.</li>
+    <li>Measured rows read the eval logs. Estimated rows start from a measured run and list their changes: drop the group list, skip pictures, swap the model, add a call.</li>
+    <li>Picture tokens follow OpenAI's vision guide: 512 px tiles for gpt-4o-mini, 32 px patches for gpt-4.1-mini.</li>
+    <li>Re-run after any eval: <code>docker compose exec backend python -m evals.cost.report</code>. Each run is saved in <code>evals/cost/results/</code>.</li>
+  </ul>
+
+  <h2 id="order">Build order</h2>
+  <p>One step, one commit. Tests or evals first in every step.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>Step</th><th>For</th></tr></thead>
+    <tbody>
+      <tr><td class="n">0</td><td><b>Setup.</b> Volume mount. Pin the model snapshot. <span class="status ok">Done 10 Nov</span></td><td>All</td></tr>
+      <tr><td class="n">1</td><td><b>Settings.</b> Tolerant read, strict write, merge on save. <span class="status ok">Done</span> <code>b30c774</code></td><td>3, ★</td></tr>
+      <tr><td class="n">2</td><td><b>Rules.</b> Shape, IDs, matching in German and English, order, <code>max_amount</code>. <span class="status ok">Done</span> <code>29d7628</code></td><td>3</td></tr>
+      <tr><td class="n">3</td><td><b>Save gate.</b> Rules at create and edit. Override. Activity log. <span class="status ok">Done</span> <code>f374254</code></td><td>3</td></tr>
+      <tr><td class="n">4</td><td><b>Totals.</b> Added up in code at every save. <span class="status ok">Done</span> <code>6929e80</code>, <code>db18415</code>, <code>f4ad0e8</code></td><td>1, ★</td></tr>
+      <tr><td class="n">5</td><td><b>Extractor.</b> Schema allows empty. Structured output. Clear spec. Buyer name. Snapshot stored. <span class="status ok">Done</span> <code>6cd66db</code> to <code>8e56e49</code></td><td>1</td></tr>
+      <tr><td class="n">5b</td><td><b>Text in pictures.</b> Failing styleGREEN test first. Local OCR on every upload. Page picture to the model only when needed. <span class="status ok">Done</span> <code>97820f2</code>, <code>c8123ea</code></td><td>1</td></tr>
+      <tr><td class="n">6</td><td><b>Search.</b> Eval first, then the search. <span class="status ok">Done for articles</span> <code>a29abcd</code>. Not started for groups.</td><td>2, 3</td></tr>
+      <tr><td class="n">7</td><td><b>Classifier.</b> Its eval, then the call. Only then the group list leaves the extractor. <span class="status no">Not started</span></td><td>3, 1</td></tr>
+      <tr><td class="n">8</td><td><b>Article suggestions</b> on the same search. <span class="status ok">Done</span> <code>a29abcd</code>, <code>b1cdd25</code></td><td>2</td></tr>
+      <tr><td class="n">9</td><td><b>Approval limit.</b> Only if time is left. <span class="status no">Not started</span></td><td>★</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul>
+    <li>Frontend tests land with the step that changes the form: 3, 5 and 8.</li>
+    <li>Step 5b comes after step 5. Until the schema allows an empty VAT ID, styleGREEN crashes and the gain can't be measured.</li>
+    <li>Step 5b rebuilt the backend image (tesseract with German). Done 10 Nov, the container was recreated.</li>
+    <li>Steps 0 to 5b are committed. Next: search (6), classifier (7), article suggestions (8).</li>
+    <li>Step 7 waits for the classifier on purpose. Otherwise uploads lose their group suggestion in between.</li>
+  </ul>
+
+  <h2 id="problems">Problems</h2>
+  <div class="tools"><button type="button" id="open-all">Open all</button><button type="button" id="close-all">Close all</button></div>
+<!--PROBLEMS-->
+
+  <footer><span>One page for all four asks. Status as of 10 Nov 2026, 17:20.</span><span>Lio FDE case study</span></footer>
+</main>
+
+<script>
+(function () {
+  var probs = Array.prototype.slice.call(document.querySelectorAll('details.prob'));
+  function setAll(open) { probs.forEach(function (d) { d.open = open; }); }
+  document.getElementById('open-all').addEventListener('click', function () { setAll(true); });
+  document.getElementById('close-all').addEventListener('click', function () { setAll(false); });
+  function reveal() {
+    var id = location.hash.slice(1);
+    if (!id) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var d = el.closest('details');
+    if (d) d.open = true;
+    el.scrollIntoView();
+  }
+  window.addEventListener('hashchange', reveal);
+  reveal();
+})();
+</script>

@@ -1,0 +1,550 @@
+<title>Lio Commodity Groups</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Style: copied from playbook.html (brief PDF look). */
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --body: #1f2328;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #f5f6f8;
+  --accent: #136f7d;
+  --dark: #111317;
+  --sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 820px; margin: 0 auto; padding: 40px max(16px, env(safe-area-inset-right, 0px)) 96px max(16px, env(safe-area-inset-left, 0px)); }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid var(--accent); }
+.logo { display: flex; align-items: center; gap: 6px; font-size: 20px; color: var(--ink); letter-spacing: -.01em; }
+.logo svg { height: 26px; width: auto; display: block; }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+
+h1 { font-size: clamp(34px, 6vw, 44px); line-height: 1.1; font-weight: 700; color: var(--ink); margin: 36px 0 4px; letter-spacing: -.02em; }
+.sub { font-size: 21px; color: var(--muted); font-weight: 300; margin: 0; }
+h2 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 48px 0 14px; }
+h3 { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0; }
+p { margin: 0 0 12px; }
+b { color: var(--ink); }
+
+ul { margin: 0; padding-left: 22px; list-style: none; }
+li { position: relative; margin: 6px 0; }
+li::before { content: ""; position: absolute; left: -15px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+
+code { font-family: var(--mono); font-size: .84em; background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 3px; }
+.panel { background: var(--panel); border-radius: 6px; padding: 18px 22px; margin: 12px 0; }
+.note { color: var(--faint); }
+a { color: var(--accent); font-weight: 700; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.card { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 14px 0; }
+.card.bonus { border-left-color: var(--dark); }
+.card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.badge { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.bonus .badge { background: var(--dark); }
+.quote { border-left: 3px solid var(--line); padding-left: 14px; color: #4b5563; font-style: italic; margin: 0 0 12px; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin: 0 0 4px; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th { background: var(--dark); color: #fff; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 12px 16px; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n { width: 40px; font-weight: 700; color: var(--accent); }
+td.t { width: 70px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+th.t { text-align: right; }
+tfoot td { color: var(--muted); border-bottom: 0; }
+
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 32px; }
+.cols > div { min-width: 0; }
+.cols h3 { margin-top: 10px; }
+
+footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--faint); }
+
+@media (max-width: 600px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .card, .panel { padding: 16px; }
+  th, td { padding: 10px; }
+}
+pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.55; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; margin: 12px 0; overflow-x: auto; white-space: pre; color: var(--body); }
+pre mark { background: #fde68a; color: var(--ink); padding: 0 2px; border-radius: 2px; }
+.status { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.status.no { color: #b42318; }
+.status.wait { color: var(--accent); }
+.status.ok { color: #067647; }
+td.r { white-space: nowrap; font-weight: 700; }
+td.r.pass { color: #067647; }
+td.r.todo { color: var(--accent); }
+.nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 18px 0 0; font-size: 14px; }
+.nav .here { color: var(--ink); font-weight: 700; }
+.diagram { overflow-x: auto; margin: 12px 0; border: 1px solid var(--line); border-radius: 8px; padding: 12px 8px; }
+.diagram svg { display: block; width: 100%; min-width: 640px; height: auto; font-family: var(--sans); }
+.diagram text { font-size: 12px; fill: var(--body); }
+.diagram .msg { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+.diagram .hd { font-size: 12px; font-weight: 700; fill: var(--ink); }
+.diagram .hs { font-size: 10.5px; fill: var(--muted); }
+.diagram .frame { font-size: 11px; font-weight: 700; fill: var(--muted); }
+.diagram .ai { fill: var(--accent); font-weight: 700; }
+.diagram .bad { fill: #b42318; font-weight: 700; }
+</style>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="logo"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">PROBLEM 3</span>
+  </div>
+
+  <h1>Commodity Groups</h1>
+  <p class="sub">Why Acme's categories don't match its books</p>
+  <div class="nav"><a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5">All problems ↗</a><a href="https://claude.ai/artifact/2WE1vvNYGuj9t99Z37f6w5">Playbook ↗</a><a href="https://claude.ai/artifact/2wyQCsPwmHWkDDEDTkAdz4">App Map ↗</a><a href="https://claude.ai/artifact/UtevwtC6sm7Xkag6ZXdJ2x">Problem 1 ↗</a><a href="https://claude.ai/artifact/Md6pmuSKugrVPTqJ8VfJxC">Problem 2 ↗</a><span class="here">Problem 3</span><a href="https://claude.ai/artifact/JuwhuY7yNAAWq8Bw7jP6kq">Bonus ↗</a></div>
+
+  <h2>Acme said</h2>
+  <p class="quote">"Cable ties always under <b>Electrical Engineering</b>, printer toner under <b>IT Hardware</b>, small software subscriptions under <b>Office Supplies</b>. Non-negotiable."</p>
+
+  <h2>Do we have tests that prove it's wrong?</h2>
+  <p><span class="status ok">Yes, as of 10 Nov</span></p>
+  <ul>
+    <li>Before: one test checked the group list loads. Nothing else.</li>
+    <li>Now: <code>backend/tests/test_categorisation.py</code>. 14 tests, no AI, no network.</li>
+    <li>Own in-memory database, seeded like production. Real Acme and Walmart logins.</li>
+    <li>Two kinds:
+      <ul>
+        <li><b>Today</b> tests pass now. They pin how it works today.</li>
+        <li><b>Target</b> tests are marked "expected to fail". Each one flips to pass when we build that piece.</li>
+      </ul>
+    </li>
+    <li>Strict: if a target test passes early, the suite goes red. So nothing passes by accident.</li>
+    <li>Whole backend suite: <b>26 pass, 6 expected to fail</b>.</li>
+    <li>The <a href="https://claude.ai/artifact/UtevwtC6sm7Xkag6ZXdJ2x">Problem 1</a> eval <b>records</b> the group but does <b>not score</b> it. The AI eval below is still to build.</li>
+  </ul>
+<pre>docker compose exec -T -e OPENAI_API_KEY= backend \
+  python -m pytest tests/test_categorisation.py -v</pre>
+
+  <h2>Tests: how it works today</h2>
+  <table>
+    <thead><tr><th>Test</th><th>What it shows</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>One global list</td><td>Acme and Walmart get the exact same groups.</td><td class="r pass">Pass</td></tr>
+      <tr><td>Acme's names live elsewhere</td><td>11 "Electrical Engineering" sits under Facility Management. 29 is plain "Hardware". Toner 204 sits under Office &amp; Administration. No "Office Supplies".</td><td class="r pass">Pass</td></tr>
+      <tr><td>Manual request takes any group</td><td>Cable ties saved as Software. No check.</td><td class="r pass">Pass</td></tr>
+      <tr><td>Settings hold one key</td><td>Only required fields. Saving <code>commodity_rules</code> is rejected (422).</td><td class="r pass">Pass</td></tr>
+      <tr><td>Save replaces everything</td><td>Saving <code>{}</code> wipes required fields. The Organization page would wipe rules the same way.</td><td class="r pass">Pass</td></tr>
+      <tr><td>Unknown key breaks the read</td><td>Rules written straight to the database make the settings read crash (500).</td><td class="r pass">Pass</td></tr>
+      <tr><td>Extraction knows no company</td><td>It takes only the PDF text. Company rules can't reach it.</td><td class="r pass">Pass</td></tr>
+      <tr><td>Guard: buyers can't change settings</td><td>403. Already true, must stay true.</td><td class="r pass">Pass</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Tests: what we build next</h2>
+  <table>
+    <thead><tr><th>Test</th><th>Done when</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Save and read rules</td><td>Admin saves Acme's rules, reads back the same rules.</td><td class="r todo">Expected fail</td></tr>
+      <tr><td>Unknown group rejected</td><td>Valid rule accepted. Rule pointing at group 999999 rejected (422).</td><td class="r todo">Expected fail</td></tr>
+      <tr><td>Reason is optional</td><td>A rule with no reason saves (reason comes back empty). Empty or blank keywords rejected (422).</td><td class="r todo">Expected fail</td></tr>
+      <tr><td>Saves merge</td><td>Saving required fields keeps the rules.</td><td class="r todo">Expected fail</td></tr>
+      <tr><td>Rules apply</td><td>"Kabelbinder 200mm" → 11. "HP 305A toner" → 29. "Office chair" → no rule.</td><td class="r todo">Expected fail</td></tr>
+      <tr><td><b>No leak to another company</b></td><td>Walmart sees no Acme rules in settings. Walmart's cable ties and toner get no rule. Walmart sets its own toner → 204; Acme's toner stays 29.</td><td class="r todo">Expected fail</td></tr>
+    </tbody>
+  </table>
+  <p class="label">Rule shape, agreed 10 Nov</p>
+  <ul>
+    <li>Rule: <code>id</code>, <code>keywords</code> and <code>commodity_group_id</code>.</li>
+    <li><code>id</code> is set by the server and never changes. The activity log points at it.</li>
+    <li><code>reason</code> is optional. Empty by default. Shown to people and agents when given.</li>
+    <li><code>max_amount</code> is optional. The rule only hits a line at or under that total. Made for "small" software. The number waits on Acme.</li>
+    <li>Full shape, matching and order: <a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5#rules">Rules and settings ↗</a>.</li>
+    <li>Keywords can't be empty: an empty rule would match nothing, or everything.</li>
+    <li>Stored in org settings under <code>commodity_rules</code>. No rules is fine: empty list.</li>
+    <li>One function every path calls: <code>categorise(db, organization_id, text)</code> → group or none.</li>
+    <li>Rename anything and only the tests change, nothing else is built yet.</li>
+  </ul>
+  <p class="label">Not covered yet</p>
+  <ul>
+    <li>Software subscriptions: "Office Supplies" doesn't exist. Waiting on Acme.</li>
+    <li>The new rule fields: <code>id</code> and <code>max_amount</code>.</li>
+    <li>German and English wording, with near misses.</li>
+    <li>Two rules on one line: the first in the list wins.</li>
+    <li>Save: a requester's wrong group is replaced by the rule group. A buyer or admin override is kept and logged.</li>
+    <li>Settings read survives an unknown key or a rule whose group is gone.</li>
+    <li>The AI classifier eval, live model.</li>
+  </ul>
+
+  <h2>How it works today</h2>
+  <ul>
+    <li>The same AI call as Problem 1 also picks the group.</li>
+    <li>It gets the full list of 2,000 groups in the prompt.</li>
+    <li>If the ID is not in the list, it is set to empty.</li>
+    <li>The list is <b>global</b>. Every company shares it.</li>
+    <li>There is <b>no per-company rule</b> anywhere.</li>
+  </ul>
+
+  <h2>The classification part of the prompt</h2>
+<pre>7. Commodity Group Classification - Select the SINGLE most appropriate commodity group from the list below
+
+Available Commodity Groups (ID | Category | Name):
+<mark>{commodity_groups_list}</mark>     ← all 2,000 lines
+
+- For classification, consider the PRIMARY nature and purpose of the items:
+  * Branded office decor/furniture → Office Equipment (<mark>15</mark>)
+  * Traditional promotional items (brochures, giveaways, banners) → Promotional Materials (<mark>43</mark>)
+  * Software/IT products → Software (<mark>31</mark>) or IT Services (<mark>30</mark>)
+  * If genuinely uncertain, set commodityGroupId to null</pre>
+  <ul>
+    <li>Highlighted IDs are hard-coded. They match today, but break silently if the list changes.</li>
+    <li>The rule "Software → Software (31)" works <b>against</b> Acme's "small software → Office Supplies".</li>
+    <li>Full prompt: <a href="https://claude.ai/artifact/UtevwtC6sm7Xkag6ZXdJ2x">Problem 1 ↗</a>.</li>
+  </ul>
+
+  <h2>What we found</h2>
+  <div class="card">
+    <div class="head"><span class="badge">A</span><h3>2 of Acme's 3 groups don't exist</h3></div>
+    <table>
+      <thead><tr><th>Item</th><th>Acme wants</th><th>In the list?</th></tr></thead>
+      <tbody>
+        <tr><td>Cable ties</td><td>Electrical Engineering</td><td><b>Yes</b>, ID 11</td></tr>
+        <tr><td>Printer toner</td><td>IT Hardware</td><td><b>No.</b> Closest: 29 Hardware</td></tr>
+        <tr><td>Small software subscription</td><td>Office Supplies</td><td><b>No.</b> No group by that name</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="head"><span class="badge">B</span><h3>The list is padded 5 times over</h3></div>
+    <ul>
+      <li>2,000 groups, only 380 real names.</li>
+      <li>The rest are copies with a suffix: "Small Pack", "Bulk", "Pallet", "Container Load", "Per-seat"...</li>
+      <li>Toner alone has 6 groups: 204, 534, 864, 1194, 1524, 1854.</li>
+      <li>So the AI can pick a "right" toner group that's still the wrong ID.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="head"><span class="badge">C</span><h3>Nowhere to put Acme's rules</h3></div>
+    <ul>
+      <li>Groups are shared by all companies.</li>
+      <li>Org settings only hold "required fields" today.</li>
+      <li>That settings JSON is the place the code itself points to for company config.</li>
+    </ul>
+  </div>
+
+  <h2>The eval to build</h2>
+  <p><span class="status wait">Needs your OK</span></p>
+  <ul>
+    <li><b>Cases:</b> short item texts with the group Acme expects.</li>
+    <li><b>Acme's 3 rules,</b> each in several wordings: "Kabelbinder 200mm", "cable ties black", "Toner HP 305A", "Notion team plan, monthly".</li>
+    <li><b>Near misses</b> that must <b>not</b> follow the rules: a cable drum, a printer, a big ERP licence.</li>
+    <li><b>The 5 real quotes,</b> with the group a person would pick.</li>
+    <li><b>Score:</b> right group out of total, per rule and overall.</li>
+    <li><b>Same cases on another company</b> (e.g. BMW). Acme's rules must not leak.</li>
+  </ul>
+  <p class="label">Expected result today</p>
+  <ul>
+    <li>Toner and software cases should all fail. Their target groups don't exist.</li>
+    <li>That failing baseline is the proof you asked for.</li>
+  </ul>
+
+  <h2>How the prompt works today</h2>
+  <div class="diagram">
+<svg viewBox="0 0 780 600" role="img" aria-label="Sequence diagram of commodity group assignment today"><defs>
+<marker id="ta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#111111"/></marker>
+<marker id="tx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#136f7d"/></marker>
+<marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#111111" stroke-width="1.4"/></marker></defs>
+<line x1="66" y1="48" x2="66" y2="588" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="214" y1="48" x2="214" y2="588" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="370" y1="48" x2="370" y2="588" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="526" y1="48" x2="526" y2="588" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="700" y1="48" x2="700" y2="588" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="68" y1="84" x2="212" y2="84" stroke="#111111" stroke-width="1.3" marker-end="url(#ta)"/>
+<text class="msg" x="140.0" y="77" text-anchor="middle">Upload quote PDF</text>
+<line x1="216" y1="122" x2="368" y2="122" stroke="#111111" stroke-width="1.3" marker-end="url(#ta)"/>
+<text class="msg" x="292.0" y="115" text-anchor="middle">POST /extract</text>
+<path d="M370 142h34v20h-32" fill="none" stroke="#111111" stroke-width="1.3" marker-end="url(#ta)"/>
+<text class="msg " x="410" y="157">pypdf → plain text</text>
+<line x1="372" y1="204" x2="524" y2="204" stroke="#111111" stroke-width="1.3" marker-end="url(#ta)"/>
+<text class="msg" x="448.0" y="197" text-anchor="middle">Load ALL groups</text>
+<line x1="524" y1="240" x2="372" y2="240" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#tr)"/>
+<text class="msg" x="448.0" y="233" text-anchor="middle">2,000 rows</text>
+<line x1="372" y1="288" x2="698" y2="288" stroke="#136f7d" stroke-width="2" marker-end="url(#tx)"/>
+<text class="msg ai" x="535.0" y="281" text-anchor="middle">ONE prompt: PDF + 2,000 groups + hints</text>
+<rect x="548" y="304" width="226" height="74" rx="6" fill="#f5f6f8" stroke="#e5e7eb"/>
+<text x="558" y="324" style="font-size:11px">Task A: fields + order lines</text>
+<text x="558" y="340" style="font-size:11px">Task B: 1 group for the whole request</text>
+<text x="558" y="356" style="font-size:11px">Hard-coded IDs 15, 43, 31, 30</text>
+<text x="558" y="372" style="font-size:11px">One answer, no confidence</text>
+<line x1="698" y1="400" x2="372" y2="400" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#tr)"/>
+<text class="msg" x="535.0" y="393" text-anchor="middle">JSON + commodityGroupId</text>
+<path d="M370 420h34v20h-32" fill="none" stroke="#111111" stroke-width="1.3" marker-end="url(#ta)"/>
+<text class="msg " x="410" y="435">ID exists? else empty</text>
+<line x1="368" y1="484" x2="216" y2="484" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#tr)"/>
+<text class="msg" x="292.0" y="477" text-anchor="middle">Pre-filled form</text>
+<line x1="212" y1="522" x2="68" y2="522" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#tr)"/>
+<text class="msg" x="140.0" y="515" text-anchor="middle">Group + dropdown</text>
+<line x1="68" y1="562" x2="212" y2="562" stroke="#111111" stroke-width="1.3" marker-end="url(#ta)"/>
+<text class="msg" x="140.0" y="555" text-anchor="middle">Accept or change, save</text>
+<rect x="8" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="66" y="24" text-anchor="middle">Person</text><text class="hs" x="66" y="39" text-anchor="middle">requester</text>
+<rect x="156" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="214" y="24" text-anchor="middle">Frontend</text><text class="hs" x="214" y="39" text-anchor="middle">Next.js</text>
+<rect x="312" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="370" y="24" text-anchor="middle">Backend</text><text class="hs" x="370" y="39" text-anchor="middle">/extract</text>
+<rect x="468" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="526" y="24" text-anchor="middle">Database</text><text class="hs" x="526" y="39" text-anchor="middle">Postgres</text>
+<rect x="642" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#136f7d" stroke-width="2"/>
+<text class="hd" x="700" y="24" text-anchor="middle" style="fill:#136f7d">OpenAI</text><text class="hs" x="700" y="39" text-anchor="middle">gpt-4o-mini</text>
+</svg>
+  </div>
+  <ul>
+    <li><b>One prompt does two jobs:</b> read the PDF and pick the group.</li>
+    <li>It picks <b>one group for the whole request</b>, not per line.</li>
+    <li>Acme's rules have nowhere to go. At best they'd be more hints in a 2,000-line prompt.</li>
+    <li>Hints in a prompt are a <b>suggestion</b>. "Non-negotiable" needs code.</li>
+    <li><b>Manual requests</b> skip all of this. No suggestion at all.</li>
+    <li>Can't test parts on their own: a wrong group could be bad reading, a bad pick, or a missing rule.</li>
+  </ul>
+
+  <h2>Proposed: split it, rules first</h2>
+  <p><span class="status ok">Agreed 10 Nov</span></p>
+  <div class="diagram">
+<svg viewBox="0 0 780 1000" role="img" aria-label="Sequence diagram of the proposed flow for Problems 1 and 3"><defs>
+<marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#111111"/></marker>
+<marker id="px" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#136f7d"/></marker>
+<marker id="pr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#111111" stroke-width="1.4"/></marker></defs>
+<line x1="62" y1="48" x2="62" y2="990" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="190" y1="48" x2="190" y2="990" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="320" y1="48" x2="320" y2="990" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="445" y1="48" x2="445" y2="990" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="570" y1="48" x2="570" y2="990" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<line x1="700" y1="48" x2="700" y2="990" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<rect x="14" y="62" width="392" height="238" rx="6" fill="none" stroke="#9ca3af"/>
+<rect x="14" y="62" width="36" height="18" rx="4" fill="#f5f6f8" stroke="#9ca3af"/><text class="frame" x="22" y="75">opt</text>
+<text class="frame msg" x="58" y="75">[PDF upload]</text>
+<line x1="64" y1="106" x2="188" y2="106" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="126.0" y="99" text-anchor="middle">PDF + org from login</text>
+<path d="M190 122h34v20h-32" fill="none" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="230" y="137">PDF → text</text>
+<line x1="192" y1="186" x2="318" y2="186" stroke="#136f7d" stroke-width="2" marker-end="url(#px)"/>
+<text class="msg ai" x="255.0" y="179" text-anchor="middle">text + buyer name</text>
+<line x1="318" y1="222" x2="192" y2="222" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#pr)"/>
+<text class="msg" x="255.0" y="215" text-anchor="middle">fields + lines, nulls allowed</text>
+<path d="M190 242h34v20h-32" fill="none" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="230" y="257">code adds up totals, flags gaps</text>
+<line x1="64" y1="330" x2="188" y2="330" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="126.0" y="323" text-anchor="middle">manual or agent lines</text>
+<line x1="192" y1="370" x2="443" y2="370" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="317.5" y="363" text-anchor="middle">lines + org</text>
+<line x1="447" y1="406" x2="568" y2="406" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="507.5" y="399" text-anchor="middle">load_settings(org)</text>
+<line x1="568" y1="440" x2="447" y2="440" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#pr)"/>
+<text class="msg" x="507.5" y="433" text-anchor="middle">typed rules, checked</text>
+<path d="M445 458h34v20h-32" fill="none" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="485" y="473">match every line</text>
+<rect x="408" y="500" width="366" height="270" rx="6" fill="none" stroke="#9ca3af"/>
+<rect x="408" y="500" width="36" height="18" rx="4" fill="#f5f6f8" stroke="#9ca3af"/><text class="frame" x="416" y="513">alt</text>
+<text class="frame msg" x="452" y="513">[a rule matches]</text>
+<text class="bad msg" x="455" y="546">Rule group + reason.</text>
+<text class="bad msg" x="455" y="564">Classifier never runs.</text>
+<line x1="408" y1="584" x2="774" y2="584" stroke="#9ca3af" stroke-dasharray="6 4"/><text class="frame msg" x="416" y="600">[no rule]</text>
+<path d="M445 610h34v20h-32" fill="none" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="485" y="625">shortlist ~15 in code</text>
+<line x1="447" y1="670" x2="698" y2="670" stroke="#136f7d" stroke-width="2" marker-end="url(#px)"/>
+<text class="msg ai" x="572.5" y="663" text-anchor="middle">lines + G1…G15 + NONE</text>
+<line x1="698" y1="704" x2="447" y2="704" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#pr)"/>
+<text class="msg" x="572.5" y="697" text-anchor="middle">one alias + reason</text>
+<path d="M445 722h34v20h-32" fill="none" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="485" y="737">alias → ID; NONE or error → empty</text>
+<line x1="443" y1="806" x2="192" y2="806" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#pr)"/>
+<text class="msg" x="317.5" y="799" text-anchor="middle">group + source + reason</text>
+<line x1="188" y1="840" x2="64" y2="840" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#pr)"/>
+<text class="msg" x="126.0" y="833" text-anchor="middle">pre-filled form</text>
+<rect x="14" y="862" width="760" height="128" rx="6" fill="none" stroke="#9ca3af"/>
+<rect x="14" y="862" width="44" height="18" rx="4" fill="#f5f6f8" stroke="#9ca3af"/><text class="frame" x="22" y="875">loop</text>
+<text class="frame msg" x="66" y="875">[every save: create and edit]</text>
+<line x1="64" y1="906" x2="188" y2="906" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="126.0" y="899" text-anchor="middle">save request + chosen group</text>
+<line x1="192" y1="936" x2="443" y2="936" stroke="#111111" stroke-width="1.3" marker-end="url(#pa)"/>
+<text class="msg" x="317.5" y="929" text-anchor="middle">re-check rules</text>
+<line x1="443" y1="970" x2="192" y2="970" stroke="#111111" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#pr)"/>
+<text class="msg" x="317.5" y="963" text-anchor="middle">rule wins or buyer overrides, logged</text>
+<rect x="4" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="62" y="24" text-anchor="middle">Person / agent</text><text class="hs" x="62" y="39" text-anchor="middle">PDF, manual, API</text>
+<rect x="132" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="190" y="24" text-anchor="middle">Backend</text><text class="hs" x="190" y="39" text-anchor="middle">FastAPI</text>
+<rect x="262" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#136f7d" stroke-width="2"/>
+<text class="hd" x="320" y="24" text-anchor="middle" style="fill:#136f7d">Extractor</text><text class="hs" x="320" y="39" text-anchor="middle">LLM 1, Problem 1</text>
+<rect x="387" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="445" y="24" text-anchor="middle">Categoriser</text><text class="hs" x="445" y="39" text-anchor="middle">code</text>
+<rect x="512" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#111111" stroke-width="1.2"/>
+<text class="hd" x="570" y="24" text-anchor="middle">Org settings</text><text class="hs" x="570" y="39" text-anchor="middle">JSON, typed</text>
+<rect x="642" y="6" width="116" height="42" rx="6" fill="#fff" stroke="#136f7d" stroke-width="2"/>
+<text class="hd" x="700" y="24" text-anchor="middle" style="fill:#136f7d">Classifier</text><text class="hs" x="700" y="39" text-anchor="middle">LLM 2</text>
+</svg>
+  </div>
+  <ul>
+    <li><b>Extractor (Problem 1):</b> reads the PDF only. No group list, so the prompt loses ~27k tokens. Strict structured output, nulls allowed. Gets the buyer's name so vendor and customer don't swap.</li>
+    <li><b>Categoriser:</b> plain code. Every path goes through it: PDF, typed or agent.</li>
+    <li><b>Rules first:</b> Acme's typed rules from org settings. A hit wins and the classifier never runs. Saves a call and can't be overruled.</li>
+    <li><b>Shortlist:</b> code, not AI. About 15 of the 380 real group names. Shared with Problem 2. How it searches is picked by an eval: <a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5#search">Shared search ↗</a>.</li>
+    <li>Word match always works with no API key, so tests stay offline and nothing changes in the database.</li>
+    <li><b>Classifier:</b> sees short aliases G1…G15 plus NONE, locked by the output schema. Code maps them back to real IDs. It can't return an ID that doesn't exist.</li>
+    <li><b>Every save re-checks rules,</b> create and edit. The dropdown or an agent can't get round them.</li>
+    <li><b>Override:</b> only a buyer or admin can keep a different group. It is logged with the rule ID.</li>
+    <li>Every result says <b>why</b>: rule, model or person.</li>
+  </ul>
+
+  <h2>Is it safe? Checked against your constraints</h2>
+  <table>
+    <thead><tr><th>Risk</th><th>How the design handles it</th><th>Proved by</th></tr></thead>
+    <tbody>
+      <tr><td>Database schema changes</td><td>None. Rules live in <code>organizations.settings</code> JSON. Source and reason go in the API reply and the activity log's <code>detail</code> JSON.</td><td>No migration in the PR</td></tr>
+      <tr><td>Rule bypassed</td><td>Enforced on the server at every save (<code>POST</code> and <code>PUT /requests</code>), not only in the form. Only a buyer or admin can override, and it is logged.</td><td>New tests: requester sends the wrong group, rule group is stored. Buyer override is kept and logged.</td></tr>
+      <tr><td>Rule leaks to another company</td><td>Rules read only from the signed-in company's settings.</td><td>Existing target test</td></tr>
+      <tr><td>Bad rule saved</td><td>Typed rule, unknown keys rejected, group must exist. Saves merge, so the Organization page can't wipe rules.</td><td>Existing target tests</td></tr>
+      <tr><td>Model invents an ID</td><td>Schema allows only G1…G15 or NONE. Code maps back. Anything else → empty.</td><td>Unit test on the mapping</td></tr>
+      <tr><td>AI fails</td><td>Classifier error → group empty, upload still works. Extractor allows nulls (fixes 6/15 crashes in <a href="https://claude.ai/artifact/UtevwtC6sm7Xkag6ZXdJ2x">Problem 1</a>).</td><td>Test with the model unavailable</td></tr>
+      <tr><td>Quality drops</td><td>Old cases and new cases both scored, live model, before and after.</td><td>Problem 1 eval + new categorisation eval</td></tr>
+      <tr><td>Cost and speed</td><td>All lines hit rules → 1 call (PDF) or 0 (manual). Otherwise 2 small calls instead of 1 huge one.</td><td>Timings in eval results</td></tr>
+    </tbody>
+  </table>
+
+  <h2>One limit from "no schema changes"</h2>
+  <ul>
+    <li>A request holds <b>one group</b>, not one per line.</li>
+    <li>So line hits must collapse to one group. <b>Agreed 10 Nov:</b>
+      <ul>
+        <li>Any line hits a rule → the rule decides.</li>
+        <li>Lines hit different rules → the rule on the highest-value line wins, and it's flagged.</li>
+        <li>No rule → the classifier picks one group for the request.</li>
+      </ul>
+    </li>
+    <li>Per-line groups need a new column. Logged for later.</li>
+  </ul>
+
+  <h2>Each step gets its own check</h2>
+  <table>
+    <thead><tr><th>Step</th><th>Kind</th><th>Checked by</th><th>Exists?</th></tr></thead>
+    <tbody>
+      <tr><td>Extractor</td><td>AI</td><td>Problem 1 eval, 5 quotes, live model</td><td><b>Yes</b></td></tr>
+      <tr><td>Rules</td><td>Code</td><td>Unit tests, written first. Acme's rules, near misses, no leak to Walmart.</td><td><b>Tests yes</b>, code no</td></tr>
+      <tr><td>Shortlist</td><td>Code</td><td>Is the right group in the top 15? Same answer every run.</td><td>No</td></tr>
+      <tr><td>Save</td><td>Code</td><td>Rule group stored even when the form sends another.</td><td>No</td></tr>
+      <tr><td>Classifier</td><td>AI</td><td>Categorisation eval below, live model</td><td>No</td></tr>
+      <tr><td>End to end</td><td>Both</td><td>The 5 quotes and Acme's 3 complaints, right group per request</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>A failure now points at one step, not "the AI".</li>
+    <li>Rules and search are deterministic, so normal tests prove them. Only the 2 model steps need evals.</li>
+  </ul>
+
+  <h2>Decisions before any code</h2>
+  <ul>
+    <li><b>Decided 10 Nov: check with Acme first, no new groups and no schema changes until they confirm.</b>
+      <ul>
+        <li><b>Why:</b> the group list and the database schema are shared by every company. A change made for one customer on a guess lands on all of them.</li>
+        <li>A product patched customer by customer turns into a monster nobody can maintain. So we fix Acme with settings only, and change the shared parts once we know it's right.</li>
+        <li><b>"IT Hardware":</b> mapped to the existing group Hardware (29), under Information Technology.</li>
+        <li><b>"Office Supplies":</b> doesn't exist. Small software subscriptions go to Office Equipment (15) as a stand-in, to confirm with Acme.</li>
+        <li><b>"Small" software:</b> a line total up to €500, a placeholder in <code>max_amount</code>, to confirm with Acme.</li>
+        <li>All three live in Acme's settings, so their answer is a settings change, not a deploy.</li>
+      </ul>
+    </li>
+    <li><b>Decided:</b> rules beat the model, enforced on every save. No IReRa. No schema changes. Structured outputs. Rules built first. One group per request; the highest-value line's rule wins.</li>
+    <li><b>Decided 10 Nov:</b> a buyer or admin can override a rule hit, logged. Rules carry an <code>id</code> and an optional <code>max_amount</code>. Two rules on one line: list order wins. Keywords work in German and English. Settings reads are tolerant, writes are strict, saves merge.</li>
+    <li><b>Prompt hints 15, 43, 31, 30 (decided 10 Nov):</b> kept as hints in the classifier prompt, by name, no hard-coded IDs.
+      <ul>
+        <li>Not turned into rules: we don't know where they came from, so we won't enforce them.</li>
+        <li>Company rules always win. Hints only guide the model when no rule matches.</li>
+        <li>Each hint gets eval cases, so we see if the model follows it.</li>
+      </ul>
+    </li>
+    <li><b>Clean up the padded list</b> now, or leave it and only add rules?</li>
+    <li><b>Group per line:</b> needs a schema change, so later.</li>
+    <li><b>Who manages the rules: Acme or us?</b>
+      <ul>
+        <li><b>Us:</b> set through settings and the API. No new UI. Acme sends changes, we apply them.</li>
+        <li><b>Acme:</b> their admin needs a screen to add, edit and remove rules. See "Later" below.</li>
+        <li>Either way: admins only, every change logged.</li>
+      </ul>
+    </li>
+    <li><b>Build order:</b> rules first (fixes Acme on their own), then split the prompt.</li>
+  </ul>
+
+  <h2>Later, if we have time</h2>
+  <p class="label">Not now. Logged so it isn't lost.</p>
+  <div class="card">
+    <div class="head"><span class="badge">1</span><h3>Target design: works at millions of rows</h3></div>
+    <p>The list is never sent to the model. Find a few candidates with cheap, indexed lookups, then let the model pick from those only. The prompt stays the same size at 2,000 or 2 million rows.</p>
+    <p class="label">1. Exact matches first (no AI)</p>
+    <ul>
+      <li>Company rules (Acme: cable ties → Electrical Engineering).</li>
+      <li>Supplier article number or EAN.</li>
+      <li>Past decisions: same company, same item text → same group.</li>
+      <li>Instant and certain at any size. Many lines end here.</li>
+    </ul>
+    <p class="label">2. Find candidates (no AI)</p>
+    <ul>
+      <li><b>Keyword search</b> on names and codes: "HP 305A", "Kabelbinder 200mm".</li>
+      <li><b>Meaning search</b> (embeddings, stored once per row): "Kabelbinder" ↔ cable ties, "Notion team plan" ↔ software subscription.</li>
+      <li><b>Filter first</b> by company, supplier or top-level category.</li>
+      <li>Combine both, keep the top 20–50. Milliseconds at millions of rows. Postgres with <code>pgvector</code> can do this.</li>
+    </ul>
+    <p class="label">3. Model picks from the shortlist</p>
+    <ul>
+      <li>Gets the line item and ~20 candidates, never the full list.</li>
+      <li>Must return one of those IDs, checked in code, plus a confidence.</li>
+      <li>Can't invent an ID. Anything off the shortlist is rejected.</li>
+    </ul>
+    <p class="label">4. Low confidence → a person</p>
+    <ul>
+      <li>They pick from the same shortlist, not a 2,000-option dropdown.</li>
+      <li>Their choice is saved and becomes an exact match next time.</li>
+    </ul>
+    <p class="label">Shrink the problem up front</p>
+    <ul>
+      <li><b>Clean up the padded list:</b> one "Toner Cartridges" group, with Bulk or Pallet as attributes. About 5× fewer rows.</li>
+      <li><b>Use the hierarchy:</b> pick the top-level category, then search inside it.</li>
+      <li><b>Same pattern solves Problem 2:</b> suggesting catalogue articles is the same search over a bigger list.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="head"><span class="badge">2</span><h3>Try OpenAI's Decisions API for step 3</h3></div>
+    <p>A new OpenAI endpoint (<code>/v1/decisions</code>, DevDay 2026) built for this exact job: we pass a question and a list of choices, it returns one of them.</p>
+    <ul>
+      <li><b>Fits step 3:</b> the shortlist becomes its choices, so the answer is always one of our groups.</li>
+      <li><b>Claims:</b> about 10× faster than a normal call, image input too. OpenAI's own numbers, not checked by us.</li>
+      <li><b>Open:</b> preview or beta status, pricing, and whether its scores work as a confidence for step 4.</li>
+      <li><b>How to judge it:</b> run the same eval against our step 3 call, compare accuracy, speed and cost.</li>
+      <li><b>Not now:</b> one model only (GPT-6 Luna), new and changing. Rules and the shortlist come first either way.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="head"><span class="badge">3</span><h3>A screen to manage rules</h3></div>
+    <p>Needed only if Acme manages its own rules. Lives on the Organization page, next to required fields.</p>
+    <ul>
+      <li><b>List:</b> each rule shows keywords, group and reason.</li>
+      <li><b>Add or edit:</b> keywords as chips, group picked by search (not the 2,000 dropdown), optional reason.</li>
+      <li><b>Try it:</b> type an item, see which rule hits before saving.</li>
+      <li><b>Remove:</b> with a confirm.</li>
+      <li><b>Who:</b> admins edit. Buyers and requesters only see the rules.</li>
+      <li><b>History:</b> who changed which rule, when.</li>
+      <li><b>On the request:</b> the group shows "Set by Acme rule" and the reason.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="head"><span class="badge">4</span><h3>Top 3 suggestions and learning from picks</h3></div>
+    <p>A person in the loop without slowing anyone down.</p>
+    <ul>
+      <li><b>Show the top 3:</b> the first is pre-selected, the other two are one click away. No 2,000 dropdown.</li>
+      <li><b>Show why:</b> rule, model or person, with the reason.</li>
+      <li><b>Record the pick:</b> which suggestion was shown, which was chosen.</li>
+      <li><b>Review it:</b> if people keep picking #2 over #1, or keep overriding a rule, change the rule or the ranking.</li>
+      <li><b>Feeds the eval:</b> real picks become new test cases.</li>
+      <li>Needs a place to store picks. Check first whether the activity log's JSON is enough before adding a table.</li>
+    </ul>
+  </div>
+
+  <footer><span>Problem 3 of 4. Evals first, then rules.</span><span>Lio FDE case study</span></footer>
+</main>
