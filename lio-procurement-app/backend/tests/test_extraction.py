@@ -128,3 +128,41 @@ def test_prompt_states_what_right_means():
     for rule in ("net total before VAT", "Charges are order lines", "Alternatives",
                  "not order lines"):
         assert rule in prompt
+
+
+def _prompt(**kwargs):
+    return request_params("Angebot", "1 | IT | Software", **kwargs)["messages"][1]["content"]
+
+
+def test_prompt_names_the_buyer():
+    prompt = _prompt(buyer_name="ACME Corp")
+    assert "The buyer is ACME Corp." in prompt
+    assert "Never the buyer" in prompt
+
+
+def test_prompt_without_a_buyer_still_says_who_the_vendor_is():
+    prompt = _prompt()
+    assert "The buyer is" not in prompt
+    assert "the company that sent the quote" in prompt
+
+
+def test_extraction_route_passes_the_company_name(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.routers import extraction as route
+
+    seen = {}
+
+    def fake_extract(pdf_text, db, buyer_name=None):
+        seen["buyer_name"] = buyer_name
+        return route.ExtractionResponse(success=False, error="stopped before the model")
+
+    monkeypatch.setattr(route, "extract_vendor_data", fake_extract)
+    client = TestClient(app)
+    token = client.post(
+        "/auth/signin", json={"email": "buyer@acme.com", "password": "demo1234"}
+    ).json()["access_token"]
+    client.post("/extraction", json={"text": "Angebot"},
+                headers={"Authorization": f"Bearer {token}"})
+    assert seen["buyer_name"] == "Acme Corp"

@@ -61,11 +61,24 @@ REPLY_SCHEMA = _strict_object({
 })
 
 
-def _build_prompt(pdf_text: str, commodity_groups_list: str) -> str:
+def _buyer_rules(buyer_name: str | None) -> str:
+    named = f"The buyer is {buyer_name}. The quote is addressed to the buyer.\n- " if buyer_name else ""
+    return (
+        f"- {named}vendorName is the company that sent the quote: the letterhead, the sender line "
+        "above the address, the signature, the footer with bank details and VAT ID. Never the "
+        "buyer, and never a company from the address block.\n"
+        "- vatId is the vendor's VAT ID, never the buyer's."
+    )
+
+
+def _build_prompt(pdf_text: str, commodity_groups_list: str, buyer_name: str | None = None) -> str:
     return f"""Extract the purchase from this supplier quote (Angebot) AND classify it into one commodity group. The quote is usually German.
 
 Document Text:
 {pdf_text}
+
+Buyer and vendor:
+{_buyer_rules(buyer_name)}
 
 Fields:
 1. title: a short (2-5 words) description of what is being bought.
@@ -112,12 +125,15 @@ def _strip_markdown_fences(content: str) -> str:
     return cleaned
 
 
-def request_params(pdf_text: str, commodity_groups_list: str) -> dict:
+def request_params(
+    pdf_text: str, commodity_groups_list: str, buyer_name: str | None = None
+) -> dict:
     return {
         "model": settings.openai_model,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": _build_prompt(pdf_text, commodity_groups_list)},
+            {"role": "user",
+             "content": _build_prompt(pdf_text, commodity_groups_list, buyer_name)},
         ],
         "response_format": {
             "type": "json_schema",
@@ -155,7 +171,9 @@ def find_missing_fields(extracted: ExtractedVendorData) -> list[str]:
     return missing
 
 
-def extract_vendor_data(pdf_text: str, db: Session) -> ExtractionResponse:
+def extract_vendor_data(
+    pdf_text: str, db: Session, buyer_name: str | None = None
+) -> ExtractionResponse:
     """Extract vendor data and classify commodity group in one AI call.
 
     Port of ``src/actions/extraction.ts`` — same prompt, model and validation.
@@ -187,7 +205,7 @@ def extract_vendor_data(pdf_text: str, db: Session) -> ExtractionResponse:
     try:
         client = OpenAI(api_key=settings.openai_api_key)
         response = client.chat.completions.create(
-            **request_params(pdf_text, commodity_groups_list)
+            **request_params(pdf_text, commodity_groups_list, buyer_name)
         )
 
         content = response.choices[0].message.content

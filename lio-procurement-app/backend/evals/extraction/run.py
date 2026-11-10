@@ -72,7 +72,7 @@ def run_case(key: dict, source: str, db) -> dict:
 
     RecordingOpenAI.last = {}
     started = time.monotonic()
-    resp = extraction.extract_vendor_data(text, db)
+    resp = extraction.extract_vendor_data(text, db, key.get("customer"))
     seconds = round(time.monotonic() - started, 2)
     raw = dict(RecordingOpenAI.last)
     app_data = resp.data.model_dump(by_alias=True) if resp.success and resp.data else None
