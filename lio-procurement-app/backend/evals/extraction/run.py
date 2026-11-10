@@ -68,21 +68,22 @@ def _raw_json(content: str | None) -> dict | None:
         return None
 
 
-def run_case(key: dict, source: str, db) -> dict:
+def run_case(key: dict, source: str, db, buyer: str | None = None) -> dict:
     pdf_bytes = (QUOTES / key["pdf"]).read_bytes()
+    buyer = buyer or key.get("customer")
 
     RecordingOpenAI.last = {}
     RecordingOpenAI.calls = []
     started = time.monotonic()
     if source == "layout":
         text = (LAYOUT / f"{key['pdf']}.txt").read_text()
-        resp = extraction.extract_vendor_data(text, db, key.get("customer"))
+        resp = extraction.extract_vendor_data(text, db, buyer)
     elif source == "pypdf":
         text = extract_text(pdf_bytes)
-        resp = extraction.extract_vendor_data(text, db, key.get("customer"))
+        resp = extraction.extract_vendor_data(text, db, buyer)
     else:
         text = extract_text(pdf_bytes)
-        resp = extraction.extract_quote(pdf_bytes, db, key.get("customer"))
+        resp = extraction.extract_quote(pdf_bytes, db, buyer)
     seconds = round(time.monotonic() - started, 2)
     raw = dict(RecordingOpenAI.last)
     raw["calls"] = len(RecordingOpenAI.calls)
@@ -234,6 +235,7 @@ def main() -> None:
     parser.add_argument("--case", action="append")
     parser.add_argument("--label", default="run")
     parser.add_argument("--without-group-list", action="store_true")
+    parser.add_argument("--buyer", default=None)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
@@ -252,7 +254,7 @@ def main() -> None:
     started = datetime.now(timezone.utc)
     meta = {"label": args.label, "model": settings.openai_model, "textSource": args.text_source,
             "runsPerCase": args.runs, "startedAt": started.isoformat(timespec="seconds"),
-            "withoutGroupList": args.without_group_list}
+            "withoutGroupList": args.without_group_list, "buyer": args.buyer or "each quote's addressee"}
     out = RESULTS / f"{started.strftime('%Y%m%d-%H%M%S')}_{args.label}"
     out.mkdir(parents=True, exist_ok=True)
 
@@ -260,7 +262,7 @@ def main() -> None:
     with SessionLocal() as db, (out / "runs.jsonl").open("w") as fh:
         for key in keys:
             for i in range(args.runs):
-                row = run_case(key, args.text_source, db)
+                row = run_case(key, args.text_source, db, args.buyer)
                 row["run"] = i + 1
                 rows.append(row)
                 fh.write(json.dumps(row, ensure_ascii=False) + "\n")

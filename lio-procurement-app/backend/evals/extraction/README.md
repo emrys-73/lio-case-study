@@ -26,6 +26,6 @@ docker compose run --rm -T -v "$PWD/../quotes:/quotes:ro" \
   backend python -m evals.extraction.run --runs 3 --label baseline
 ```
 
-Options: `--model gpt-4.1`, `--text-source pypdf` (text layer only, the path before OCR), `--text-source layout`, `--case hoffmann`, `--without-group-list`.
+Options: `--model gpt-4.1`, `--text-source pypdf` (text layer only, the path before OCR), `--text-source layout`, `--case hoffmann`, `--without-group-list`, `--buyer "Acme Corp"` (the signed-in company as the app passes it; default is each quote's addressee).
 The default `--text-source pdf` runs `extract_quote`, the same path as an upload: text layer, OCR, and page pictures when needed.
 Each full run is 15 calls, about 370k input tokens.
