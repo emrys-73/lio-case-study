@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models import CommodityGroup
 from app.schemas.extraction import ExtractedVendorData, ExtractionResponse
+from app.services.totals import check_totals
 
 logger = logging.getLogger(__name__)
 
@@ -148,6 +149,13 @@ def parse_reply(content: str) -> ExtractedVendorData:
     return ExtractedVendorData.model_validate(json.loads(_strip_markdown_fences(content)))
 
 
+def apply_totals(extracted: ExtractedVendorData) -> dict:
+    totals = check_totals(extracted.order_lines, extracted.total_cost)
+    if extracted.order_lines:
+        extracted.total_cost = totals["computed"]
+    return totals
+
+
 def _blank(value: str | None) -> bool:
     return value is None or not value.strip()
 
@@ -217,6 +225,7 @@ def extract_vendor_data(
         logger.exception("Error extracting vendor data")
         return ExtractionResponse(success=False, error=str(exc))
 
+    totals = apply_totals(extracted)
     missing_fields = find_missing_fields(extracted)
 
     # Validate that the returned commodity group id actually exists.
@@ -235,4 +244,5 @@ def extract_vendor_data(
         success=True,
         data=extracted,
         missing_fields=missing_fields or None,
+        totals=totals,
     )

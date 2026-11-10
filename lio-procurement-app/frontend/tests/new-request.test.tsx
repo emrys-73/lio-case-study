@@ -95,4 +95,29 @@ describe('new request from a PDF quote', () => {
     expect(screen.getByDisplayValue('Verpackung')).toBeInTheDocument();
     expect(screen.getAllByPlaceholderText('pcs, licenses, etc.')[1]).toHaveValue('');
   });
+
+  it('warns when the lines do not add up to the total on the quote', async () => {
+    vi.mocked(api.extraction.extract).mockResolvedValue({
+      ...hoffmann,
+      totals: { computed: 17000, printed: 17230, match: false },
+    } as never);
+    const { container } = renderPage();
+    await uploadQuote(container);
+
+    expect(
+      await screen.findByText(/The lines add up to €17000.00, the quote says €17230.00/),
+    ).toBeInTheDocument();
+  });
+
+  it('says nothing about totals when they match', async () => {
+    vi.mocked(api.extraction.extract).mockResolvedValue({
+      ...hoffmann,
+      totals: { computed: 17000, printed: 17000, match: true },
+    } as never);
+    const { container } = renderPage();
+    await uploadQuote(container);
+
+    await screen.findByDisplayValue('Hoffmann Nürnberg GmbH');
+    expect(screen.queryByText(/The lines add up to/)).not.toBeInTheDocument();
+  });
 });

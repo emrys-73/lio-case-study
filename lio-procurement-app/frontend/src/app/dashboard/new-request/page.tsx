@@ -48,6 +48,8 @@ export default function NewRequestPage() {
   const [warning, setWarning] = useState('');
   const [extracting, setExtracting] = useState(false);
   const [notFound, setNotFound] = useState<string[]>([]);
+  const [printedTotal, setPrintedTotal] = useState<number | null>(null);
+  const totalsDiffer = printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
 
   // PDF parsing mutation
   const parsePDFMutation = useMutation({
@@ -97,6 +99,7 @@ export default function NewRequestPage() {
       setOrderLines((extracted.orderLines || []).map(toFormLine));
       setTotalCost(extracted.totalCost || 0);
       setNotFound(extractionResult.missingFields || []);
+      setPrintedTotal(extractionResult.totals?.printed ?? null);
       
       // Set commodity group (now included in extraction)
       if (extracted.commodityGroupId) {
@@ -225,6 +228,12 @@ export default function NewRequestPage() {
 
       {error && <Alert variant="error" className="mb-6">{error}</Alert>}
       {warning && <Alert variant="warning" className="mb-6">{warning}</Alert>}
+      {totalsDiffer && (
+        <Alert variant="warning" className="mb-6">
+          The lines add up to €{totalCost.toFixed(2)}, the quote says €{printedTotal.toFixed(2)}.
+          Check the lines before you submit.
+        </Alert>
+      )}
       {success && <Alert variant="success" className="mb-6">{success}</Alert>}
 
       <form onSubmit={handleSubmit} className="space-y-8">

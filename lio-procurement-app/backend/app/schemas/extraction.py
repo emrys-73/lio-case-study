@@ -41,13 +41,19 @@ class ExtractedVendorData(BaseModel):
     order_lines: list[OrderLineData] = Field(default_factory=list, alias="orderLines")
     total_cost: float | None = Field(default=None, alias="totalCost")
     alternatives: list[AlternativeData] = Field(default_factory=list)
+    commodity_group_id: int | None = Field(default=None, alias="commodityGroupId")
+    commodity_group_name: str | None = Field(default=None, alias="commodityGroupName")
 
     @field_validator("order_lines", "alternatives", mode="before")
     @classmethod
     def _null_lines_are_empty(cls, value):
         return [] if value is None else value
-    commodity_group_id: int | None = Field(default=None, alias="commodityGroupId")
-    commodity_group_name: str | None = Field(default=None, alias="commodityGroupName")
+
+
+class ExtractionTotals(BaseModel):
+    computed: float
+    printed: float | None = None
+    match: bool | None = None
 
 
 class ExtractionResponse(BaseModel):
@@ -57,3 +63,4 @@ class ExtractionResponse(BaseModel):
     data: ExtractedVendorData | None = None
     error: str | None = None
     missing_fields: list[str] | None = Field(default=None, alias="missingFields")
+    totals: ExtractionTotals | None = None

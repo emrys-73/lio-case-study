@@ -108,6 +108,13 @@ export interface ExtractionResponse {
   data?: ExtractedVendorData;
   error?: string;
   missingFields?: string[];
+  totals?: ExtractionTotals;
+}
+
+export interface ExtractionTotals {
+  computed: number;
+  printed: number | null;
+  match: boolean | null;
 }
 
 export interface Supplier {

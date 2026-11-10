@@ -24,6 +24,7 @@ from app.schemas.requests import (
     RequestUpdate,
     StatusUpdate,
 )
+from app.services.totals import add_up
 
 router = APIRouter(prefix="/requests", tags=["requests"])
 
@@ -124,6 +125,15 @@ def _order_lines_signature(lines) -> list[tuple]:
     ]
 
 
+def _server_totals(payload: RequestCreate | RequestUpdate) -> dict:
+    return {
+        "computed": add_up(payload.order_lines),
+        "submitted": payload.total_cost,
+        "printed": None,
+        "match": None,
+    }
+
+
 def _changed_fields(request: ProcurementRequest, payload: RequestUpdate) -> list[str]:
     """Return the field keys whose value differs between the request and payload."""
     changed: list[str] = []
@@ -183,6 +193,7 @@ def create_request(
 ) -> RequestOut:
     _validate_commodity_group(db, payload.commodity_group_id)
     _enforce_required_fields(db, membership.organization_id, payload)
+    totals = _server_totals(payload)
 
     # Vendor fields are already cleaned up during extraction, so we can persist
     # them directly here.
@@ -193,7 +204,7 @@ def create_request(
         vendor_name=payload.vendor_name,
         vat_id=payload.vat_id,
         commodity_group_id=payload.commodity_group_id,
-        total_cost=payload.total_cost,
+        total_cost=totals["computed"],
         department=payload.department,
         organization_id=membership.organization_id,
         created_by=membership.user_id,
@@ -212,7 +223,9 @@ def create_request(
     ]
     db.add(request)
     db.flush()
-    _log_activity(db, request.id, membership.user_id, "created", "Request created")
+    _log_activity(
+        db, request.id, membership.user_id, "created", "Request created", {"totals": totals}
+    )
     db.commit()
 
     request = _get_org_request(db, request.id, membership.organization_id)
@@ -229,6 +242,8 @@ def update_request(
     request = _get_org_request(db, request_id, membership.organization_id)
     _validate_commodity_group(db, payload.commodity_group_id)
     _enforce_required_fields(db, membership.organization_id, payload)
+    totals = _server_totals(payload)
+    payload = payload.model_copy(update={"total_cost": totals["computed"]})
 
     changed = _changed_fields(request, payload)
 
@@ -261,7 +276,7 @@ def update_request(
             membership.user_id,
             "updated",
             f"Updated {', '.join(labels)}",
-            {"changed_fields": changed},
+            {"changed_fields": changed, "totals": totals},
         )
     db.commit()
 
