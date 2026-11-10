@@ -55,12 +55,22 @@ export interface MembersResponse {
   invites: OrganizationInvite[];
 }
 
+export type CatalogStatus = 'switched' | 'ignored' | 'no_match' | 'picked';
+
+export interface OrderLineCatalog {
+  status: CatalogStatus;
+  article_number: string | null;
+  offer_price: number | null;
+  catalog_price: number | null;
+}
+
 export interface OrderLineInput {
   positionDescription: string;
   unitPrice: number;
   amount: number;
   unit: string;
   totalPrice: number;
+  catalog?: OrderLineCatalog;
 }
 
 export interface CreateRequestInput {
@@ -157,6 +167,34 @@ export interface Article {
   unit: string;
   quantity: string;
   created_at: string;
+}
+
+export interface CatalogArticle {
+  article_number: string;
+  description: string;
+  supplier_name: string;
+  unit: string;
+  unit_price: number;
+  currency: string;
+}
+
+export interface CatalogSuggestion {
+  match: CatalogArticle | null;
+}
+
+export interface CatalogSearchResult {
+  items: CatalogArticle[];
+}
+
+function toCatalogArticle(raw: CatalogArticle): CatalogArticle {
+  return {
+    article_number: String(raw.article_number),
+    description: String(raw.description ?? ''),
+    supplier_name: String(raw.supplier_name ?? ''),
+    unit: String(raw.unit ?? ''),
+    unit_price: Number(raw.unit_price),
+    currency: String(raw.currency ?? 'EUR'),
+  };
 }
 
 export interface ArticlePage {
@@ -350,6 +388,19 @@ export const articles = {
 
   count(): Promise<{ count: number }> {
     return apiFetch('/articles/count');
+  },
+
+  async suggest(q: string, vendor?: string): Promise<CatalogSuggestion> {
+    const qs = new URLSearchParams({ q });
+    if (vendor?.trim()) qs.set('vendor', vendor.trim());
+    const result = await apiFetch<CatalogSuggestion>(`/articles/suggest?${qs.toString()}`);
+    return { match: result?.match ? toCatalogArticle(result.match) : null };
+  },
+
+  async search(q: string, limit = 5): Promise<CatalogSearchResult> {
+    const qs = new URLSearchParams({ q, limit: String(limit) });
+    const result = await apiFetch<CatalogSearchResult>(`/articles/search?${qs.toString()}`);
+    return { items: (result?.items ?? []).map(toCatalogArticle) };
   },
 };
 

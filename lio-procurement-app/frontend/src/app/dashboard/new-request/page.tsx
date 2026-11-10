@@ -5,25 +5,37 @@ import { useRouter } from 'next/navigation';
 import * as api from '@/lib/api';
 import { useCommodityGroups } from '@/lib/hooks/useCommodityGroups';
 import { Button, Input, Alert, Loader } from '@/components/base';
-import { grossFits } from '@/lib/totals';
 import { AutoSetChip, AutoSetHelper, CorrectedNote, LockedGroupField, isStaff } from '@/components/CommodityAuto';
+import {
+  AlternativesBox,
+  LineCheck,
+  TotalsCheck,
+  fillMissingPrice,
+  markText,
+  useOwnDepartment,
+} from '@/components/ExtractionReview';
+import {
+  CatalogAddBox,
+  CatalogLineNote,
+  CatalogSwitchAllBar,
+  freeLine,
+  liveMatch,
+  newLineKey,
+  pickedLine,
+  switchLine,
+  toOrderLineInput,
+  undoLine,
+  useCatalogSuggest,
+  type CatalogLine,
+} from '@/components/CatalogSuggest';
 import type { Commodity } from '@/types/database';
 
-interface OrderLine {
-  positionDescription: string;
-  unitPrice: number;
-  amount: number;
-  unit: string;
-  totalPrice: number;
-}
+type OrderLine = CatalogLine;
 
 function toFormLine(line: api.ExtractedOrderLine): OrderLine {
   return {
-    positionDescription: line.positionDescription ?? '',
-    unitPrice: line.unitPrice ?? 0,
-    amount: line.amount ?? 1,
-    unit: line.unit ?? '',
-    totalPrice: line.totalPrice ?? 0,
+    key: newLineKey(),
+    ...fillMissingPrice(line),
   };
 }
 
@@ -48,9 +60,11 @@ export default function NewRequestPage() {
   const [vendorName, setVendorName] = useState('');
   const [vatId, setVatId] = useState('');
   const [department, setDepartment] = useState('');
+  useOwnDepartment(setDepartment);
   const [commodityGroupId, setCommodityGroupId] = useState<number | null>(null);
   const [orderLines, setOrderLines] = useState<OrderLine[]>([]);
   const [totalCost, setTotalCost] = useState<number>(0);
+  useCatalogSuggest(orderLines, setOrderLines, vendorName);
 
   // UI state
   const [file, setFile] = useState<File | null>(null);
@@ -136,16 +150,15 @@ export default function NewRequestPage() {
     return () => clearTimeout(timer);
   }, [categoriseKey]);
 
-  const grossDiffers = printedGross !== null && !grossFits(totalCost, printedVat, printedGross);
-  const totalsDiffer =
-    printedGross === null && printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
-
   // Handle file upload and extraction
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (!uploadedFile) return;
 
-    if (uploadedFile.type !== 'application/pdf') {
+    const isPdf =
+      ['application/pdf', 'application/x-pdf'].includes(uploadedFile.type) ||
+      uploadedFile.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
       setError('Please upload a PDF file');
       return;
     }
@@ -171,7 +184,6 @@ export default function NewRequestPage() {
       setTitle(extracted.title || '');
       setVendorName(extracted.vendorName || '');
       setVatId(extracted.vatId || '');
-      setDepartment(extracted.department || '');
       setOrderLines((extracted.orderLines || []).map(toFormLine));
       setTotalCost(extracted.totalCost || 0);
       setNotFound(extractionResult.missingFields || []);
@@ -208,6 +220,7 @@ export default function NewRequestPage() {
     setOrderLines([
       ...orderLines,
       {
+        key: newLineKey(),
         positionDescription: '',
         unitPrice: 0,
         amount: 1,
@@ -233,6 +246,13 @@ export default function NewRequestPage() {
     const newTotal = updated.reduce((sum, line) => sum + line.totalPrice, 0);
     setTotalCost(newTotal);
   };
+
+  const setLines = (updated: OrderLine[]) => {
+    setOrderLines(updated);
+    setTotalCost(updated.reduce((sum, line) => sum + line.totalPrice, 0));
+  };
+  const changeLine = (index: number, change: (line: OrderLine) => OrderLine) =>
+    setLines(orderLines.map((line, i) => (i === index ? change(line) : line)));
 
   // Remove order line
   const removeOrderLine = (index: number) => {
@@ -272,7 +292,7 @@ export default function NewRequestPage() {
         commodityGroupId: commodityGroupId,
         totalCost,
         department,
-        orderLines,
+        orderLines: orderLines.map(toOrderLineInput),
         extraction,
       });
 
@@ -310,19 +330,6 @@ export default function NewRequestPage() {
 
       {error && <Alert variant="error" className="mb-6">{error}</Alert>}
       {warning && <Alert variant="warning" className="mb-6">{warning}</Alert>}
-      {totalsDiffer && (
-        <Alert variant="warning" className="mb-6">
-          The lines add up to €{totalCost.toFixed(2)}, the quote says €{printedTotal.toFixed(2)}.
-          Check the lines before you submit.
-        </Alert>
-      )}
-      {grossDiffers && (
-        <Alert variant="warning" className="mb-6">
-          The lines add up to €{totalCost.toFixed(2)} before VAT. That doesn&apos;t fit the
-          quote&apos;s total of €{printedGross.toFixed(2)} with VAT. Check the lines before you
-          submit.
-        </Alert>
-      )}
       {success && <Alert variant="success" className="mb-6">{success}</Alert>}
       {success && (
         <CorrectedNote
@@ -349,7 +356,7 @@ export default function NewRequestPage() {
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-accent-deep/50 transition-colors">
             <input
               type="file"
-              accept="application/pdf"
+              accept="application/pdf,.pdf"
               onChange={handleFileChange}
               className="hidden"
               id="pdf-upload"
@@ -422,7 +429,7 @@ export default function NewRequestPage() {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
               placeholder="IT Department"
-              helperText={notFound.includes('Department') && !department ? NOT_FOUND : undefined}
+              helperText={!department ? 'Not set on your profile' : undefined}
             />
           </div>
 
@@ -498,6 +505,18 @@ export default function NewRequestPage() {
             </Button>
           </div>
 
+          <CatalogAddBox
+            onPick={(article) => setLines([...orderLines, pickedLine(article)])}
+            onFree={(text) => setLines([...orderLines, freeLine(text)])}
+          />
+
+          {extraction && (
+            <CatalogSwitchAllBar
+              lines={orderLines}
+              onSwitchAll={() => setLines(orderLines.map((line) => (liveMatch(line) ? switchLine(line) : line)))}
+            />
+          )}
+
           {orderLines.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               No order lines yet. Add one to get started.
@@ -505,7 +524,7 @@ export default function NewRequestPage() {
           ) : (
             <div className="space-y-4">
               {orderLines.map((line, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div key={line.key} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-sm font-medium text-gray-700">Line {index + 1}</h3>
                     <button
@@ -539,6 +558,7 @@ export default function NewRequestPage() {
                         updateOrderLine(index, 'unitPrice', parseFloat(e.target.value) || 0)
                       }
                       required
+                      helperText={markText(line, 'unitPrice')}
                     />
 
                     <Input
@@ -550,6 +570,7 @@ export default function NewRequestPage() {
                         updateOrderLine(index, 'amount', parseFloat(e.target.value) || 1)
                       }
                       required
+                      helperText={markText(line, 'amount')}
                     />
 
                     <Input
@@ -561,16 +582,29 @@ export default function NewRequestPage() {
                     />
                   </div>
 
+                  <CatalogLineNote
+                    line={line}
+                    onSwitch={() => changeLine(index, switchLine)}
+                    onUndo={() => changeLine(index, undoLine)}
+                  />
+
                   <div className="mt-2 text-right">
                     <span className="text-sm text-gray-600">Total: </span>
                     <span className="text-lg font-semibold tracking-tight text-ink">
                       €{line.totalPrice.toFixed(2)}
                     </span>
                   </div>
+
+                  <LineCheck line={line} />
                 </div>
               ))}
             </div>
           )}
+
+          <AlternativesBox
+            extraction={extraction}
+            onAdd={(line) => setLines([...orderLines, { ...line, key: newLineKey() }])}
+          />
         </div>
 
         {/* Total Cost */}
@@ -581,6 +615,12 @@ export default function NewRequestPage() {
               €{totalCost.toFixed(2)}
             </span>
           </div>
+          <TotalsCheck
+            totalCost={totalCost}
+            printedTotal={printedTotal}
+            printedVat={printedVat}
+            printedGross={printedGross}
+          />
         </div>
 
         {/* Submit */}
