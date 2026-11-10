@@ -1,0 +1,597 @@
+<title>Lio Case Study Summary</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one 820px column, summary first, every detail inside a closed fold. Style copied from FDE-Case-Study.pdf. */
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --body: #1f2328;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #f5f6f8;
+  --accent: #136f7d;
+  --accent-soft: #e6f1f3;
+  --dark: #111317;
+  --warn: #9a5b00;
+  --warn-soft: #fbf1dc;
+  --sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 820px; margin: 0 auto; padding-block: 40px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid var(--accent); }
+.logo { display: flex; align-items: center; gap: 6px; font-size: 20px; color: var(--ink); }
+.logo svg { height: 26px; width: auto; display: block; }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .28em; color: var(--accent); }
+
+h1 { font-size: clamp(34px, 6vw, 44px); line-height: 1.1; font-weight: 700; color: var(--ink); margin: 36px 0 4px; letter-spacing: -.02em; text-wrap: balance; }
+.sub { font-size: 21px; color: var(--muted); font-weight: 300; margin: 0; }
+h2 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 48px 0 14px; text-wrap: balance; }
+h3 { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0; }
+p { margin: 0 0 12px; }
+b { color: var(--ink); }
+
+ul { margin: 0; padding-left: 22px; list-style: none; }
+li { position: relative; margin: 6px 0; }
+li::before { content: ""; position: absolute; left: -15px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+
+code { font-family: var(--mono); font-size: .84em; background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 3px; overflow-wrap: anywhere; }
+.panel { background: var(--panel); border-radius: 6px; padding: 18px 22px; margin: 12px 0; }
+.note { color: var(--muted); font-size: 13.5px; }
+a { color: var(--accent); font-weight: 700; text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.card { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 14px 0; }
+.card.bonus { border-left-color: var(--dark); }
+.card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.badge { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.bonus .badge { background: var(--dark); }
+.quote { border-left: 3px solid var(--line); padding-left: 14px; color: #4b5563; font-style: italic; margin: 0 0 12px; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin: 14px 0 4px; }
+
+.pill { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.pill.part { background: var(--warn-soft); color: var(--warn); }
+
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th { background: var(--dark); color: #fff; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 12px 16px; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n { width: 40px; font-weight: 700; color: var(--accent); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+details { border-top: 1px solid var(--line); margin-top: 14px; }
+details > summary { cursor: pointer; list-style: none; padding: 12px 0 2px; font-weight: 700; color: var(--accent); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "+"; flex: none; width: 18px; height: 18px; border: 1.5px solid var(--accent); border-radius: 50%; display: grid; place-items: center; font-size: 13px; line-height: 1; }
+details[open] > summary::before { content: "\2212"; }
+details > .in { padding: 6px 0 4px; }
+details.block { border: 1px solid var(--line); border-radius: 8px; padding: 0 22px 10px; margin: 10px 0; }
+details.block > summary { padding: 14px 0 4px; font-size: 15px; color: var(--ink); }
+
+/* diagrams */
+.flow { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 14px 0 6px; }
+.box { flex: 1 1 110px; min-width: 0; border: 1.5px solid var(--dark); border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.35; background: var(--bg); }
+.box b { display: block; font-size: 13.5px; }
+.box span { color: var(--muted); }
+.box.ai { border-color: var(--accent); background: var(--accent-soft); }
+.box.ai b { color: var(--accent); }
+.box.gate { background: var(--dark); border-color: var(--dark); }
+.box.gate b { color: #fff; }
+.box.gate span { color: #c7cbd1; }
+.box.warn { border-color: var(--warn); background: var(--warn-soft); }
+.box.warn b { color: var(--warn); }
+.arrow { flex: none; align-self: center; color: var(--muted); font-weight: 700; font-size: 16px; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin: 4px 0 0; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; border: 1.5px solid var(--dark); }
+.legend i.ai { border-color: var(--accent); background: var(--accent-soft); }
+.legend i.gate { background: var(--dark); }
+.legend i.warn { border-color: var(--warn); background: var(--warn-soft); }
+
+.bars { display: grid; grid-template-columns: minmax(0, 150px) minmax(0, 1fr); gap: 10px 14px; align-items: center; margin: 14px 0 6px; font-size: 13.5px; }
+.bars .name { color: var(--ink); font-weight: 700; line-height: 1.3; }
+.pair { display: grid; gap: 4px; min-width: 0; }
+.bar { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.track { flex: 1 1 auto; min-width: 0; height: 12px; background: var(--panel); border-radius: 3px; }
+.fill { display: block; height: 12px; border-radius: 3px; background: var(--faint); min-width: 2px; }
+.fill.now { background: var(--accent); }
+.val { flex: none; width: 46px; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12.5px; }
+.val.now { color: var(--accent); font-weight: 700; }
+
+.quotes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.q { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.35; min-width: 0; }
+.q b { display: block; overflow-wrap: anywhere; }
+.q .r { font-weight: 700; color: var(--accent); }
+.q.off { border-color: var(--warn); background: var(--warn-soft); }
+.q.off .r { color: var(--warn); }
+
+footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--faint); }
+
+@media (max-width: 600px) {
+  .card, .panel { padding: 16px; }
+  details.block { padding: 0 16px 10px; }
+  th, td { padding: 10px; }
+  .quotes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bars { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .bars .name { margin-top: 8px; }
+  .arrow { transform: rotate(90deg); flex-basis: 100%; text-align: center; }
+  .box { flex-basis: 100%; }
+  .pill { margin-left: 0; }
+}
+</style>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="logo"><svg viewBox="40 48 1824 896" role="img" aria-label="Lio"><g transform="translate(0.000000,994.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4505 9345 c-665 -67 -1462 -367 -2100 -791 -912 -605 -1580 -1642 -1819 -2824 -84 -415 -91 -869 -21 -1345 179 -1215 914 -2367 1955 -3065 704 -472 1531 -712 2460 -714 716 -2 1289 133 1927 452 901 452 1773 1313 2063 2037 195 485 77 834 -324 964 -126 41 -122 40 -306 56 -1025 93 -1723 631 -2034 1569 -78 236 -102 631 -111 1856 -5 673 -10 782 -42 900 -175 662 -776 992 -1648 905z m605 -383 c366 -86 567 -254 671 -562 l32 -95 8 -703 c14 -1295 40 -1726 119 -1986 319 -1053 1173 -1747 2282 -1856 230 -23 264 -28 322 -50 124 -47 160 -112 143 -255 -12 -107 -71 -282 -97 -289 -48 -14 -257 -48 -396 -65 -1631 -201 -3192 439 -4215 1729 -806 1017 -1128 2304 -897 3587 l22 122 116 55 c429 203 910 343 1335 390 109 11 471 -3 555 -22z m-2439 -774 c-107 -956 44 -1844 458 -2693 683 -1397 1986 -2402 3511 -2705 509 -101 1169 -119 1665 -45 l49 8 -19 -29 c-43 -66 -221 -277 -333 -395 -102 -107 -127 -127 -164 -136 -23 -6 -104 -27 -179 -46 -884 -228 -1918 -160 -2799 186 -1140 446 -2090 1366 -2560 2477 -244 575 -350 1108 -350 1746 0 452 51 836 162 1217 l32 109 100 87 c56 48 123 105 150 126 68 56 280 204 285 199 2 -2 -1 -50 -8 -106z m-1062 -1053 c-220 -1711 548 -3463 1976 -4512 1025 -753 2324 -1095 3560 -938 60 7 111 12 113 11 1 -2 -46 -35 -105 -73 -386 -252 -808 -441 -1212 -543 -879 -221 -1986 -106 -2781 290 -1245 620 -2124 1903 -2255 3291 -26 267 -17 670 20 879 90 523 298 1082 566 1525 87 142 133 215 135 212 1 -1 -7 -65 -17 -142z M14092 7415 c-104 -33 -218 -135 -258 -231 -119 -284 143 -587 461 -535 328 54 462 430 234 659 -40 40 -130 94 -185 110 -54 16 -197 14 -252 -3z M10450 4740 l0 -2540 1505 0 1505 0 0 275 0 275 -1195 0 -1195 0 0 2265 0 2265 -310 0 -310 0 0 -2540z M16665 6053 c-503 -31 -911 -235 -1205 -603 -274 -345 -410 -754 -427 -1290 -34 -1087 559 -1894 1480 -2015 1008 -132 1792 457 1976 1485 37 209 45 590 16 805 -114 850 -606 1432 -1342 1584 -96 20 -338 43 -413 39 -19 -1 -57 -3 -85 -5z m397 -552 c536 -124 868 -667 868 -1416 0 -609 -221 -1082 -611 -1309 -247 -143 -673 -164 -975 -47 -173 67 -344 212 -467 398 -339 508 -335 1425 7 1937 168 252 384 396 673 451 112 21 388 14 505 -14z M13920 4110 l0 -1899 300 -3 300 -3 0 1903 0 1902 -300 0 -300 0 0 -1900z"/></g></svg></span>
+    <span class="kicker">SUMMARY</span>
+  </div>
+
+  <h1>Acme Case Study</h1>
+  <p class="sub">What we fixed, what is left, what to check with Acme</p>
+
+  <h2>In short</h2>
+  <ul>
+    <li>Acme sent 3 complaints and 1 bonus ask. <b>All four are covered.</b></li>
+    <li>The 3 complaints are built, tested and committed. The bonus is built halfway.</li>
+    <li>Every AI change was measured first. Every code change had tests first.</li>
+    <li>Where the AI is still wrong, the form says so. <b>No wrong extraction is silent.</b></li>
+    <li>Where we had to guess what Acme means, the guess is a setting. Acme's answer is a settings change, not a deploy.</li>
+    <li>No database changes. Nothing is pushed yet. The pull request is the last step.</li>
+  </ul>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Acme's ask</th><th>What we built</th><th>Proof</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td><b>PDF extraction</b> is wrong, empty or crashes</td><td>Fixed the crash, wrote down what "right" is, totals added up in code, text read from pictures, warnings in the form</td><td>Crashes 6/15 to 0. Fully right 0/15 to 12/15.</td><td>Built. 1 quote still wrong, always warned.</td></tr>
+      <tr><td class="n">2</td><td><b>Negotiated prices</b> are not used</td><td>The form suggests Acme's catalogue article on a line, one tap to switch</td><td>39 of 40 wordings matched, 0 wrong suggestions.</td><td>Built. Answer key to check.</td></tr>
+      <tr><td class="n">3</td><td><b>Commodity groups</b> don't match Acme's books</td><td>Company rules that always beat the AI, enforced at every save</td><td>Acme's 3 examples pass in German and English, by form, PDF and API.</td><td>Built. 2 group names to confirm.</td></tr>
+      <tr><td class="n">★</td><td><b>No approval</b> under €2,000</td><td>Limit as a company setting, the approval rule, an "Auto" label</td><td>43 tests on the rule.</td><td>Half built. Save step not committed.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>One flow for every request</h2>
+  <ul>
+    <li>Before: one AI call did everything. It worked or it didn't.</li>
+    <li>Now: small steps. Each one is tested alone, so a wrong result points at one step.</li>
+    <li>Every request passes the save check, however it was made. So the hard rules live there.</li>
+  </ul>
+  <div class="flow" role="img" aria-label="Flow: PDF, extractor, order lines, company rules, catalogue suggestion, save check, approval">
+    <div class="box"><b>PDF quote</b><span>or typed, or an agent</span></div>
+    <span class="arrow">→</span>
+    <div class="box ai"><b>Extractor</b><span>AI reads the quote</span></div>
+    <span class="arrow">→</span>
+    <div class="box"><b>Order lines</b><span>totals added in code</span></div>
+    <span class="arrow">→</span>
+    <div class="box"><b>Company rules</b><span>set the group</span></div>
+    <span class="arrow">→</span>
+    <div class="box"><b>Catalogue</b><span>suggests the article</span></div>
+    <span class="arrow">→</span>
+    <div class="box gate"><b>Save check</b><span>rules, totals, limit</span></div>
+    <span class="arrow">→</span>
+    <div class="box"><b>Approval</b><span>auto under the limit</span></div>
+  </div>
+  <p class="legend"><span><i class="ai"></i>AI</span><span><i></i>Plain code</span><span><i class="gate"></i>Every request passes here</span></p>
+
+  <h2>The four asks</h2>
+
+  <!-- PROBLEM 1 -->
+  <div class="card">
+    <div class="head"><span class="badge">1</span><h3>PDF extraction</h3><span class="pill">Built</span></div>
+    <p class="quote">"The extracted data is often wrong. Fields come out incorrect or empty, and sometimes the upload errors out completely."</p>
+    <p class="label">What was really wrong</p>
+    <ul>
+      <li>Our own schema crashed on an empty VAT ID. That was 6 of 15 uploads.</li>
+      <li>Nobody had written down what "right" means: net or gross, shipping, alternatives.</li>
+      <li>The AI did the sums and nothing checked them.</li>
+      <li>Part of one quote is a picture, so no text reader saw it.</li>
+      <li>A bigger model made the same mistakes. It was not the model.</li>
+    </ul>
+    <p class="label">What we did</p>
+    <ul>
+      <li>Built an eval first: 5 quotes, hand-checked answer keys, the real model, 3 runs each.</li>
+      <li>Empty fields are allowed and shown as missing. No more crashes.</li>
+      <li>The prompt now says what right is. The reply follows a fixed schema.</li>
+      <li>Totals, VAT and gross are added up and checked in code.</li>
+      <li>OCR reads the text in pictures on every upload.</li>
+      <li>The form shows alternatives apart, marks what doesn't add up, and takes the department from the profile.</li>
+    </ul>
+    <p class="label">Before and now, 15 live runs</p>
+    <div class="bars">
+      <span class="name">Quotes fully right</span>
+      <div class="pair">
+        <div class="bar"><span class="track"><span class="fill" style="width:0%"></span></span><span class="val">0/15</span></div>
+        <div class="bar"><span class="track"><span class="fill now" style="width:80%"></span></span><span class="val now">12/15</span></div>
+      </div>
+      <span class="name">Uploads that crash</span>
+      <div class="pair">
+        <div class="bar"><span class="track"><span class="fill" style="width:40%"></span></span><span class="val">6/15</span></div>
+        <div class="bar"><span class="track"><span class="fill now" style="width:0%"></span></span><span class="val now">0/15</span></div>
+      </div>
+      <span class="name">Vendor and VAT ID right</span>
+      <div class="pair">
+        <div class="bar"><span class="track"><span class="fill" style="width:60%"></span></span><span class="val">9/15</span></div>
+        <div class="bar"><span class="track"><span class="fill now" style="width:100%"></span></span><span class="val now">15/15</span></div>
+      </div>
+      <span class="name">Total is the net cost</span>
+      <div class="pair">
+        <div class="bar"><span class="track"><span class="fill" style="width:0%"></span></span><span class="val">0/15</span></div>
+        <div class="bar"><span class="track"><span class="fill now" style="width:80%"></span></span><span class="val now">12/15</span></div>
+      </div>
+      <span class="name">Shipping and fees found</span>
+      <div class="pair">
+        <div class="bar"><span class="track"><span class="fill" style="width:20%"></span></span><span class="val">3/15</span></div>
+        <div class="bar"><span class="track"><span class="fill now" style="width:80%"></span></span><span class="val now">12/15</span></div>
+      </div>
+    </div>
+    <p class="legend"><span><i style="background:var(--faint);border-color:var(--faint)"></i>Before</span><span><i style="background:var(--accent);border-color:var(--accent)"></i>Now</span></p>
+
+    <p class="label">Per quote, now</p>
+    <div class="quotes">
+      <div class="q"><b>Gärtner Gregg</b><span class="r">Right 3 of 3</span></div>
+      <div class="q"><b>Hoffmann</b><span class="r">Right 3 of 3</span></div>
+      <div class="q"><b>styleGREEN</b><span class="r">Right 3 of 3</span></div>
+      <div class="q"><b>Dream in Green</b><span class="r">Right 3 of 3</span></div>
+      <div class="q off"><b>Apple</b><span class="r">Wrong 3 of 3, warned</span></div>
+    </div>
+    <p class="note">Run fix10, 10 Nov 16:48 UTC. This is the committed code. The 3 runs that are not fully right are all the Apple quote.</p>
+
+    <p class="label">Not fully covered</p>
+    <ul>
+      <li><b>The Apple quote.</b> A €10.55 copyright levy is dropped every time. The form warns every time. See the next section.</li>
+      <li><b>Slower.</b> About 12 to 19 seconds per quote, from about 10. OCR takes 5 to 7 of them.</li>
+      <li><b>Vendor in the demo.</b> The sample quotes are addressed to Lio, not Acme. Signed in as Acme, one vendor comes back as "Lio Technologies GmbH" with no warning. Real Acme quotes name Acme.</li>
+      <li><b>5 quotes is thin.</b> The eval shows what broke on known cases, not that production is safe.</li>
+    </ul>
+
+    <details>
+      <summary>Every fix, in order, with its number</summary>
+      <div class="in scroll">
+        <table>
+          <thead><tr><th>Fix</th><th>Measured</th></tr></thead>
+          <tbody>
+            <tr><td>Schema accepts empty fields</td><td>Crashes 6/15 to 0</td></tr>
+            <tr><td>Fixed reply schema sent to OpenAI</td><td>No score change. Guards against broken JSON.</td></tr>
+            <tr><td>What "right" is, written in the prompt</td><td>Fully right 0 to 6/15. Alternatives bought 9 to 3.</td></tr>
+            <tr><td>Tell the model who the buyer is</td><td>Vendor 12 to 15/15</td></tr>
+            <tr><td>Totals added up in code, again at every save</td><td>Lines add up 6 to 14/15</td></tr>
+            <tr><td>VAT and gross as their own fields, checked against the lines</td><td>A dropped line now shows as a warning</td></tr>
+            <tr><td>Text in pictures: OCR, page picture only when needed</td><td>VAT ID 12 to 15/15. Fully right 6 to 9/15.</td></tr>
+            <tr><td>VAT lines out, alternatives out of the lines, lump-sum charges</td><td>Fully right 9 to 12/15. Dream in Green now right.</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li>Tried and dropped, results kept: extra prompt lines on VAT, rules after the group list, layout text, totals-block rows.</li>
+          <li>Temperature set to 0 and the model pinned to a dated snapshot, so scores only move when we change something.</li>
+          <li>Every extraction is stored with the request. Each correction a person makes is a future eval case.</li>
+        </ul>
+      </div>
+    </details>
+    <details>
+      <summary>What it costs</summary>
+      <div class="in">
+        <ul>
+          <li>Before the fixes: $0.0039 per quote. Now: $0.0069 per quote.</li>
+          <li>About $7 per 1,000 quotes. One wrong request a person has to fix costs more.</li>
+          <li>Most of the cost is the 2,000-group list pasted into every call. Taking it out cuts tokens about 11 times, with the same score in a test run.</li>
+          <li>Decided: keep the page-picture call. Bad data costs more than about a cent per upload.</li>
+          <li>A cost engine prices every setup from the measured runs: <code>python -m evals.cost.report</code>.</li>
+        </ul>
+      </div>
+    </details>
+    <p class="note" style="margin-top:14px"><a href="https://claude.ai/artifact/UtevwtC6sm7Xkag6ZXdJ2x">Full Problem 1 page ↗</a> &nbsp; <a href="https://claude.ai/artifact/6kayLmMaciAoHXFrC447r5">Answer keys next to the PDFs ↗</a></p>
+  </div>
+
+  <!-- PROBLEM 2 -->
+  <div class="card">
+    <div class="head"><span class="badge">2</span><h3>Negotiated prices</h3><span class="pill">Built</span></div>
+    <p class="quote">"When someone creates a request, I want the system to suggest the matching articles we already have on catalog, so we actually use those agreements."</p>
+    <p class="label">What was really wrong</p>
+    <ul>
+      <li>Nothing matched a request line to a catalogue article. The feature did not exist.</li>
+    </ul>
+    <p class="label">What we did</p>
+    <ul>
+      <li>Built a search eval first: 59 wordings, 40 that should match and 19 that must get nothing.</li>
+      <li>A line now shows "Did you mean" with the article and its negotiated price. One tap switches, with Undo.</li>
+      <li>One sure match or nothing. No list of maybes.</li>
+      <li>Works in German and English, with no AI call, in about 10 ms.</li>
+      <li>Only the signed-in company's catalogue is searched.</li>
+      <li>What the person did with each suggestion is logged, so Acme can count how often its prices are used.</li>
+    </ul>
+    <p class="label">Proof</p>
+    <ul>
+      <li>39 of 40 wordings matched. 0 wrong suggestions at the strict setting.</li>
+      <li>On wording it had never seen: 6 of 10, still 0 wrong.</li>
+    </ul>
+    <p class="label">Not fully covered</p>
+    <ul>
+      <li>The eval answer key is our draft. It needs a human check.</li>
+      <li>The same article is sold by up to 11 suppliers. We pick the quote's own vendor, then the cheapest. Acme has to confirm.</li>
+      <li>Suggestions show on a new request, not yet when editing one.</li>
+      <li>Keeping a pricier offer is silent. The approver is not told yet.</li>
+    </ul>
+    <details>
+      <summary>Why words and not embeddings</summary>
+      <div class="in">
+        <ul>
+          <li>Embeddings ranked the right article first 40 of 40 times.</li>
+          <li>But near misses scored as high as real matches. With no wrong suggestion allowed, only 11 would be shown.</li>
+          <li>Word matching with a small German to English map gave 39 of 40. So it ships, and embeddings stay in the code behind a flag.</li>
+          <li>The shown setting is a little looser: two "must be nothing" wordings now get a suggestion of the right kind. A suggestion is only shown, the person switches by hand.</li>
+        </ul>
+      </div>
+    </details>
+    <p class="note" style="margin-top:14px"><a href="https://claude.ai/artifact/Md6pmuSKugrVPTqJ8VfJxC">Full Problem 2 page ↗</a> &nbsp; <a href="https://claude.ai/artifact/9dEtpWB8BWE3T43SttFqjN">Screens ↗</a></p>
+  </div>
+
+  <!-- PROBLEM 3 -->
+  <div class="card">
+    <div class="head"><span class="badge">3</span><h3>Commodity groups</h3><span class="pill">Built</span></div>
+    <p class="quote">"Cable ties always under Electrical Engineering, printer toner under IT Hardware, small software subscriptions under Office Supplies. Non-negotiable."</p>
+    <p class="label">What was really wrong</p>
+    <ul>
+      <li>Only the AI picked the group, from 2,000 groups pasted into the prompt.</li>
+      <li>There was nowhere to put a company rule. A hint in a prompt is a suggestion, and "non-negotiable" needs code.</li>
+      <li>Typed requests got no group help at all.</li>
+      <li>2 of Acme's 3 group names don't exist in the list.</li>
+    </ul>
+    <p class="label">What we did</p>
+    <div class="flow" role="img" aria-label="Flow: line text, company rule hit, group locked, checked again at save">
+      <div class="box"><b>Line text</b><span>"Kabelbinder 200mm"</span></div>
+      <span class="arrow">→</span>
+      <div class="box"><b>Company rule</b><span>keywords, German and English</span></div>
+      <span class="arrow">→</span>
+      <div class="box"><b>Group locked</b><span>"Set automatically"</span></div>
+      <span class="arrow">→</span>
+      <div class="box gate"><b>Save check</b><span>wrong group is corrected</span></div>
+    </div>
+    <ul>
+      <li>Rules live in Acme's settings. No other company sees them.</li>
+      <li>A rule hit wins over the AI, on every create and every edit.</li>
+      <li>A wrong group sent by the form or an agent is quietly corrected and logged.</li>
+      <li>Only a buyer or admin can override. That is logged too.</li>
+    </ul>
+    <p class="label">Proof</p>
+    <ul>
+      <li>Acme's 3 examples land in the right group in German and English, through the form, a PDF and the API.</li>
+      <li>Near misses hit nothing: a cable drum, a printer, a big ERP licence.</li>
+      <li>A test proves Acme's rules never reach another company.</li>
+    </ul>
+    <p class="label">Not fully covered</p>
+    <ul>
+      <li><b>"IT Hardware" and "Office Supplies" don't exist.</b> We use Hardware and Office Equipment as stand-ins until Acme confirms.</li>
+      <li><b>"Small" software</b> is a line up to €500. That number is our placeholder.</li>
+      <li>"Subscription" also catches a magazine under €500. Needs Acme's real wording.</li>
+      <li>No screen to manage rules. They are set through the settings API.</li>
+      <li>Requests where no rule matches still get the old AI pick. A smaller classifier is started, not committed, with no eval yet.</li>
+    </ul>
+    <details>
+      <summary>Why we did not add Acme's groups to the list</summary>
+      <div class="in">
+        <ul>
+          <li>The group list is shared by every company. A change made for one customer on a guess lands on all of them.</li>
+          <li>So Acme is fixed with settings only. The shared parts change once we know it's right.</li>
+          <li>All three open points are settings. Acme's answer is a settings change.</li>
+        </ul>
+      </div>
+    </details>
+    <details>
+      <summary>How a rule matches</summary>
+      <div class="in">
+        <ul>
+          <li>Both sides are cleaned the same way: lower case, umlauts spelled out, punctuation to spaces.</li>
+          <li>"toner" hits "Tonerkartusche" and "Druckertoner". "cable tie" hits "cable ties".</li>
+          <li>Several rules on one line: list order wins. Lines hit different rules: the highest-value line decides.</li>
+          <li>A request holds one group, not one per line. Per-line groups need a database change, so later.</li>
+        </ul>
+      </div>
+    </details>
+    <p class="note" style="margin-top:14px"><a href="https://claude.ai/artifact/GREGtJRcVsswTD8zhvEWgK">Full Problem 3 page ↗</a></p>
+  </div>
+
+  <!-- BONUS -->
+  <div class="card bonus">
+    <div class="head"><span class="badge">★</span><h3>Bonus: approval limit</h3><span class="pill part">Half built</span></div>
+    <p class="quote">"Anything below €2,000 shouldn't need approval at all."</p>
+    <p class="label">Committed</p>
+    <ul>
+      <li>The limit is a company setting. Acme's is 2000. No limit keeps today's behaviour.</li>
+      <li>The rule that decides, with 43 tests: €1,999.99 is approved, €2,000.00 still needs a buyer.</li>
+      <li>An "Auto" label on the Requests and Approvals lists.</li>
+    </ul>
+    <p class="label">Written, not committed</p>
+    <ul>
+      <li>Auto-approval when a request is saved, and back to pending when an edit takes it over the limit.</li>
+      <li>One older test still expects a buyer to approve a small request. It has to be updated before this is committed.</li>
+    </ul>
+    <p class="label">Safe by design</p>
+    <ul>
+      <li>The limit is checked against the net total added up in code. The total the form sends is never trusted.</li>
+      <li>A request whose lines don't add up is never approved automatically.</li>
+      <li>A buyer's no stays a no.</li>
+    </ul>
+    <p class="label">Not covered</p>
+    <ul>
+      <li>Splitting one order into small ones to stay under the limit.</li>
+      <li>Any member can close a request before approval. Found here, logged as its own fix.</li>
+    </ul>
+    <p class="note" style="margin-top:14px"><a href="https://claude.ai/artifact/JuwhuY7yNAAWq8Bw7jP6kq">Full bonus page ↗</a></p>
+  </div>
+
+  <h2>Where the AI is still wrong, the form covers it</h2>
+  <ul>
+    <li>We did not aim for a perfect extraction. We aimed for <b>no wrong answer the person can't see</b>.</li>
+    <li>The eval counts it: wrong answers with no warning in the form. <b>0 of 3.</b></li>
+    <li>It also counts false alarms: right quotes that got a warning. <b>0 of 12.</b></li>
+  </ul>
+
+  <div class="card">
+    <div class="head"><h3>The Apple quote, step by step</h3></div>
+    <div class="flow" role="img" aria-label="Flow: Apple quote, AI drops the levy, code check finds the gap, form warns, person fixes">
+      <div class="box"><b>Apple quote</b><span>laptop plus a €10.55 copyright levy</span></div>
+      <span class="arrow">→</span>
+      <div class="box ai"><b>Extractor</b><span>reads the laptop, drops the levy</span></div>
+      <span class="arrow">→</span>
+      <div class="box"><b>Code check</b><span>lines plus VAT don't reach the gross</span></div>
+      <span class="arrow">→</span>
+      <div class="box warn"><b>Form warns</b><span>right under the total</span></div>
+      <span class="arrow">→</span>
+      <div class="box"><b>Person</b><span>adds the levy as a line</span></div>
+    </div>
+    <p class="legend"><span><i class="ai"></i>AI</span><span><i></i>Plain code</span><span><i class="warn"></i>Shown to the person</span></p>
+    <ul style="margin-top:12px">
+      <li>The levy sits in the totals block of the quote, not in the item table. The model skips it on 3 of 3 runs.</li>
+      <li>The gross total and the VAT are read right. So the code sees the lines are €10.55 short and says so.</li>
+      <li>A request with that warning is never approved automatically.</li>
+      <li>We tried two fixes. One changed nothing. One fixed Apple but broke Dream in Green, so it was taken out. Both results are kept.</li>
+    </ul>
+    <p class="label">Next for Apple</p>
+    <ul>
+      <li>Retry the second fix with a guard for alternatives.</li>
+      <li>One-tap fix in the form: "Add the missing €10.55 as a line".</li>
+      <li>Test every page as a picture on a model with cheap picture input.</li>
+    </ul>
+  </div>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>What can go wrong</th><th>What the person sees</th></tr></thead>
+    <tbody>
+      <tr><td>A line or fee is dropped</td><td>Warning under the total</td></tr>
+      <tr><td>Quantity times price is not the line total</td><td>Warning on that line</td></tr>
+      <tr><td>The quote offers alternatives</td><td>Shown under the lines, with "Add as a line". Not counted as bought.</td></tr>
+      <tr><td>A field is empty</td><td>Marked as missing. Never blocks, unless the company requires it.</td></tr>
+      <tr><td>A price is missing but the line total is there</td><td>Filled from the total and marked</td></tr>
+      <tr><td>The AI call fails</td><td>An error. The person types the request by hand.</td></tr>
+      <tr><td>The form or an agent sends the wrong group</td><td>Corrected at save, with a quiet note</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>To check with Acme</h2>
+  <ul>
+    <li>We had no contact with Acme during the case study. So every guess is written down here.</li>
+    <li>Each one is a setting or a small change, ready for their answer.</li>
+  </ul>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Question</th><th>What we assumed</th><th>If they say otherwise</th></tr></thead>
+    <tbody>
+      <tr><td class="n">3</td><td>Which group is "IT Hardware"?</td><td>Hardware, under Information Technology</td><td>Settings change</td></tr>
+      <tr><td class="n">3</td><td>Which group is "Office Supplies"?</td><td>Office Equipment, as a stand-in</td><td>Settings change, or a new group for everyone</td></tr>
+      <tr><td class="n">3</td><td>What is a "small" software subscription?</td><td>A line up to €500</td><td>Settings change</td></tr>
+      <tr><td class="n">3</td><td>Are these three the full list? Who keeps the rules up to date?</td><td>Three rules, set by us through the API</td><td>More rules, or a rules screen for their admin</td></tr>
+      <tr><td class="n">2</td><td>Several suppliers sell the same article. Which one wins?</td><td>The quote's own vendor, then the cheapest</td><td>Small code change</td></tr>
+      <tr><td class="n">2</td><td>Off-catalogue buying: a nudge, or a rule?</td><td>A nudge. Keeping the other offer is silent.</td><td>The strict version is designed, not built</td></tr>
+      <tr><td class="n">1</td><td>Is the request total net or gross?</td><td>Net, with shipping and fees as lines</td><td>Prompt and answer keys change, eval re-run</td></tr>
+      <tr><td class="n">1</td><td>Can we get the quotes that failed for them?</td><td>The 5 sample quotes are the whole set</td><td>Each new quote is one new eval file</td></tr>
+      <tr><td class="n">★</td><td>€2,000 net or gross? Per request? Every department?</td><td>Net, per request, strictly below, whole company</td><td>Settings or small rule change</td></tr>
+      <tr><td class="n">★</td><td>What about orders split to stay under the limit?</td><td>Not handled</td><td>Needs a design</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="label">How we would run it</p>
+  <ul>
+    <li>Send the questions for Problem 3 first. It is the one Acme called non-negotiable.</li>
+    <li>Ask for 20 to 30 real quotes, failing and working, scans included. Run the eval on them before changing anything.</li>
+    <li>Show Acme the form with one of their own quotes. Watch what they correct.</li>
+    <li>Read the stored extractions after two weeks. Every correction becomes a new eval case.</li>
+  </ul>
+
+  <h2>Later</h2>
+  <p>Not asked by Acme, or too big for the timebox. Logged so nothing is lost.</p>
+
+  <details class="block">
+    <summary>Problem 1, extraction</summary>
+    <div class="in">
+      <ul>
+        <li>The quote next to the form, so checking a value takes one glance.</li>
+        <li>Click a field and see where on the page the value came from.</li>
+        <li>One-tap fixes for a mismatch.</li>
+        <li>Confidence per field, so the person checks the unsure ones first.</li>
+        <li>Swap a line for one of the quote's alternatives.</li>
+        <li>Vendor tied to whoever owns the VAT ID and bank details.</li>
+        <li>The group list out of the extraction prompt. About 11 times fewer tokens.</li>
+        <li>A human review queue, the eval in CI, weekly spot checks in production.</li>
+        <li>A reasoning log for every AI decision: value, where, why.</li>
+      </ul>
+    </div>
+  </details>
+  <details class="block">
+    <summary>Problem 2, negotiated prices</summary>
+    <div class="in">
+      <ul>
+        <li>Suggestions when editing a request.</li>
+        <li>A flag for the approver: "+€X vs catalogue" on lines that ignored a match.</li>
+        <li>The strict version: a check at submit, with a reason for keeping a pricier offer. Only if Acme makes catalogue use a rule.</li>
+        <li>A report of what Acme buys off-catalogue, from the logged "no match" lines.</li>
+        <li>A link from the order line to the article in the database, to measure agreement use.</li>
+      </ul>
+    </div>
+  </details>
+  <details class="block">
+    <summary>Problem 3, commodity groups</summary>
+    <div class="in">
+      <ul>
+        <li>A screen for Acme's admin to add, edit, try and remove rules.</li>
+        <li>For requests with no rule: search a short list of groups, then a small AI pick from that list, with its own eval.</li>
+        <li>Show the top 3 groups and learn from which one people pick.</li>
+        <li>Clean the padded list: 2,000 groups are 380 real names.</li>
+        <li>A group per line, not one per request.</li>
+        <li>An override button for buyers in the form.</li>
+      </ul>
+    </div>
+  </details>
+  <details class="block">
+    <summary>Bonus, approval limit</summary>
+    <div class="in">
+      <ul>
+        <li>Commit auto-approval at save, with the old test updated.</li>
+        <li>A screen to set the limit.</li>
+        <li>Use the gross check at save too, so right quotes stop waiting for a buyer.</li>
+        <li>Stop requesters closing a request before approval.</li>
+        <li>Catch split orders.</li>
+      </ul>
+    </div>
+  </details>
+
+  <h2>How we worked</h2>
+  <ul>
+    <li><b>Measure first.</b> An eval before any AI change. Tests before any other change.</li>
+    <li><b>Real model.</b> Evals call the live model, never a fake one. Every run is saved with the prompt, the model and the date.</li>
+    <li><b>One step, one commit.</b> 40 commits on the branch. The why is in each message.</li>
+    <li><b>No database changes.</b> New data goes into the settings and the activity log.</li>
+    <li><b>Settings over patches.</b> Acme's quirks live in Acme's settings, not in the product.</li>
+  </ul>
+  <div class="panel">
+    <ul>
+      <li>Backend tests: <b>323 pass</b>, 1 old test to update for the uncommitted auto-approval. At the start: 12.</li>
+      <li>Frontend tests: <b>62 pass</b>. At the start: none.</li>
+      <li>Extraction eval: <b>24 saved runs</b>. Search eval: <b>7 saved runs</b>.</li>
+      <li>Branch <code>case-study/improvements</code>. Nothing pushed.</li>
+    </ul>
+  </div>
+
+  <h2>Left before hand-off</h2>
+  <ul>
+    <li>Update the old test and commit auto-approval at save.</li>
+    <li>One end-to-end check: the 5 quotes and Acme's 3 complaints, through the real app.</li>
+    <li>Re-run the eval signed in as Acme. The last such run was before the latest fixes.</li>
+    <li>Open the pull request. Its description is the hand-off.</li>
+  </ul>
+
+  <h2>All pages</h2>
+  <ul>
+    <li><a href="https://claude.ai/artifact/1kRAbazDyn3sEAkcK2ckP5">The full case study, every detail ↗</a></li>
+    <li><a href="https://claude.ai/artifact/2WE1vvNYGuj9t99Z37f6w5">Playbook ↗</a> &nbsp; <a href="https://claude.ai/artifact/2wyQCsPwmHWkDDEDTkAdz4">App Map ↗</a> &nbsp; <a href="https://claude.ai/artifact/9dEtpWB8BWE3T43SttFqjN">Screens ↗</a></li>
+  </ul>
+
+  <footer><span>Summary of the Acme case study. Status 10 Nov 2026.</span><span>Lio FDE case study</span></footer>
+</main>
