@@ -18,10 +18,8 @@ from app.seed import seed
 LIMIT = 2000
 OFFICE_EQUIPMENT = 15
 SETTINGS = "/organizations/me/settings"
-
-STEP_4 = pytest.mark.xfail(
-    strict=True, reason="step 4: hook into create/update in routers/requests.py"
-)
+AUTO = "auto_approved"
+RESET = "approval_reset"
 
 
 @pytest.mark.parametrize(
@@ -280,12 +278,12 @@ def _activity(db_session, request_id, action):
         return [row.detail for row in rows]
 
 
-@STEP_4
 def test_create_below_the_limit_is_auto_approved_and_logged(client, db_session):
     _set_limit(client, LIMIT)
     created = _create(client, [_line("Office chair", 1999.99)])
     assert created["approval_status"] == "approved"
     assert created["approved_by"] is None
+    assert created["approved_at"] is not None
     assert _activity(db_session, created["id"], "auto_approved") == [
         {"limit": LIMIT, "computed_total": 1999.99}
     ]
@@ -314,7 +312,6 @@ def test_an_org_without_a_limit_stays_pending(client, db_session):
     assert _activity(db_session, created["id"], "auto_approved") == []
 
 
-@STEP_4
 def test_editing_an_auto_approved_request_to_the_limit_sends_it_back_to_pending(
     client, db_session
 ):
@@ -326,3 +323,87 @@ def test_editing_an_auto_approved_request_to_the_limit_sends_it_back_to_pending(
     assert edited["total_cost"] == 2000.0
     assert edited["approval_status"] == "pending"
     assert edited["approved_by"] is None
+    assert edited["approved_at"] is None
+    assert _activity(db_session, created["id"], RESET) == [
+        {"from_total": 1999.99, "to_total": 2000.0, "limit": LIMIT}
+    ]
+
+
+def _decide(client, created, decision, email="buyer@acme.com"):
+    r = client.patch(
+        f"/requests/{created['id']}/approval",
+        json={"decision": decision},
+        headers=_token(client, email),
+    )
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_a_pending_request_edited_under_the_limit_is_auto_approved(client, db_session):
+    _set_limit(client, LIMIT)
+    created = _create(client, [_line("Schleifmaschine", 2500.0)])
+    assert created["approval_status"] == "pending"
+    edited = _edit(client, created, [_line("Schleifmaschine", 1500.0)])
+    assert edited["approval_status"] == "approved"
+    assert edited["approved_by"] is None
+    assert edited["approved_at"] is not None
+    assert _activity(db_session, created["id"], AUTO) == [
+        {"limit": LIMIT, "computed_total": 1500.0}
+    ]
+
+
+def test_a_rejected_request_stays_rejected_after_an_edit_under_the_limit(client, db_session):
+    _set_limit(client, LIMIT)
+    created = _create(client, [_line("Schleifmaschine", 2500.0)])
+    rejected = _decide(client, created, "rejected")
+    edited = _edit(client, created, [_line("Schleifmaschine", 100.0)])
+    assert edited["approval_status"] == "rejected"
+    assert edited["approved_by"] == rejected["approved_by"]
+    assert _activity(db_session, created["id"], AUTO) == []
+    assert _activity(db_session, created["id"], RESET) == []
+
+
+def test_a_buyer_approval_holds_on_a_lower_total_and_resets_on_a_higher_one(client, db_session):
+    _set_limit(client, LIMIT)
+    created = _create(client, [_line("Schleifmaschine", 2500.0)])
+    approved = _decide(client, created, "approved")
+    lower = _edit(client, created, [_line("Schleifmaschine", 2400.0)])
+    assert lower["approval_status"] == "approved"
+    assert lower["approved_by"] == approved["approved_by"]
+    higher = _edit(client, created, [_line("Schleifmaschine", 2600.0)])
+    assert higher["approval_status"] == "pending"
+    assert higher["approved_by"] is None
+    assert higher["approved_at"] is None
+    assert _activity(db_session, created["id"], RESET) == [
+        {"from_total": 2400.0, "to_total": 2600.0, "limit": LIMIT}
+    ]
+
+
+SWITCHED = {
+    "status": "switched",
+    "article_number": "LIN-00862",
+    "offer_price": 240.0,
+    "catalog_price": 186.0,
+}
+
+
+def test_the_catalog_choices_still_reach_the_created_and_updated_detail(client, db_session):
+    _set_limit(client, LIMIT)
+    created = _create(client, [dict(_line("Toner schwarz XL", 186.0), catalog=SWITCHED)])
+    [detail] = _activity(db_session, created["id"], "created")
+    assert detail["catalog"] == [{"line": 1, **SWITCHED}]
+    lines = [_line("Office chair", 10.0), dict(_line("Toner schwarz XL", 186.0), catalog=SWITCHED)]
+    _edit(client, created, lines)
+    [detail] = _activity(db_session, created["id"], "updated")
+    assert detail["catalog"] == [{"line": 2, **SWITCHED}]
+
+
+def test_the_seed_sets_acme_limit_once_and_keeps_an_admin_value(client, db_session):
+    with db_session() as s:
+        assert seed(s)["approval_limit"] == 1
+    assert _read_settings(client)["approval_limit"] == LIMIT
+    assert _read_settings(client, "admin@walmart.com").get("approval_limit") is None
+    _set_limit(client, 5000)
+    with db_session() as s:
+        assert seed(s)["approval_limit"] == 0
+    assert _read_settings(client)["approval_limit"] == 5000

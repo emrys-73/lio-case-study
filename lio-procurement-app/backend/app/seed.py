@@ -202,6 +202,8 @@ ACME_SOFTWARE_RULE = {
 
 ACME_RULES = [ACME_CABLE_TIE_RULE, ACME_TONER_RULE, ACME_SOFTWARE_RULE]
 
+ACME_APPROVAL_LIMIT = 2000.0
+
 
 def seed_commodity_rules(db: Session, org: Organization) -> int:
     settings = org.settings or {}
@@ -228,6 +230,14 @@ def seed_commodity_rules(db: Session, org: Organization) -> int:
     return len(new)
 
 
+def seed_approval_limit(db: Session, org: Organization) -> int:
+    settings = org.settings or {}
+    if "approval_limit" in settings:
+        return 0
+    org.settings = {**settings, "approval_limit": ACME_APPROVAL_LIMIT}
+    return 1
+
+
 def seed(db: Session) -> dict[str, int]:
     """Seed everything. Returns counts of newly created rows per kind.
 
@@ -249,6 +259,7 @@ def seed(db: Session) -> dict[str, int]:
     }
     db.flush()
     counts["commodity_rules"] = seed_commodity_rules(db, dev_org) if dev_org else 0
+    counts["approval_limit"] = seed_approval_limit(db, dev_org) if dev_org else 0
     db.commit()
     return counts
 

@@ -24,6 +24,7 @@ from app.schemas.requests import (
     RequestUpdate,
     StatusUpdate,
 )
+from app.services.approval import approval_on_save
 from app.services.categorisation import commodity_block, rule_for_lines
 from app.services.organization_settings import load_settings
 from app.services.totals import add_up, same_amount
@@ -365,6 +366,8 @@ def create_request(
         db, membership, payload, suggested_id=_suggested_group(payload.extraction)
     )
     commodity = _saved_commodity(db, membership, group, hit)
+    limit = load_settings(db.get(Organization, membership.organization_id)).approval_limit
+    approval = approval_on_save("pending", False, None, totals["computed"], limit, totals["match"])
 
     # Vendor fields are already cleaned up during extraction, so we can persist
     # them directly here.
@@ -380,6 +383,8 @@ def create_request(
         organization_id=membership.organization_id,
         created_by=membership.user_id,
         status="open",
+        approval_status=approval.status,
+        approved_at=datetime.now(timezone.utc) if approval.status == "approved" else None,
     )
     request.order_lines = [
         OrderLine(
@@ -404,6 +409,8 @@ def create_request(
     if catalog := _catalog_choices(payload):
         created["catalog"] = catalog
     _log_activity(db, request.id, membership.user_id, "created", "Request created", created)
+    for event in approval.events:
+        _log_activity(db, request.id, membership.user_id, event.action, event.summary, event.detail)
     _log_override(db, request.id, membership.user_id, override)
     _log_correction(db, request.id, membership.user_id, commodity)
     db.commit()
@@ -426,6 +433,15 @@ def update_request(
     payload = payload.model_copy(update={"total_cost": totals["computed"]})
     payload, group, override, hit = _apply_company_rules(db, membership, payload, stored=request)
     commodity = _saved_commodity(db, membership, group, hit)
+    limit = load_settings(db.get(Organization, membership.organization_id)).approval_limit
+    approval = approval_on_save(
+        request.approval_status,
+        request.approved_by is not None,
+        request.total_cost,
+        totals["computed"],
+        limit,
+        totals["match"],
+    )
 
     changed = _changed_fields(request, payload)
 
@@ -436,6 +452,10 @@ def update_request(
     request.commodity_group_id = payload.commodity_group_id
     request.total_cost = payload.total_cost
     request.department = payload.department
+    if approval.events:
+        request.approval_status = approval.status
+        request.approved_by = None
+        request.approved_at = datetime.now(timezone.utc) if approval.status == "approved" else None
 
     # Replace order lines (same semantics as the original delete-and-insert).
     request.order_lines = [
@@ -461,6 +481,8 @@ def update_request(
             {"changed_fields": changed, "totals": totals, "group": group}
             | ({"catalog": catalog} if (catalog := _catalog_choices(payload)) else {}),
         )
+    for event in approval.events:
+        _log_activity(db, request.id, membership.user_id, event.action, event.summary, event.detail)
     _log_override(db, request.id, membership.user_id, override)
     _log_correction(db, request.id, membership.user_id, commodity)
     db.commit()
