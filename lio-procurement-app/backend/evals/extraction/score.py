@@ -148,11 +148,29 @@ def arithmetic(got_lines: list[dict], total: Any) -> dict:
 WARNING_FIELDS = {"Vendor Name", "VAT ID", "Order Lines", "Total Cost"}
 
 
-def warned(app: dict) -> bool:
+def totals_warning(app: dict) -> bool:
     totals = app.get("totals") or {}
-    if totals.get("match") is False or totals.get("grossMatch") is False:
-        return True
-    return bool(WARNING_FIELDS & set(app.get("missingFields") or []))
+    if totals.get("grossMatch") is not None:
+        return totals["grossMatch"] is False
+    return totals.get("match") is False
+
+
+def warned(app: dict) -> bool:
+    return totals_warning(app) or bool(WARNING_FIELDS & set(app.get("missingFields") or []))
+
+
+def lines_right(result: dict) -> bool:
+    return (
+        not result["crashed"]
+        and result["fields"]["totalCost"]
+        and result["itemsFound"] == result["itemsExpected"]
+        and result["chargesFound"] == result["chargesExpected"]
+        and result["extraLines"] == 0
+    )
+
+
+def false_alarm(result: dict, app: dict) -> bool:
+    return lines_right(result) and totals_warning(app)
 
 
 def score(data: dict | None, key: dict) -> dict:

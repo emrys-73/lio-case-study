@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from evals.extraction.score import score, unit_canon, vat_ok, vendor_ok, warned
+from evals.extraction.score import false_alarm, score, totals_warning, unit_canon, vat_ok, vendor_ok, warned
 
 KEY = json.loads(
     (Path(__file__).parents[1] / "evals/extraction/cases/gaertner-gregg.json").read_text()
@@ -77,9 +77,19 @@ def test_vat_and_gross_are_scored_on_their_own():
     assert s["fullyCorrect"]
 
 
-def test_a_totals_mismatch_counts_as_a_warning():
+def test_the_form_checks_the_gross_first_and_the_net_only_without_one():
+    assert totals_warning({"totals": {"match": True, "grossMatch": False}})
+    assert not totals_warning({"totals": {"match": False, "grossMatch": True}})
+    assert totals_warning({"totals": {"match": False, "grossMatch": None}})
     assert warned({"totals": {"match": False, "grossMatch": None}, "missingFields": None})
-    assert warned({"totals": {"match": True, "grossMatch": False}, "missingFields": None})
+
+
+def test_right_lines_with_a_totals_warning_is_a_false_alarm():
+    s = score(PERFECT, KEY)
+    assert false_alarm(s, {"totals": {"grossMatch": False}})
+    assert not false_alarm(s, {"totals": {"grossMatch": True}})
+    wrong = score({**PERFECT, "orderLines": PERFECT["orderLines"][:1]}, KEY)
+    assert not false_alarm(wrong, {"totals": {"grossMatch": False}})
 
 
 def test_a_scored_field_listed_as_missing_counts_as_a_warning():

@@ -262,3 +262,30 @@ def test_an_edit_with_no_lines_stores_a_total_of_zero(client, db_session):
     r = client.put(f"/requests/{rid}", json=edit, headers=headers)
     assert r.status_code == 200, r.text
     assert float(r.json()["total_cost"]) == 0.0
+
+
+def test_vat_printed_in_two_places_is_no_false_alarm():
+    totals = check_totals(_lines(715.52, 120.62, 350.0, 113.85), 1186.14, vat=225.37, gross=1546.99)
+    assert totals["grossMatch"] is True
+
+
+def test_vat_counted_as_a_line_does_not_fit_the_gross():
+    totals = check_totals(_lines(1467.61, 280.85, 10.55), 1759.01, vat=280.85, gross=1759.01)
+    assert totals["grossMatch"] is False
+
+
+def test_an_alternative_counted_as_bought_does_not_fit_the_gross():
+    totals = check_totals(_lines(715.26, 622.0, 430.0, 215.0), 1552.26, vat=254.08, gross=1847.19)
+    assert totals["grossMatch"] is False
+
+
+def test_reduced_rate_and_no_vat_fit_the_gross():
+    assert check_totals(_lines(100.0), None, vat=7.0, gross=107.0)["grossMatch"] is True
+    assert check_totals(_lines(100.0), None, vat=None, gross=107.0)["grossMatch"] is True
+    assert check_totals(_lines(1000.0), None, vat=0.0, gross=1000.0)["grossMatch"] is True
+    assert check_totals(_lines(1000.0), None, vat=None, gross=1000.0)["grossMatch"] is True
+
+
+def test_the_gross_alone_is_enough_to_check():
+    assert check_totals(_lines(1299.99), None, vat=None, gross=1546.99)["grossMatch"] is True
+    assert check_totals(_lines(1186.14), None, vat=None, gross=1546.99)["grossMatch"] is False

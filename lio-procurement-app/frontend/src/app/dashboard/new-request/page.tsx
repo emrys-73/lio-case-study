@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import * as api from '@/lib/api';
 import { useCommodityGroups } from '@/lib/hooks/useCommodityGroups';
 import { Button, Input, Alert, Loader } from '@/components/base';
+import { grossFits } from '@/lib/totals';
 
 interface OrderLine {
   positionDescription: string;
@@ -51,11 +52,9 @@ export default function NewRequestPage() {
   const [printedTotal, setPrintedTotal] = useState<number | null>(null);
   const [printedVat, setPrintedVat] = useState<number | null>(null);
   const [printedGross, setPrintedGross] = useState<number | null>(null);
-  const totalsDiffer = printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
-  const grossDiffers =
-    printedVat !== null &&
-    printedGross !== null &&
-    Math.abs(totalCost + printedVat - printedGross) >= 0.005;
+  const grossDiffers = printedGross !== null && !grossFits(totalCost, printedVat, printedGross);
+  const totalsDiffer =
+    printedGross === null && printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
 
   // Handle file upload and extraction
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,8 +231,9 @@ export default function NewRequestPage() {
       )}
       {grossDiffers && (
         <Alert variant="warning" className="mb-6">
-          The lines plus VAT come to €{(totalCost + printedVat).toFixed(2)}, the quote&apos;s gross is
-          €{printedGross.toFixed(2)}. A line may be missing.
+          The lines add up to €{totalCost.toFixed(2)} before VAT. That doesn&apos;t fit the
+          quote&apos;s total of €{printedGross.toFixed(2)} with VAT. Check the lines before you
+          submit.
         </Alert>
       )}
       {success && <Alert variant="success" className="mb-6">{success}</Alert>}

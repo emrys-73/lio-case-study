@@ -13,7 +13,7 @@ import app.services.extraction as extraction
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.services.pdf import extract_text
-from evals.extraction.score import score, warned
+from evals.extraction.score import false_alarm, lines_right, score, warned
 
 HERE = Path(__file__).parent
 CASES = HERE / "cases"
@@ -144,6 +144,8 @@ def summarise(rows: list[dict], meta: dict) -> tuple[dict, str]:
         "grossTotal": sum(s.get("totalsBlock", {}).get("grossTotal", False) for s in ok),
         "wrong": sum(not r["score"]["fullyCorrect"] for r in rows),
         "wrongAndSilent": sum(not r["score"]["fullyCorrect"] and not warned(r["app"]) for r in rows),
+        "linesRight": sum(lines_right(r["score"]) for r in rows),
+        "falseAlarms": sum(false_alarm(r["score"], r["app"]) for r in rows),
         "avgSeconds": round(sum(r["seconds"] for r in rows) / n, 1) if n else 0,
         "promptTokens": sum(r["model"].get("promptTokens") or 0 for r in rows),
         "completionTokens": sum(r["model"].get("completionTokens") or 0 for r in rows),
@@ -206,6 +208,7 @@ def summarise(rows: list[dict], meta: dict) -> tuple[dict, str]:
         f"| VAT amount right | {_pct(o['vatAmount'], n)} |",
         f"| Gross total right | {_pct(o['grossTotal'], n)} |",
         f"| Wrong with no warning in the form | {_pct(o['wrongAndSilent'], o['wrong'])} |",
+        f"| Lines and total right but totals warning shown | {_pct(o['falseAlarms'], o['linesRight'])} |",
         f"| Avg seconds per quote | {o['avgSeconds']} |",
         f"| Tokens in / out | {o['promptTokens']:,} / {o['completionTokens']:,} |",
         f"| OCR added text | {_pct(o['ocrAddedText'], n)} |",
