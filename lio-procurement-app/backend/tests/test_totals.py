@@ -168,6 +168,7 @@ def test_create_ignores_the_total_the_client_sent(client, db_session):
     [created] = _activity(db_session, r.json()["id"], "created")
     assert created.detail["totals"] == {
         "computed": 1758.0, "submitted": 1.0, "printed": None, "match": None,
+        "linesOff": [],
     }
 
 
@@ -189,6 +190,7 @@ def test_edit_ignores_the_total_the_client_sent(client, db_session):
     [updated] = _activity(db_session, rid, "updated")
     assert updated.detail["totals"] == {
         "computed": 1438.0, "submitted": 99.0, "printed": None, "match": None,
+        "linesOff": [],
     }
 
 
@@ -209,6 +211,7 @@ def test_create_from_a_pdf_stores_what_the_extraction_returned(client, db_sessio
     assert created.detail["extraction"] == SNAPSHOT
     assert created.detail["totals"] == {
         "computed": 1758.0, "submitted": 1758.0, "printed": 1758.0, "match": True,
+        "linesOff": [],
     }
 
 
@@ -226,3 +229,36 @@ def test_typed_request_has_no_snapshot(client, db_session):
     [created] = _activity(db_session, r.json()["id"], "created")
     assert created.detail["source"] == "manual"
     assert "extraction" not in created.detail
+
+
+def test_a_line_where_qty_times_price_is_not_the_total_is_flagged_not_changed(client, db_session):
+    payload = _create("Moss wall", 1.0)
+    payload["orderLines"] = [
+        dict(GREGG_LINES[0]),
+        {"positionDescription": "Schrauben", "unitPrice": 100.0, "amount": 10,
+         "unit": "pieces", "totalPrice": 1.0},
+    ]
+    r = client.post("/requests", json=payload, headers=_token(client))
+    assert float(r.json()["total_cost"]) == 1439.0
+    [created] = _activity(db_session, r.json()["id"], "created")
+    assert created.detail["totals"]["linesOff"] == [2]
+
+
+def test_a_discounted_line_is_flagged_for_a_look(client, db_session):
+    payload = _create("Moss picture", 715.26)
+    payload["orderLines"] = [
+        {"positionDescription": "Moosbild Mix-Moos", "unitPrice": 894.08, "amount": 1,
+         "unit": "pieces", "totalPrice": 715.26},
+    ]
+    r = client.post("/requests", json=payload, headers=_token(client))
+    [created] = _activity(db_session, r.json()["id"], "created")
+    assert created.detail["totals"]["linesOff"] == [1]
+
+
+def test_an_edit_with_no_lines_stores_a_total_of_zero(client, db_session):
+    headers = _token(client)
+    rid = client.post("/requests", json=_create("Moss wall", 1758.0), headers=headers).json()["id"]
+    edit = dict(_create("Moss wall", 1758.0), title="Moss wall", orderLines=[])
+    r = client.put(f"/requests/{rid}", json=edit, headers=headers)
+    assert r.status_code == 200, r.text
+    assert float(r.json()["total_cost"]) == 0.0

@@ -138,6 +138,11 @@ def _server_totals(payload: RequestCreate | RequestUpdate, printed: float | None
         "submitted": payload.total_cost,
         "printed": printed,
         "match": None if printed is None else same_amount(computed, printed),
+        "linesOff": [
+            number
+            for number, line in enumerate(payload.order_lines, start=1)
+            if not same_amount(line.unit_price * line.amount, line.total_price)
+        ],
     }
 
 
