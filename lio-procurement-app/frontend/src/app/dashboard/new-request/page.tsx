@@ -15,6 +15,18 @@ interface OrderLine {
   totalPrice: number;
 }
 
+function toFormLine(line: api.ExtractedOrderLine): OrderLine {
+  return {
+    positionDescription: line.positionDescription ?? '',
+    unitPrice: line.unitPrice ?? 0,
+    amount: line.amount ?? 1,
+    unit: line.unit ?? '',
+    totalPrice: line.totalPrice ?? 0,
+  };
+}
+
+const NOT_FOUND = 'Not found in the quote';
+
 export default function NewRequestPage() {
   const router = useRouter();
   const { data: commodityGroups } = useCommodityGroups();
@@ -35,6 +47,7 @@ export default function NewRequestPage() {
   const [success, setSuccess] = useState('');
   const [warning, setWarning] = useState('');
   const [extracting, setExtracting] = useState(false);
+  const [notFound, setNotFound] = useState<string[]>([]);
 
   // PDF parsing mutation
   const parsePDFMutation = useMutation({
@@ -81,8 +94,9 @@ export default function NewRequestPage() {
       setVendorName(extracted.vendorName || '');
       setVatId(extracted.vatId || '');
       setDepartment(extracted.department || '');
-      setOrderLines(extracted.orderLines || []);
+      setOrderLines((extracted.orderLines || []).map(toFormLine));
       setTotalCost(extracted.totalCost || 0);
+      setNotFound(extractionResult.missingFields || []);
       
       // Set commodity group (now included in extraction)
       if (extracted.commodityGroupId) {
@@ -297,6 +311,7 @@ export default function NewRequestPage() {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
               placeholder="IT Department"
+              helperText={notFound.includes('Department') && !department ? NOT_FOUND : undefined}
             />
           </div>
 
@@ -306,6 +321,7 @@ export default function NewRequestPage() {
             onChange={(e) => setTitle(e.target.value)}
             required
             placeholder="Adobe Creative Cloud Subscription"
+            helperText={notFound.includes('Title/Short Description') && !title ? NOT_FOUND : undefined}
           />
         </div>
 
@@ -320,6 +336,7 @@ export default function NewRequestPage() {
               onChange={(e) => setVendorName(e.target.value)}
               required
               placeholder="Adobe Systems"
+              helperText={notFound.includes('Vendor Name') && !vendorName ? NOT_FOUND : undefined}
             />
 
             <Input
@@ -327,6 +344,7 @@ export default function NewRequestPage() {
               value={vatId}
               onChange={(e) => setVatId(e.target.value)}
               placeholder="DE123456789"
+              helperText={notFound.includes('VAT ID') && !vatId ? NOT_FOUND : undefined}
             />
           </div>
 

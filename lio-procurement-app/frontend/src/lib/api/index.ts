@@ -84,13 +84,21 @@ export interface UpdateRequestInput {
   orderLines: OrderLineInput[];
 }
 
+export interface ExtractedOrderLine {
+  positionDescription: string | null;
+  unitPrice: number | null;
+  amount: number | null;
+  unit: string | null;
+  totalPrice: number | null;
+}
+
 export interface ExtractedVendorData {
-  title: string;
-  vendorName: string;
-  vatId: string;
-  department: string;
-  orderLines: OrderLineInput[];
-  totalCost: number;
+  title: string | null;
+  vendorName: string | null;
+  vatId: string | null;
+  department: string | null;
+  orderLines: ExtractedOrderLine[];
+  totalCost: number | null;
   commodityGroupId: number | null;
   commodityGroupName: string | null;
 }
