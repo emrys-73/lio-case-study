@@ -110,6 +110,11 @@ export interface ExtractionResponse {
   error?: string;
   missingFields?: string[];
   totals?: ExtractionTotals;
+  reading?: {
+    ocrLines: string[];
+    pagesWithoutText: number[];
+    pageImagesSent: boolean;
+  };
 }
 
 export interface ExtractionTotals {
@@ -351,5 +356,10 @@ export const pdf = {
 export const extraction = {
   extract(text: string): Promise<ExtractionResponse> {
     return apiFetch('/extraction', { body: { text } });
+  },
+  fromPdf(file: File): Promise<ExtractionResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiFetch('/extraction/pdf', { formData });
   },
 };

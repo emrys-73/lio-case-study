@@ -6,7 +6,7 @@ Measures how well the PDF quote extraction works, on real quotes, against the re
 
 - `cases/<id>.json`: one answer key per quote. Add a quote = add a file. `status` says if a human checked it.
 - `score.py`: pure scoring, no network. Unit tests in `tests/test_eval_score.py`.
-- `run.py`: runs every case through `extract_text` and `extract_vendor_data`, logs the raw model reply, scores it.
+- `run.py`: runs every case through `extract_quote` (the upload path), logs every model call and the raw reply, scores it.
 - `inputs/layout/`: `pdftotext -layout` text, used with `--text-source layout` to test the input step on its own.
 - `results/<timestamp>_<label>/`: `runs.jsonl` (every run in full), `summary.json`, `summary.md`. Never edited by hand.
 
@@ -26,5 +26,6 @@ docker compose run --rm -T -v "$PWD/../quotes:/quotes:ro" \
   backend python -m evals.extraction.run --runs 3 --label baseline
 ```
 
-Options: `--model gpt-4.1`, `--text-source layout`, `--case hoffmann`.
+Options: `--model gpt-4.1`, `--text-source pypdf` (text layer only, the path before OCR), `--text-source layout`, `--case hoffmann`, `--without-group-list`.
+The default `--text-source pdf` runs `extract_quote`, the same path as an upload: text layer, OCR, and page pictures when needed.
 Each full run is 15 calls, about 370k input tokens.

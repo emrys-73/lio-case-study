@@ -27,6 +27,7 @@ log = logging.getLogger("eval.extraction")
 class RecordingOpenAI(OpenAI):
 
     last: dict = {}
+    calls: list = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,6 +36,7 @@ class RecordingOpenAI(OpenAI):
         def recorded_create(**params):
             started = time.monotonic()
             RecordingOpenAI.last = {"model": params.get("model")}
+            RecordingOpenAI.calls.append(RecordingOpenAI.last)
             try:
                 resp = create(**params)
             except Exception as exc:
@@ -68,13 +70,24 @@ def _raw_json(content: str | None) -> dict | None:
 
 def run_case(key: dict, source: str, db) -> dict:
     pdf_bytes = (QUOTES / key["pdf"]).read_bytes()
-    text = (LAYOUT / f"{key['pdf']}.txt").read_text() if source == "layout" else extract_text(pdf_bytes)
 
     RecordingOpenAI.last = {}
+    RecordingOpenAI.calls = []
     started = time.monotonic()
-    resp = extraction.extract_vendor_data(text, db, key.get("customer"))
+    if source == "layout":
+        text = (LAYOUT / f"{key['pdf']}.txt").read_text()
+        resp = extraction.extract_vendor_data(text, db, key.get("customer"))
+    elif source == "pypdf":
+        text = extract_text(pdf_bytes)
+        resp = extraction.extract_vendor_data(text, db, key.get("customer"))
+    else:
+        text = extract_text(pdf_bytes)
+        resp = extraction.extract_quote(pdf_bytes, db, key.get("customer"))
     seconds = round(time.monotonic() - started, 2)
     raw = dict(RecordingOpenAI.last)
+    raw["calls"] = len(RecordingOpenAI.calls)
+    raw["promptTokens"] = sum(c.get("promptTokens") or 0 for c in RecordingOpenAI.calls)
+    raw["completionTokens"] = sum(c.get("completionTokens") or 0 for c in RecordingOpenAI.calls)
     app_data = resp.data.model_dump(by_alias=True) if resp.success and resp.data else None
     raw_parsed = _raw_json(raw.get("content"))
 
@@ -85,7 +98,8 @@ def run_case(key: dict, source: str, db) -> dict:
         "model": raw,
         "app": {"success": resp.success, "error": resp.error,
                 "missingFields": resp.missing_fields, "data": app_data,
-                "totals": resp.totals.model_dump(by_alias=True) if resp.totals else None},
+                "totals": resp.totals.model_dump(by_alias=True) if resp.totals else None,
+                "reading": resp.reading},
         "score": score(app_data, key),
         "modelOnlyScore": score(raw_parsed, key) if raw_parsed else None,
     }
@@ -133,6 +147,9 @@ def summarise(rows: list[dict], meta: dict) -> tuple[dict, str]:
         "avgSeconds": round(sum(r["seconds"] for r in rows) / n, 1) if n else 0,
         "promptTokens": sum(r["model"].get("promptTokens") or 0 for r in rows),
         "completionTokens": sum(r["model"].get("completionTokens") or 0 for r in rows),
+        "ocrAddedText": sum(bool((r["app"].get("reading") or {}).get("ocrLines")) for r in rows),
+        "pageImagesSent": sum(bool((r["app"].get("reading") or {}).get("pageImagesSent"))
+                              for r in rows),
     }
 
     keys = {r["case"]: r for r in rows}
@@ -191,6 +208,8 @@ def summarise(rows: list[dict], meta: dict) -> tuple[dict, str]:
         f"| Wrong with no warning in the form | {_pct(o['wrongAndSilent'], o['wrong'])} |",
         f"| Avg seconds per quote | {o['avgSeconds']} |",
         f"| Tokens in / out | {o['promptTokens']:,} / {o['completionTokens']:,} |",
+        f"| OCR added text | {_pct(o['ocrAddedText'], n)} |",
+        f"| Page pictures sent to the model | {_pct(o['pageImagesSent'], n)} |",
         "",
         "| Case | Crashes | Fully correct | Total kind | Alternatives | Missing charges |",
         "|---|---|---|---|---|---|",
@@ -208,7 +227,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--model", default=None)
-    parser.add_argument("--text-source", choices=["pypdf", "layout"], default="pypdf")
+    parser.add_argument("--text-source", choices=["pdf", "pypdf", "layout"], default="pdf")
     parser.add_argument("--case", action="append")
     parser.add_argument("--label", default="run")
     parser.add_argument("--without-group-list", action="store_true")

@@ -1,13 +1,18 @@
+import base64
+import io
 import json
 import logging
 
 from openai import OpenAI
+from PIL import Image
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models import CommodityGroup
 from app.schemas.extraction import ExtractedVendorData, ExtractionResponse
+from app.services.ocr import PictureText, read_pictures, render_pages
+from app.services.pdf import extract_pages
 from app.services.totals import check_totals
 
 logger = logging.getLogger(__name__)
@@ -130,15 +135,34 @@ def _strip_markdown_fences(content: str) -> str:
     return cleaned
 
 
+IMAGE_DPI = 150
+MAX_IMAGE_PAGES = 4
+PICTURE_LABEL = "Text found in pictures on the page (OCR, may have misreads):"
+
+
+def _image_part(image: Image.Image) -> dict:
+    png = io.BytesIO()
+    image.save(png, format="PNG")
+    data = base64.b64encode(png.getvalue()).decode("ascii")
+    return {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{data}",
+                                               "detail": "high"}}
+
+
 def request_params(
-    pdf_text: str, commodity_groups_list: str, buyer_name: str | None = None
+    pdf_text: str,
+    commodity_groups_list: str,
+    buyer_name: str | None = None,
+    page_images: list[Image.Image] | None = None,
 ) -> dict:
+    prompt = _build_prompt(pdf_text, commodity_groups_list, buyer_name)
+    content: str | list[dict] = prompt
+    if page_images:
+        content = [{"type": "text", "text": prompt}, *map(_image_part, page_images)]
     return {
         "model": settings.openai_model,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",
-             "content": _build_prompt(pdf_text, commodity_groups_list, buyer_name)},
+            {"role": "user", "content": content},
         ],
         "response_format": {
             "type": "json_schema",
@@ -186,13 +210,16 @@ def find_missing_fields(extracted: ExtractedVendorData) -> list[str]:
 
 
 def extract_vendor_data(
-    pdf_text: str, db: Session, buyer_name: str | None = None
+    pdf_text: str,
+    db: Session,
+    buyer_name: str | None = None,
+    page_images: list[Image.Image] | None = None,
 ) -> ExtractionResponse:
     """Extract vendor data and classify commodity group in one AI call.
 
     Port of ``src/actions/extraction.ts`` — same prompt, model and validation.
     """
-    if not pdf_text or not pdf_text.strip():
+    if (not pdf_text or not pdf_text.strip()) and not page_images:
         return ExtractionResponse(success=False, error="No text provided for extraction")
 
     if not settings.openai_api_key:
@@ -219,7 +246,7 @@ def extract_vendor_data(
     try:
         client = OpenAI(api_key=settings.openai_api_key)
         response = client.chat.completions.create(
-            **request_params(pdf_text, commodity_groups_list, buyer_name)
+            **request_params(pdf_text, commodity_groups_list, buyer_name, page_images)
         )
 
         content = response.choices[0].message.content
@@ -252,3 +279,61 @@ def extract_vendor_data(
         missing_fields=missing_fields or None,
         totals=totals,
     )
+
+
+def quote_text(pages: list[str], pictures: PictureText) -> str:
+    text = "\n".join(pages)
+    if pictures.lines:
+        text += "\n\n" + PICTURE_LABEL + "\n" + "\n".join(pictures.lines)
+    return text
+
+
+def needs_page_images(pictures: PictureText, answer: ExtractionResponse) -> bool:
+    if pictures.pages_without_text:
+        return True
+    if not answer.success or answer.data is None:
+        return False
+    return _blank(answer.data.vendor_name) or _blank(answer.data.vat_id)
+
+
+def merge_picture_answer(
+    first: ExtractionResponse, second: ExtractionResponse, pictures: PictureText
+) -> ExtractionResponse:
+    if not second.success or second.data is None:
+        return first
+    if pictures.pages_without_text or not first.success or first.data is None:
+        return second
+    data = first.data.model_copy()
+    if _blank(data.vendor_name):
+        data.vendor_name = second.data.vendor_name
+    if _blank(data.vat_id):
+        data.vat_id = second.data.vat_id
+    return first.model_copy(update={"data": data,
+                                    "missing_fields": find_missing_fields(data) or None})
+
+
+def _read_pictures_safely(pdf_bytes: bytes, pages: list[str]) -> PictureText:
+    try:
+        return read_pictures(pdf_bytes, pages)
+    except Exception:
+        logger.exception("OCR failed, going on with the text layer only")
+        return PictureText()
+
+
+def extract_quote(
+    pdf_bytes: bytes, db: Session, buyer_name: str | None = None
+) -> ExtractionResponse:
+    pages = extract_pages(pdf_bytes)
+    pictures = _read_pictures_safely(pdf_bytes, pages)
+    text = quote_text(pages, pictures)
+    answer = extract_vendor_data(text, db, buyer_name)
+    images_sent = needs_page_images(pictures, answer)
+    if images_sent:
+        images = render_pages(pdf_bytes, dpi=IMAGE_DPI)[:MAX_IMAGE_PAGES]
+        second = extract_vendor_data(text, db, buyer_name, page_images=images)
+        answer = merge_picture_answer(answer, second, pictures)
+    return answer.model_copy(update={"reading": {
+        "ocrLines": pictures.lines,
+        "pagesWithoutText": pictures.pages_without_text,
+        "pageImagesSent": images_sent,
+    }})

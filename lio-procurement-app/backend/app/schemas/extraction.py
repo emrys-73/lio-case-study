@@ -71,3 +71,4 @@ class ExtractionResponse(BaseModel):
     error: str | None = None
     missing_fields: list[str] | None = Field(default=None, alias="missingFields")
     totals: ExtractionTotals | None = None
+    reading: dict | None = None

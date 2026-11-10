@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
 import * as api from '@/lib/api';
 import { useCommodityGroups } from '@/lib/hooks/useCommodityGroups';
 import { Button, Input, Alert, Loader } from '@/components/base';
@@ -50,24 +49,13 @@ export default function NewRequestPage() {
   const [notFound, setNotFound] = useState<string[]>([]);
   const [extraction, setExtraction] = useState<api.ExtractionResponse | undefined>();
   const [printedTotal, setPrintedTotal] = useState<number | null>(null);
-  const totalsDiffer = printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
   const [printedVat, setPrintedVat] = useState<number | null>(null);
   const [printedGross, setPrintedGross] = useState<number | null>(null);
+  const totalsDiffer = printedTotal !== null && Math.abs(totalCost - printedTotal) >= 0.005;
   const grossDiffers =
     printedVat !== null &&
     printedGross !== null &&
     Math.abs(totalCost + printedVat - printedGross) >= 0.005;
-
-  // PDF parsing mutation
-  const parsePDFMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const result = await api.pdf.parse(file);
-      if (!result.text) {
-        throw new Error('Failed to parse PDF');
-      }
-      return result.text;
-    },
-  });
 
   // Handle file upload and extraction
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,11 +75,7 @@ export default function NewRequestPage() {
     setExtracting(true);
 
     try {
-      // Step 1: Parse PDF
-      const pdfText = await parsePDFMutation.mutateAsync(uploadedFile);
-
-      // Step 2: Extract structured data AND classify commodity group in one AI call
-      const extractionResult = await api.extraction.extract(pdfText);
+      const extractionResult = await api.extraction.fromPdf(uploadedFile);
       
       if (!extractionResult.success || !extractionResult.data) {
         throw new Error(extractionResult.error || 'Failed to extract data');

@@ -16,8 +16,7 @@ vi.mock('@/lib/hooks/useCommodityGroups', () => ({
 }));
 
 vi.mock('@/lib/api', () => ({
-  pdf: { parse: vi.fn() },
-  extraction: { extract: vi.fn() },
+  extraction: { fromPdf: vi.fn() },
   requests: { create: vi.fn(), uploadDocument: vi.fn() },
 }));
 
@@ -57,14 +56,14 @@ async function uploadQuote(container: HTMLElement) {
 
 describe('new request from a PDF quote', () => {
   beforeEach(() => {
-    vi.mocked(api.pdf.parse).mockResolvedValue({ text: 'Angebot' });
-    vi.mocked(api.extraction.extract).mockResolvedValue(hoffmann as never);
+    vi.mocked(api.extraction.fromPdf).mockResolvedValue(hoffmann as never);
   });
 
   it('fills the form from the extraction', async () => {
     const { container } = renderPage();
     await uploadQuote(container);
 
+    expect(api.extraction.fromPdf).toHaveBeenCalledWith(expect.any(File));
     expect(await screen.findByDisplayValue('Hoffmann Nürnberg GmbH')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Schleifmaschine HN-GS 450')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Lieferung und Montage')).toBeInTheDocument();
@@ -97,7 +96,7 @@ describe('new request from a PDF quote', () => {
   });
 
   it('warns when the lines do not add up to the total on the quote', async () => {
-    vi.mocked(api.extraction.extract).mockResolvedValue({
+    vi.mocked(api.extraction.fromPdf).mockResolvedValue({
       ...hoffmann,
       totals: { computed: 17000, printed: 17230, match: false },
     } as never);
@@ -110,7 +109,7 @@ describe('new request from a PDF quote', () => {
   });
 
   it('says nothing about totals when they match', async () => {
-    vi.mocked(api.extraction.extract).mockResolvedValue({
+    vi.mocked(api.extraction.fromPdf).mockResolvedValue({
       ...hoffmann,
       totals: { computed: 17000, printed: 17000, match: true },
     } as never);
@@ -122,7 +121,7 @@ describe('new request from a PDF quote', () => {
   });
 
   it('warns when the lines plus VAT do not make the gross on the quote', async () => {
-    vi.mocked(api.extraction.extract).mockResolvedValue({
+    vi.mocked(api.extraction.fromPdf).mockResolvedValue({
       ...hoffmann,
       totals: { computed: 17000, printed: 17000, match: true, vat: 3230, gross: 20330, grossMatch: false },
     } as never);
@@ -145,7 +144,7 @@ describe('new request from a PDF quote', () => {
         ],
       },
     };
-    vi.mocked(api.extraction.extract).mockResolvedValue(complete as never);
+    vi.mocked(api.extraction.fromPdf).mockResolvedValue(complete as never);
     vi.mocked(api.requests.create).mockResolvedValue({ id: 'r1' } as never);
     const { container } = renderPage();
     await uploadQuote(container);
