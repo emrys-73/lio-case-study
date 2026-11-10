@@ -1,6 +1,7 @@
 import json
 
-from app.services.extraction import find_missing_fields, parse_reply
+from app.schemas.extraction import ExtractedVendorData, OrderLineData
+from app.services.extraction import REPLY_SCHEMA, find_missing_fields, parse_reply, request_params
 
 HOFFMANN_REPLY = {
     "title": "Industrial Grinding Machine Purchase",
@@ -65,3 +66,34 @@ def test_blank_strings_still_count_as_missing():
 def test_reply_in_code_fences_still_parses():
     data = parse_reply("```json\n" + json.dumps(HOFFMANN_REPLY) + "\n```")
     assert data.total_cost == 17000.0
+
+
+def _objects(schema):
+    if schema.get("type") == "object" or "object" in schema.get("type", []):
+        yield schema
+    for value in schema.get("properties", {}).values():
+        yield from _objects(value)
+    if "items" in schema:
+        yield from _objects(schema["items"])
+
+
+def test_reply_schema_follows_openai_strict_rules():
+    for obj in _objects(REPLY_SCHEMA):
+        assert obj["additionalProperties"] is False
+        assert sorted(obj["required"]) == sorted(obj["properties"])
+
+
+def test_reply_schema_and_parser_use_the_same_names():
+    top = set(REPLY_SCHEMA["properties"])
+    line = set(REPLY_SCHEMA["properties"]["orderLines"]["items"]["properties"])
+    assert top <= {f.alias or n for n, f in ExtractedVendorData.model_fields.items()}
+    assert line <= {f.alias or n for n, f in OrderLineData.model_fields.items()}
+
+
+def test_model_call_asks_for_the_strict_schema():
+    params = request_params("Angebot", "1 | IT | Software")
+    fmt = params["response_format"]
+    assert fmt["type"] == "json_schema"
+    assert fmt["json_schema"]["strict"] is True
+    assert fmt["json_schema"]["schema"] == REPLY_SCHEMA
+    assert params["temperature"] == 0

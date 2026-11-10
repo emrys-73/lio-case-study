@@ -19,6 +19,40 @@ SYSTEM_PROMPT = (
 )
 
 
+def _nullable(kind: str) -> dict:
+    return {"type": [kind, "null"]}
+
+
+def _strict_object(properties: dict) -> dict:
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": list(properties),
+        "additionalProperties": False,
+    }
+
+
+REPLY_SCHEMA = _strict_object({
+    "title": _nullable("string"),
+    "vendorName": _nullable("string"),
+    "vatId": _nullable("string"),
+    "department": _nullable("string"),
+    "orderLines": {
+        "type": "array",
+        "items": _strict_object({
+            "positionDescription": _nullable("string"),
+            "unitPrice": _nullable("number"),
+            "amount": _nullable("number"),
+            "unit": _nullable("string"),
+            "totalPrice": _nullable("number"),
+        }),
+    },
+    "totalCost": _nullable("number"),
+    "commodityGroupId": _nullable("integer"),
+    "commodityGroupName": _nullable("string"),
+})
+
+
 def _build_prompt(pdf_text: str, commodity_groups_list: str) -> str:
     return f"""You are a data extraction and classification specialist. Extract procurement/vendor offer information from the following German document text AND classify it into the appropriate commodity group.
 
@@ -86,6 +120,22 @@ def _strip_markdown_fences(content: str) -> str:
     return cleaned
 
 
+def request_params(pdf_text: str, commodity_groups_list: str) -> dict:
+    return {
+        "model": settings.openai_model,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": _build_prompt(pdf_text, commodity_groups_list)},
+        ],
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": "quote_extraction", "strict": True, "schema": REPLY_SCHEMA},
+        },
+        "max_completion_tokens": 4000,
+        "temperature": 0,
+    }
+
+
 def parse_reply(content: str) -> ExtractedVendorData:
     return ExtractedVendorData.model_validate(json.loads(_strip_markdown_fences(content)))
 
@@ -145,13 +195,7 @@ def extract_vendor_data(pdf_text: str, db: Session) -> ExtractionResponse:
     try:
         client = OpenAI(api_key=settings.openai_api_key)
         response = client.chat.completions.create(
-            model=settings.openai_model,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": _build_prompt(pdf_text, commodity_groups_list)},
-            ],
-            max_completion_tokens=4000,
-            temperature=0,
+            **request_params(pdf_text, commodity_groups_list)
         )
 
         content = response.choices[0].message.content
