@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.deps import get_current_membership
 from app.db.session import get_db
 from app.models import Article, OrganizationMember
-from app.schemas.articles import ArticleOut, ArticlePage
+from app.schemas.articles import ArticleOut, ArticlePage, CatalogArticle, SearchOut, SuggestOut
+from app.services import catalogue_search
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
@@ -74,3 +75,71 @@ def count_articles(
         or 0
     )
     return {"count": total}
+
+
+def _catalogue(db: Session, organization_id) -> catalogue_search.Catalogue:
+    descriptions = db.scalars(
+        select(Article.description).where(Article.organization_id == organization_id).distinct()
+    ).all()
+    return catalogue_search.catalogue_for(list(descriptions))
+
+
+def _offers(db: Session, organization_id, descriptions: list[str]) -> dict[str, list[dict]]:
+    stmt = (
+        select(Article)
+        .where(Article.organization_id == organization_id, Article.description.in_(descriptions))
+        .options(joinedload(Article.supplier))
+    )
+    grouped: dict[str, list[dict]] = {}
+    for a in db.scalars(stmt):
+        grouped.setdefault(a.description, []).append(
+            {
+                "article_number": a.article_number,
+                "description": a.description,
+                "supplier_name": a.supplier.name if a.supplier else None,
+                "unit": a.unit,
+                "unit_price": float(a.unit_price),
+                "currency": a.currency,
+            }
+        )
+    return grouped
+
+
+def _picked(offers: list[dict], vendor: str | None, unit: str | None) -> CatalogArticle | None:
+    article = catalogue_search.pick_article(offers, vendor=vendor, unit=unit)
+    return CatalogArticle(**article) if article else None
+
+
+@router.get("/suggest", response_model=SuggestOut)
+def suggest_article(
+    q: str = Query(default="", max_length=500),
+    vendor: str | None = Query(default=None, max_length=300),
+    unit: str | None = Query(default=None, max_length=50),
+    membership: OrganizationMember = Depends(get_current_membership),
+    db: Session = Depends(get_db),
+) -> SuggestOut:
+    catalogue = _catalogue(db, membership.organization_id)
+    method = catalogue_search.SHIPPED
+    description = catalogue_search.sure(catalogue_search.rank(catalogue, q, method), method)
+    if description is None:
+        return SuggestOut(match=None)
+    offers = _offers(db, membership.organization_id, [description]).get(description, [])
+    return SuggestOut(match=_picked(offers, vendor, unit))
+
+
+@router.get("/search", response_model=SearchOut)
+def search_articles(
+    q: str = Query(default="", max_length=500),
+    limit: int = Query(default=5, ge=1, le=20),
+    vendor: str | None = Query(default=None, max_length=300),
+    unit: str | None = Query(default=None, max_length=50),
+    membership: OrganizationMember = Depends(get_current_membership),
+    db: Session = Depends(get_db),
+) -> SearchOut:
+    catalogue = _catalogue(db, membership.organization_id)
+    descriptions = catalogue_search.search(catalogue, q, limit=limit)
+    if not descriptions:
+        return SearchOut(items=[])
+    offers = _offers(db, membership.organization_id, descriptions)
+    items = [_picked(offers.get(d, []), vendor, unit) for d in descriptions]
+    return SearchOut(items=[item for item in items if item is not None])

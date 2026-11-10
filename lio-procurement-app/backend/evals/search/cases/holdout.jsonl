@@ -1,0 +1,15 @@
+{"id": "ho-wiper-de", "query": "Scheibenwischer 600mm Flachbalken", "expected": "Windscreen wiper 600 mm flat", "kind": "match", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-drill-de", "query": "Akkuschrauber 18V brushless Bosch", "expected": "Cordless drill 18 V brushless", "kind": "match", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-isopropanol", "query": "Isopropanol 99% 5L Kanister", "expected": "Solvent isopropanol 99%", "kind": "match", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-sticky-en", "query": "post-it notes 76x76 assorted colours", "expected": "Sticky notes 76×76 mm assorted", "kind": "match", "lang": "en", "set": "holdout", "checked": false}
+{"id": "ho-label-de", "query": "Versandetiketten A6 Thermo", "expected": "Shipping label A6 thermal", "kind": "match", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-headset-en", "query": "Jabra speakerphone USB bluetooth", "expected": "Conference speakerphone USB/Bluetooth", "kind": "match", "lang": "en", "set": "holdout", "checked": false}
+{"id": "ho-wrap-typo", "query": "bubbel wrap 1000mm x 100m", "expected": "Bubble wrap 1000 mm × 100 m", "kind": "match", "lang": "en", "set": "holdout", "checked": false}
+{"id": "ho-motor-de", "query": "Elektromotor 2,2 kW 3000 U/min", "expected": "Industrial motor 2.2 kW, 3000 rpm", "kind": "match", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-epoxy-de", "query": "2K Epoxidkleber Industrie", "expected": "Industrial adhesive 2-component epoxy", "kind": "match", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-dock-90w", "query": "USB C dock 90W power delivery", "expected": "Docking station USB-C, 90 W PD", "kind": "match", "lang": "en", "set": "holdout", "checked": false}
+{"id": "ho-desk-lamp", "query": "Schreibtischlampe LED", "expected": null, "kind": "off_catalogue", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-water", "query": "Mineralwasser 0,5l Kiste", "expected": null, "kind": "off_catalogue", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-wiper-500", "query": "Scheibenwischer 500mm", "expected": null, "kind": "near_miss", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-toner-colour", "query": "Toner farbig Set CMY", "expected": null, "kind": "ambiguous", "lang": "de", "set": "holdout", "checked": false}
+{"id": "ho-drill-36v", "query": "Akkubohrschrauber 36V", "expected": null, "kind": "near_miss", "lang": "de", "set": "holdout", "checked": false}

@@ -1,0 +1,34 @@
+{
+  "settings": {
+    "methods": [
+      "words"
+    ],
+    "threshold": null,
+    "margin": null,
+    "defaults": {
+      "words": {
+        "threshold": 0.65,
+        "margin": 0.15
+      },
+      "embeddings": {
+        "threshold": 0.4,
+        "margin": 0.17
+      }
+    },
+    "embedding_model": "text-embedding-3-small",
+    "cases": 59,
+    "answer_key": "drafted, not yet checked by Adrian"
+  },
+  "summary": {
+    "words": {
+      "cases": 59,
+      "right": 39,
+      "wrong_sure": 0,
+      "missed": 1,
+      "correct_nothing": 19,
+      "top5": 40,
+      "should_match": 40,
+      "median_ms": 4.4
+    }
+  }
+}

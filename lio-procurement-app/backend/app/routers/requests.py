@@ -114,6 +114,14 @@ def _log_activity(
     )
 
 
+def _catalog_choices(payload: RequestCreate | RequestUpdate) -> list[dict]:
+    return [
+        {"line": index + 1, **line.catalog.model_dump()}
+        for index, line in enumerate(payload.order_lines)
+        if line.catalog is not None
+    ]
+
+
 def _order_lines_signature(lines) -> list[tuple]:
     return [
         (
@@ -393,6 +401,8 @@ def create_request(
     }
     if payload.extraction:
         created["extraction"] = payload.extraction
+    if catalog := _catalog_choices(payload):
+        created["catalog"] = catalog
     _log_activity(db, request.id, membership.user_id, "created", "Request created", created)
     _log_override(db, request.id, membership.user_id, override)
     _log_correction(db, request.id, membership.user_id, commodity)
@@ -448,7 +458,8 @@ def update_request(
             membership.user_id,
             "updated",
             f"Updated {', '.join(labels)}",
-            {"changed_fields": changed, "totals": totals, "group": group},
+            {"changed_fields": changed, "totals": totals, "group": group}
+            | ({"catalog": catalog} if (catalog := _catalog_choices(payload)) else {}),
         )
     _log_override(db, request.id, membership.user_id, override)
     _log_correction(db, request.id, membership.user_id, commodity)

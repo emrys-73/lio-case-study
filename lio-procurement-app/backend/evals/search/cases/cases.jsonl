@@ -1,0 +1,44 @@
+{"id": "toner-black-de", "query": "Toner schwarz XL", "expected": "Toner cartridge black, high-yield", "kind": "match", "lang": "de", "checked": false}
+{"id": "toner-cyan-brand", "query": "HP toner cartridge cyan 207A", "expected": "Toner cartridge cyan", "kind": "match", "lang": "en", "checked": false}
+{"id": "toner-yellow-de", "query": "Toner gelb", "expected": "Toner cartridge yellow", "kind": "match", "lang": "de", "checked": false}
+{"id": "copy-paper-recycled-de", "query": "Kopierpapier A4 Recycling 80g", "expected": "Copy paper A4 recycled 80 g", "kind": "match", "lang": "de", "checked": false}
+{"id": "copy-paper-a3-en", "query": "copy paper A3 80gsm 500 sheets", "expected": "Copy paper A3 80 g, 500 sheets", "kind": "match", "lang": "en", "checked": false}
+{"id": "bearing-6205-de", "query": "Kugellager 6205 2RS", "expected": "Ball bearing 6205-2RS", "kind": "match", "lang": "de", "checked": false}
+{"id": "bearing-6301-en", "query": "ball bearings 6301ZZ", "expected": "Ball bearing 6301 ZZ", "kind": "match", "lang": "en", "checked": false}
+{"id": "bearing-6202-vendor", "query": "Rillenkugellager 6202-2RS SKF", "vendor": "Osterhaus Technik GmbH & Co. KG", "expected": "Ball bearing 6202-2RS", "kind": "match", "lang": "de", "checked": false}
+{"id": "gloves-nitrile-coated-de", "query": "Sicherheitshandschuhe nitrilbeschichtet Gr. 9", "expected": "Safety gloves nitrile-coated", "kind": "match", "lang": "de", "checked": false}
+{"id": "bolt-m8-de", "query": "Edelstahlschrauben M8x30 A2", "expected": "Stainless steel bolt M8×30 A2", "kind": "match", "lang": "de", "checked": false}
+{"id": "pallet-epal-de", "query": "Europalette neu EPAL", "expected": "Euro pallet new EPAL", "kind": "match", "lang": "de", "checked": false}
+{"id": "stretch-film-de", "query": "Stretchfolie 500mm x 300m 23my", "expected": "Stretch film 500 mm × 300 m, 23 µm", "kind": "match", "lang": "de", "checked": false}
+{"id": "dock-dual-4k", "query": "USB-C Docking Station dual 4K", "expected": "Docking station USB-C, dual 4K", "kind": "match", "lang": "en", "checked": false}
+{"id": "dock-tb4-short", "query": "Thunderbolt 4 dock", "expected": "Docking station Thunderbolt 4", "kind": "match", "lang": "en", "checked": false}
+{"id": "laptop-i7-de", "query": "Laptop 14 Zoll i7 32GB 1TB", "expected": "Business laptop 14\" i7 / 32 GB / 1 TB SSD", "kind": "match", "lang": "de", "checked": false}
+{"id": "extinguisher-abc-de", "query": "Feuerlöscher 6kg ABC Pulver", "expected": "Fire extinguisher 6 kg ABC powder", "kind": "match", "lang": "de", "checked": false}
+{"id": "extinguisher-co2-de", "query": "CO2 Feuerlöscher 5 kg", "expected": "Fire extinguisher 5 kg CO₂", "kind": "match", "lang": "de", "checked": false}
+{"id": "chair-mesh-de", "query": "Bürostuhl ergonomisch Netzrücken mesh", "expected": "Office chair ergonomic mesh", "kind": "match", "lang": "de", "checked": false}
+{"id": "whiteboard-magnetic-de", "query": "Whiteboard 90x120 magnetisch", "expected": "Whiteboard 90×120 cm magnetic", "kind": "match", "lang": "de", "checked": false}
+{"id": "patch-cat7-de", "query": "Patchkabel Cat7 5m", "expected": "Patch cable Cat 7 5 m", "kind": "match", "lang": "de", "checked": false}
+{"id": "switch-48-poe", "query": "Netzwerk Switch 48 Port PoE", "expected": "Network switch 48-port gigabit PoE", "kind": "match", "lang": "de", "checked": false}
+{"id": "led-panel-600", "query": "LED Panel 600x600 4000K", "expected": "LED panel light 600×600 4000 K", "kind": "match", "lang": "en", "checked": false}
+{"id": "keyboard-split-de", "query": "Tastatur Maus Set kabellos ergonomisch split", "expected": "Wireless keyboard and mouse set ergonomic split", "kind": "match", "lang": "de", "checked": false}
+{"id": "bubble-wrap-de", "query": "Luftpolsterfolie 500mm x 100m", "expected": "Bubble wrap 500 mm × 100 m", "kind": "match", "lang": "de", "checked": false}
+{"id": "engine-oil-de", "query": "Motoröl 5W-30 vollsynthetisch", "expected": "Engine oil 5W-30 synthetic", "kind": "match", "lang": "de", "checked": false}
+{"id": "winter-tyre-de", "query": "Winterreifen 195/65 R15", "expected": "Fleet tyre 195/65 R15 winter", "kind": "match", "lang": "de", "checked": false}
+{"id": "monitor-1080-de", "query": "24 Zoll Monitor 1080p", "expected": "24-inch monitor 1080p IPS", "kind": "match", "lang": "de", "checked": false}
+{"id": "binder-75-de", "query": "Ordner A4 75mm", "expected": "Ring binder A4 75 mm", "kind": "match", "lang": "de", "checked": false}
+{"id": "hydraulic-63-de", "query": "Hydraulikzylinder 63mm Bohrung 300mm Hub", "expected": "Hydraulic cylinder 63 mm bore, 300 mm stroke", "kind": "match", "lang": "de", "checked": false}
+{"id": "helpdesk-de", "query": "IT Support Remote Helpdesk Stunden", "expected": "IT support remote helpdesk", "kind": "match", "lang": "de", "checked": false}
+{"id": "cable-ties-de", "query": "Kabelbinder 200mm schwarz", "expected": null, "kind": "off_catalogue", "lang": "de", "checked": false}
+{"id": "coffee-beans-de", "query": "Kaffeebohnen 1kg", "expected": null, "kind": "off_catalogue", "lang": "de", "checked": false}
+{"id": "pencils-de", "query": "Bleistifte HB 12 Stück", "expected": null, "kind": "off_catalogue", "lang": "de", "checked": false}
+{"id": "iphone-en", "query": "iPhone 15 Pro 256GB", "expected": null, "kind": "off_catalogue", "lang": "en", "checked": false}
+{"id": "toner-green", "query": "Toner cartridge green", "expected": null, "kind": "near_miss", "lang": "en", "checked": false}
+{"id": "bearing-6204", "query": "Kugellager 6204-2RS", "expected": null, "kind": "near_miss", "lang": "de", "checked": false}
+{"id": "bolt-m12", "query": "Stainless steel bolt M12x50 A2", "expected": null, "kind": "near_miss", "lang": "en", "checked": false}
+{"id": "extinguisher-2kg", "query": "Fire extinguisher 2 kg CO2", "expected": null, "kind": "near_miss", "lang": "en", "checked": false}
+{"id": "monitor-27-4k", "query": "27 Zoll Monitor 4K", "expected": null, "kind": "near_miss", "lang": "de", "checked": false}
+{"id": "paper-a5", "query": "Kopierpapier A5", "expected": null, "kind": "near_miss", "lang": "de", "checked": false}
+{"id": "chair-gaming", "query": "office chair gaming RGB", "expected": null, "kind": "near_miss", "lang": "en", "checked": false}
+{"id": "monitor-1440-ambiguous", "query": "monitor 1440p", "expected": null, "kind": "ambiguous", "lang": "en", "checked": false}
+{"id": "gloves-nitrile-ambiguous", "query": "Handschuhe Nitril", "expected": null, "kind": "ambiguous", "lang": "de", "checked": false}
+{"id": "laptop-ambiguous", "query": "Laptop", "expected": null, "kind": "ambiguous", "lang": "de", "checked": false}

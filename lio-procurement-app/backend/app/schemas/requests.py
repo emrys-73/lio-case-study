@@ -12,12 +12,20 @@ ApprovalStatus = Literal["pending", "approved", "rejected"]
 # Inputs (camelCase — matches what the frontend forms already send)
 # ---------------------------------------------------------------------------
 
+class CatalogChoiceIn(BaseModel):
+    status: Literal["switched", "ignored", "no_match", "picked"]
+    article_number: str | None = None
+    offer_price: float | None = None
+    catalog_price: float | None = None
+
+
 class OrderLineIn(BaseModel):
     position_description: str = Field(alias="positionDescription")
     unit_price: float = Field(alias="unitPrice")
     amount: float
     unit: str
     total_price: float = Field(alias="totalPrice")
+    catalog: CatalogChoiceIn | None = None
 
 
 class RequestCreate(BaseModel):
