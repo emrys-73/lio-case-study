@@ -97,7 +97,8 @@ def update_settings(
 ) -> OrganizationSettings:
     org = db.get(Organization, membership.organization_id)
     try:
-        saved = save_settings(db, org, payload)
+        actor = db.get(Profile, membership.user_id)
+        saved = save_settings(db, org, payload, actor.email if actor else str(membership.user_id))
     except InvalidSettings as error:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)

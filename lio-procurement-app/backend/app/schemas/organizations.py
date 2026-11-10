@@ -11,12 +11,13 @@ MemberRole = Literal["admin", "buyer", "requester"]
 ConfigurableRequiredField = Literal["vat_id", "department"]
 
 
-class CommodityRule(BaseModel):
+class _RuleFields(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     keywords: list[str] = Field(min_length=1)
     commodity_group_id: int
     reason: str = ""
+    max_amount: float | None = Field(default=None, gt=0)
 
     @field_validator("keywords")
     @classmethod
@@ -25,6 +26,18 @@ class CommodityRule(BaseModel):
         if any(not keyword for keyword in cleaned):
             raise ValueError("keywords can't be blank")
         return cleaned
+
+
+class CommodityRuleIn(_RuleFields):
+    id: str | None = None
+    updated_by: str | None = None
+    updated_at: datetime | None = None
+
+
+class CommodityRule(_RuleFields):
+    id: str
+    updated_by: str | None = None
+    updated_at: datetime | None = None
 
 
 class OrganizationSettings(BaseModel):
@@ -44,7 +57,7 @@ class OrganizationSettingsUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     required_fields: list[ConfigurableRequiredField] | None = None
-    commodity_rules: list[CommodityRule] | None = None
+    commodity_rules: list[CommodityRuleIn] | None = None
 
 
 class OrganizationCreate(BaseModel):

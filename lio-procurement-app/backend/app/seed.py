@@ -8,6 +8,7 @@ with:
 """
 import logging
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -26,6 +27,8 @@ from app.models import (
     Supplier,
     User,
 )
+from app.schemas.organizations import CommodityRule
+from app.services.organization_settings import new_rule_id
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +166,26 @@ def seed_organizations_and_accounts(db: Session) -> tuple[int, int]:
     return orgs_created, users_created
 
 
+ACME_CABLE_TIE_RULE = {
+    "keywords": ["cable tie", "kabelbinder"],
+    "commodity_group_id": 11,
+    "reason": "Acme books cable ties under Electrical Engineering",
+}
+
+
+def seed_commodity_rules(db: Session, org: Organization) -> int:
+    if "commodity_rules" in (org.settings or {}):
+        return 0
+    rule = CommodityRule(
+        id=new_rule_id(),
+        updated_by="seed",
+        updated_at=datetime.now(timezone.utc),
+        **ACME_CABLE_TIE_RULE,
+    )
+    org.settings = {**(org.settings or {}), "commodity_rules": [rule.model_dump(mode="json")]}
+    return 1
+
+
 def seed(db: Session) -> dict[str, int]:
     """Seed everything. Returns counts of newly created rows per kind.
 
@@ -182,6 +205,8 @@ def seed(db: Session) -> dict[str, int]:
         "organizations": orgs_created,
         "users": users_created,
     }
+    db.flush()
+    counts["commodity_rules"] = seed_commodity_rules(db, dev_org) if dev_org else 0
     db.commit()
     return counts
 

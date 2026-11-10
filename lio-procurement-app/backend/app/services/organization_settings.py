@@ -1,4 +1,6 @@
 import logging
+import secrets
+from datetime import datetime, timezone
 
 from pydantic import TypeAdapter, ValidationError
 from sqlalchemy import select
@@ -7,10 +9,12 @@ from sqlalchemy.orm import Session, object_session
 from app.models import CommodityGroup, Organization
 from app.schemas.organizations import (
     CommodityRule,
+    CommodityRuleIn,
     ConfigurableRequiredField,
     OrganizationSettings,
     OrganizationSettingsUpdate,
 )
+from app.services.keywords import words
 
 logger = logging.getLogger(__name__)
 
@@ -65,13 +69,24 @@ def load_settings(org: Organization | None) -> OrganizationSettings:
     return OrganizationSettings(required_fields=required_fields, commodity_rules=rules)
 
 
+_RULE_CONTENT = {"keywords", "commodity_group_id", "reason", "max_amount"}
+
+
+def new_rule_id() -> str:
+    return f"r_{secrets.token_hex(4)}"
+
+
 def save_settings(
-    db: Session, org: Organization, update: OrganizationSettingsUpdate
+    db: Session, org: Organization, update: OrganizationSettingsUpdate, actor: str
 ) -> OrganizationSettings:
+    current = load_settings(org)
     changes = update.model_dump(exclude_unset=True, exclude_none=True)
-    merged = OrganizationSettings.model_validate(
-        {**load_settings(org).model_dump(), **changes}
-    )
+    if update.commodity_rules is not None:
+        changes["commodity_rules"] = [
+            rule.model_dump()
+            for rule in _stamp_rules(current.commodity_rules, update.commodity_rules, actor)
+        ]
+    merged = OrganizationSettings.model_validate({**current.model_dump(), **changes})
     missing = _unknown_groups(db, merged.commodity_rules)
     if missing:
         raise InvalidSettings(
@@ -79,6 +94,34 @@ def save_settings(
         )
     org.settings = merged.model_dump(mode="json")
     return merged
+
+
+def _stamp_rules(
+    existing: list[CommodityRule], incoming: list[CommodityRuleIn], actor: str
+) -> list[CommodityRule]:
+    by_id = {rule.id: rule for rule in existing}
+    seen: set[str] = set()
+    now = datetime.now(timezone.utc)
+    stamped = []
+    for rule in incoming:
+        if rule.id is not None and rule.id not in by_id:
+            raise InvalidSettings(f"Unknown rule id: {rule.id}")
+        if rule.id in seen:
+            raise InvalidSettings(f"Rule id used twice: {rule.id}")
+        if rule.id is not None:
+            seen.add(rule.id)
+        empty = [keyword for keyword in rule.keywords if not words(keyword)]
+        if empty:
+            raise InvalidSettings(f"Keywords need letters or digits: {empty}")
+        content = rule.model_dump(include=_RULE_CONTENT)
+        old = by_id.get(rule.id)
+        if old is not None and old.model_dump(include=_RULE_CONTENT) == content:
+            stamped.append(old)
+            continue
+        stamped.append(
+            CommodityRule(id=rule.id or new_rule_id(), updated_by=actor, updated_at=now, **content)
+        )
+    return stamped
 
 
 def _as_list(org: Organization, raw: dict, key: str) -> list:

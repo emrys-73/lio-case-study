@@ -32,6 +32,13 @@ ACME_RULES = [
     },
 ]
 
+SERVER_FIELDS = {"id", "max_amount", "updated_by", "updated_at"}
+
+
+def _as_written(rules):
+    return [{k: v for k, v in rule.items() if k not in SERVER_FIELDS} for rule in rules]
+
+
 target = pytest.mark.xfail(strict=True, reason="Problem 3 target, not built yet")
 
 
@@ -167,12 +174,13 @@ def test_empty_patch_changes_nothing(client):
 
 
 def test_read_skips_unknown_keys_and_dead_rules_and_logs_them(client, db_session, caplog):
-    dead = dict(ACME_RULES[1], commodity_group_id=999999)
+    live = dict(ACME_RULES[0], id="r_live")
+    dead = dict(ACME_RULES[1], id="r_dead", commodity_group_id=999999)
     with db_session() as s:
         org = s.scalar(select(Organization).where(Organization.slug == "acme"))
         org.settings = {
             "required_fields": ["vat_id", "shoe_size"],
-            "commodity_rules": [ACME_RULES[0], dead, {"keywords": []}],
+            "commodity_rules": [live, dead, {"keywords": []}, ACME_RULES[1]],
             "approval_limt": 2000,
         }
         s.commit()
@@ -223,7 +231,7 @@ def test_admin_saves_rules_and_reads_them_back(client):
     )
     assert r.status_code == 200, r.text
     saved = client.get("/organizations/me/settings", headers=headers).json()
-    assert saved["commodity_rules"] == ACME_RULES
+    assert _as_written(saved["commodity_rules"]) == ACME_RULES
 
 
 def test_rule_with_unknown_group_is_rejected(client):
@@ -245,7 +253,7 @@ def test_reason_is_optional_but_keywords_are_not(client):
     )
     assert r.status_code == 200, r.text
     saved = client.get("/organizations/me/settings", headers=headers).json()
-    assert saved["commodity_rules"] == [dict(bare, reason="")]
+    assert _as_written(saved["commodity_rules"]) == [dict(bare, reason="")]
 
     for keywords in ([], [""], ["  "]):
         empty = dict(bare, keywords=keywords)
@@ -265,7 +273,7 @@ def test_saving_required_fields_keeps_rules(client):
     )
     saved = client.get("/organizations/me/settings", headers=headers).json()
     assert saved["required_fields"] == ["vat_id"]
-    assert saved["commodity_rules"] == ACME_RULES
+    assert _as_written(saved["commodity_rules"]) == ACME_RULES
 
 
 def test_guard_buyer_cannot_change_settings(client):
@@ -277,7 +285,6 @@ def test_guard_buyer_cannot_change_settings(client):
     assert r.status_code == 403
 
 
-@target
 def test_acme_rules_map_lines_to_acme_groups(client, db_session):
     from app.services.categorisation import categorise
 
@@ -293,7 +300,6 @@ def test_acme_rules_map_lines_to_acme_groups(client, db_session):
         assert categorise(s, acme, "Office chair") is None
 
 
-@target
 def test_acme_rules_do_not_leak_to_another_company(client, db_session):
     from app.services.categorisation import categorise
 
@@ -323,3 +329,183 @@ def test_acme_rules_do_not_leak_to_another_company(client, db_session):
     with db_session() as s:
         assert categorise(s, acme, "HP 305A toner black") == IT_HARDWARE
         assert categorise(s, walmart, "HP 305A toner black") == TONER_CARTRIDGES
+
+
+SOFTWARE_RULE = {
+    "keywords": ["subscription", "abo", "abonnement"],
+    "commodity_group_id": SOFTWARE,
+    "reason": "Small software subscriptions, test data only",
+    "max_amount": 50,
+}
+
+
+def _save_rules(client, rules, email="admin@acme.com"):
+    r = client.patch(
+        "/organizations/me/settings",
+        json={"commodity_rules": rules},
+        headers=_token(client, email),
+    )
+    assert r.status_code == 200, r.text
+    return r.json()["commodity_rules"]
+
+
+def test_server_sets_rule_id_and_who_and_when(client):
+    saved = _save_rules(client, ACME_RULES)
+    ids = [rule["id"] for rule in saved]
+    assert all(ids) and len(set(ids)) == 2
+    assert {rule["updated_by"] for rule in saved} == {"admin@acme.com"}
+    assert all(rule["updated_at"] for rule in saved)
+    assert [rule["max_amount"] for rule in saved] == [None, None]
+
+
+def test_rule_id_never_changes_and_untouched_rules_keep_their_stamp(client):
+    first = _save_rules(client, ACME_RULES)
+    edited = [dict(first[0]), dict(first[1], keywords=["toner", "druckerpatrone"])]
+    edited[0]["updated_by"] = "someone@else.com"
+    second = _save_rules(client, list(reversed(edited)))
+    by_id = {rule["id"]: rule for rule in second}
+    assert set(by_id) == {first[0]["id"], first[1]["id"]}
+    assert by_id[first[0]["id"]] == first[0]
+    assert by_id[first[1]["id"]]["keywords"] == ["toner", "druckerpatrone"]
+    assert by_id[first[1]["id"]]["updated_at"] >= first[1]["updated_at"]
+    assert [rule["id"] for rule in second] == [first[1]["id"], first[0]["id"]]
+
+
+def test_rule_id_from_nowhere_is_rejected(client):
+    headers = _token(client, "admin@acme.com")
+    for rules in (
+        [dict(ACME_RULES[0], id="r_made_up")],
+        [dict(ACME_RULES[0], id="r_same"), dict(ACME_RULES[1], id="r_same")],
+    ):
+        r = client.patch(
+            "/organizations/me/settings", json={"commodity_rules": rules}, headers=headers
+        )
+        assert r.status_code == 422, rules
+    first = _save_rules(client, ACME_RULES)
+    twice = [dict(ACME_RULES[0], id=first[0]["id"]), dict(ACME_RULES[1], id=first[0]["id"])]
+    r = client.patch("/organizations/me/settings", json={"commodity_rules": twice}, headers=headers)
+    assert r.status_code == 422
+
+
+def test_max_amount_must_be_positive_and_keywords_must_have_letters(client):
+    headers = _token(client, "admin@acme.com")
+    for rule in (
+        dict(SOFTWARE_RULE, max_amount=0),
+        dict(SOFTWARE_RULE, max_amount=-5),
+        dict(SOFTWARE_RULE, keywords=["--"]),
+    ):
+        r = client.patch(
+            "/organizations/me/settings", json={"commodity_rules": [rule]}, headers=headers
+        )
+        assert r.status_code == 422, rule
+    saved = _save_rules(client, [SOFTWARE_RULE])
+    assert saved[0]["max_amount"] == 50
+
+
+MATCHING_CASES = [
+    ("Kabelbinder 200mm schwarz", ELECTRICAL_ENGINEERING),
+    ("KABELBINDER-SET 100 Stk.", ELECTRICAL_ENGINEERING),
+    ("Nylonkabelbinder UV-beständig", ELECTRICAL_ENGINEERING),
+    ("Cable ties, black, 200 mm", ELECTRICAL_ENGINEERING),
+    ("cable-tie mounts", ELECTRICAL_ENGINEERING),
+    ("Kabeltrommel 50m", None),
+    ("cable drum 50m", None),
+    ("tie for the cable", None),
+    ("HP 305A toner black", IT_HARDWARE),
+    ("Tonerkartusche HP 305A", IT_HARDWARE),
+    ("Druckertoner schwarz", IT_HARDWARE),
+    ("TONER", IT_HARDWARE),
+    ("HP LaserJet printer", None),
+    ("Drucker", None),
+    ("Office chair", None),
+    ("", None),
+]
+
+
+@pytest.mark.parametrize("text, expected", MATCHING_CASES)
+def test_keywords_match_german_and_english(client, db_session, text, expected):
+    from app.services.categorisation import categorise
+
+    _save_rules(client, ACME_RULES)
+    with db_session() as s:
+        assert categorise(s, _org_id(db_session, "acme"), text) == expected
+
+
+def test_umlauts_and_eszett_match_either_spelling(client, db_session):
+    from app.services.categorisation import categorise
+
+    _save_rules(
+        client,
+        [
+            {"keywords": ["Drucker-Zubehör"], "commodity_group_id": IT_HARDWARE},
+            {"keywords": ["Maßband"], "commodity_group_id": ELECTRICAL_ENGINEERING},
+        ],
+    )
+    acme = _org_id(db_session, "acme")
+    with db_session() as s:
+        assert categorise(s, acme, "Drucker Zubehoer Set") == IT_HARDWARE
+        assert categorise(s, acme, "DRUCKER-ZUBEHÖR") == IT_HARDWARE
+        assert categorise(s, acme, "Zubehör für Drucker") is None
+        assert categorise(s, acme, "MASSBAND 5m") == ELECTRICAL_ENGINEERING
+        assert categorise(s, acme, "Maßbandhalter") == ELECTRICAL_ENGINEERING
+
+
+def test_short_keywords_match_the_whole_word_only(client, db_session):
+    from app.services.categorisation import categorise
+
+    _save_rules(client, [dict(SOFTWARE_RULE, max_amount=None)])
+    acme = _org_id(db_session, "acme")
+    with db_session() as s:
+        assert categorise(s, acme, "Software-Abo monatlich") == SOFTWARE
+        assert categorise(s, acme, "Notion team plan, monthly subscription") == SOFTWARE
+        assert categorise(s, acme, "Jahresabonnement Adobe") == SOFTWARE
+        assert categorise(s, acme, "Kabo Schrank") is None
+        assert categorise(s, acme, "Abort-Ventil") is None
+        assert categorise(s, acme, "ERP licence 2026") is None
+
+
+def test_max_amount_only_hits_lines_at_or_under_it(client, db_session):
+    from app.services.categorisation import categorise
+
+    _save_rules(client, [SOFTWARE_RULE])
+    acme = _org_id(db_session, "acme")
+    with db_session() as s:
+        assert categorise(s, acme, "Notion subscription", 12.0) == SOFTWARE
+        assert categorise(s, acme, "Notion subscription", 50.0) == SOFTWARE
+        assert categorise(s, acme, "SAP subscription", 25000.0) is None
+        assert categorise(s, acme, "Notion subscription") is None
+
+
+def test_two_rules_on_one_line_first_in_the_list_wins(client, db_session):
+    from app.services.categorisation import categorise
+
+    acme = _org_id(db_session, "acme")
+    line = "Kabelbinder und Toner Paket"
+    _save_rules(client, ACME_RULES)
+    with db_session() as s:
+        assert categorise(s, acme, line) == ELECTRICAL_ENGINEERING
+    _save_rules(client, list(reversed(ACME_RULES)))
+    with db_session() as s:
+        assert categorise(s, acme, line) == IT_HARDWARE
+
+
+def test_seed_gives_acme_only_the_cable_tie_rule(client, db_session):
+    from app.services.categorisation import categorise
+
+    with db_session() as s:
+        seed(s)
+    acme = _org_id(db_session, "acme")
+    walmart = _org_id(db_session, "walmart")
+    rules = client.get(
+        "/organizations/me/settings", headers=_token(client, "admin@acme.com")
+    ).json()["commodity_rules"]
+    assert [rule["commodity_group_id"] for rule in rules] == [ELECTRICAL_ENGINEERING]
+    with db_session() as s:
+        assert categorise(s, acme, "Kabelbinder 200mm") == ELECTRICAL_ENGINEERING
+        assert categorise(s, acme, "HP 305A toner") is None
+        assert categorise(s, walmart, "Kabelbinder 200mm") is None
+        seed(s)
+    again = client.get(
+        "/organizations/me/settings", headers=_token(client, "admin@acme.com")
+    ).json()["commodity_rules"]
+    assert again == rules
