@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from evals.extraction.score import score, unit_canon, vat_ok, vendor_ok
+from evals.extraction.score import score, unit_canon, vat_ok, vendor_ok, warned
 
 KEY = json.loads(
     (Path(__file__).parents[1] / "evals/extraction/cases/gaertner-gregg.json").read_text()
@@ -66,3 +66,27 @@ def test_every_key_adds_up():
         assert round(items + charges, 2) == key["totals"]["net"], path.name
         for l in key["lines"]:
             assert abs(l["unitPrice"][0] * l["amount"] - l["totalPrice"]) < 0.01, (path.name, l["description"])
+
+
+def test_vat_and_gross_are_scored_on_their_own():
+    s = score({**PERFECT, "vatAmount": 334.02, "grossTotal": 2092.02}, KEY)
+    assert s["totalsBlock"] == {"vatAmount": True, "grossTotal": True}
+    assert s["fullyCorrect"]
+    s = score({**PERFECT, "vatAmount": None, "grossTotal": 2000.0}, KEY)
+    assert s["totalsBlock"] == {"vatAmount": False, "grossTotal": False}
+    assert s["fullyCorrect"]
+
+
+def test_a_totals_mismatch_counts_as_a_warning():
+    assert warned({"totals": {"match": False, "grossMatch": None}, "missingFields": None})
+    assert warned({"totals": {"match": True, "grossMatch": False}, "missingFields": None})
+
+
+def test_a_scored_field_listed_as_missing_counts_as_a_warning():
+    assert warned({"totals": {"match": True}, "missingFields": ["VAT ID"]})
+
+
+def test_title_or_department_missing_is_no_warning():
+    assert not warned({"totals": {"match": True, "grossMatch": True},
+                       "missingFields": ["Department", "Title/Short Description"]})
+    assert not warned({"totals": None, "missingFields": None})

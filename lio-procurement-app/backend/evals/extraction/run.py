@@ -13,7 +13,7 @@ import app.services.extraction as extraction
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.services.pdf import extract_text
-from evals.extraction.score import score
+from evals.extraction.score import score, warned
 
 HERE = Path(__file__).parent
 CASES = HERE / "cases"
@@ -84,7 +84,8 @@ def run_case(key: dict, source: str, db) -> dict:
         "seconds": seconds,
         "model": raw,
         "app": {"success": resp.success, "error": resp.error,
-                "missingFields": resp.missing_fields, "data": app_data},
+                "missingFields": resp.missing_fields, "data": app_data,
+                "totals": resp.totals.model_dump(by_alias=True) if resp.totals else None},
         "score": score(app_data, key),
         "modelOnlyScore": score(raw_parsed, key) if raw_parsed else None,
     }
@@ -125,6 +126,10 @@ def summarise(rows: list[dict], meta: dict) -> tuple[dict, str]:
         "alternativesCounted": sum(s["alternativesCounted"] for s in ok),
         "extraLines": sum(s["extraLines"] for s in ok),
         "linesSumToTotal": sum(s["arithmetic"]["linesSumToTotal"] for s in ok),
+        "vatAmount": sum(s.get("totalsBlock", {}).get("vatAmount", False) for s in ok),
+        "grossTotal": sum(s.get("totalsBlock", {}).get("grossTotal", False) for s in ok),
+        "wrong": sum(not r["score"]["fullyCorrect"] for r in rows),
+        "wrongAndSilent": sum(not r["score"]["fullyCorrect"] and not warned(r["app"]) for r in rows),
         "avgSeconds": round(sum(r["seconds"] for r in rows) / n, 1) if n else 0,
         "promptTokens": sum(r["model"].get("promptTokens") or 0 for r in rows),
         "completionTokens": sum(r["model"].get("completionTokens") or 0 for r in rows),
@@ -181,6 +186,9 @@ def summarise(rows: list[dict], meta: dict) -> tuple[dict, str]:
         f"| Alternatives counted as purchases | {o['alternativesCounted']} |",
         f"| Extra lines | {o['extraLines']} |",
         f"| Lines sum to total | {_pct(o['linesSumToTotal'], n)} |",
+        f"| VAT amount right | {_pct(o['vatAmount'], n)} |",
+        f"| Gross total right | {_pct(o['grossTotal'], n)} |",
+        f"| Wrong with no warning in the form | {_pct(o['wrongAndSilent'], o['wrong'])} |",
         f"| Avg seconds per quote | {o['avgSeconds']} |",
         f"| Tokens in / out | {o['promptTokens']:,} / {o['completionTokens']:,} |",
         "",
@@ -203,12 +211,17 @@ def main() -> None:
     parser.add_argument("--text-source", choices=["pypdf", "layout"], default="pypdf")
     parser.add_argument("--case", action="append")
     parser.add_argument("--label", default="run")
+    parser.add_argument("--without-group-list", action="store_true")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     if args.model:
         settings.openai_model = args.model
     extraction.OpenAI = RecordingOpenAI
+    if args.without_group_list:
+        build = extraction._build_prompt
+        extraction._build_prompt = lambda text, groups, *rest: build(
+            text, "(left out for this run)", *rest)
 
     keys = [json.loads(p.read_text()) for p in sorted(CASES.glob("*.json"))]
     if args.case:
@@ -216,7 +229,8 @@ def main() -> None:
 
     started = datetime.now(timezone.utc)
     meta = {"label": args.label, "model": settings.openai_model, "textSource": args.text_source,
-            "runsPerCase": args.runs, "startedAt": started.isoformat(timespec="seconds")}
+            "runsPerCase": args.runs, "startedAt": started.isoformat(timespec="seconds"),
+            "withoutGroupList": args.without_group_list}
     out = RESULTS / f"{started.strftime('%Y%m%d-%H%M%S')}_{args.label}"
     out.mkdir(parents=True, exist_ok=True)
 

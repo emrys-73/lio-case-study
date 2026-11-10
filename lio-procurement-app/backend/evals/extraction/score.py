@@ -145,6 +145,16 @@ def arithmetic(got_lines: list[dict], total: Any) -> dict:
             "linesSumToTotal": sums_to_total}
 
 
+WARNING_FIELDS = {"Vendor Name", "VAT ID", "Order Lines", "Total Cost"}
+
+
+def warned(app: dict) -> bool:
+    totals = app.get("totals") or {}
+    if totals.get("match") is False or totals.get("grossMatch") is False:
+        return True
+    return bool(WARNING_FIELDS & set(app.get("missingFields") or []))
+
+
 def score(data: dict | None, key: dict) -> dict:
     if data is None:
         return {"crashed": True, "fullyCorrect": False}
@@ -173,6 +183,11 @@ def score(data: dict | None, key: dict) -> dict:
         "alternativesCounted": sum(e["reason"] == "alternative" for e in ls["extras"]),
         "lines": ls,
         "arithmetic": arithmetic(lines, total),
+        "totalsBlock": {
+            "vatAmount": num_eq(data.get("vatAmount"),
+                                round(key["totals"]["gross"] - key["totals"]["net"], 2)),
+            "grossTotal": num_eq(data.get("grossTotal"), key["totals"]["gross"]),
+        },
         "recorded": {
             "title": data.get("title"),
             "department": data.get("department"),
