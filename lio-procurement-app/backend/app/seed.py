@@ -28,6 +28,7 @@ from app.models import (
     User,
 )
 from app.schemas.organizations import CommodityRule
+from app.services.keywords import words
 from app.services.organization_settings import new_rule_id
 
 logger = logging.getLogger(__name__)
@@ -172,18 +173,59 @@ ACME_CABLE_TIE_RULE = {
     "reason": "Acme books cable ties under Electrical Engineering",
 }
 
+ACME_TONER_RULE = {
+    "keywords": ["tonerkartusche", "toner cartridge", "toner"],
+    "commodity_group_id": 29,
+    "reason": "Acme books printer toner under IT Hardware",
+}
+
+ACME_SOFTWARE_RULE = {
+    "keywords": [
+        "software subscription",
+        "subscription",
+        "softwareabo",
+        "abo",
+        "abonnement",
+        "saas",
+        "softwarelizenz",
+        "software lizenz",
+        "software licence",
+        "software license",
+    ],
+    "commodity_group_id": 15,
+    "max_amount": 500,
+    "reason": (
+        "Acme books small software subscriptions under Office Supplies, which is not in the "
+        "taxonomy, so Office Equipment until we confirm with Acme; limit to confirm with Acme"
+    ),
+}
+
+ACME_RULES = [ACME_CABLE_TIE_RULE, ACME_TONER_RULE, ACME_SOFTWARE_RULE]
+
 
 def seed_commodity_rules(db: Session, org: Organization) -> int:
-    if "commodity_rules" in (org.settings or {}):
-        return 0
-    rule = CommodityRule(
-        id=new_rule_id(),
-        updated_by="seed",
-        updated_at=datetime.now(timezone.utc),
-        **ACME_CABLE_TIE_RULE,
-    )
-    org.settings = {**(org.settings or {}), "commodity_rules": [rule.model_dump(mode="json")]}
-    return 1
+    settings = org.settings or {}
+    existing = settings.get("commodity_rules")
+    existing = existing if isinstance(existing, list) else []
+    taken = {
+        " ".join(words(keyword))
+        for rule in existing
+        if isinstance(rule, dict)
+        for keyword in rule.get("keywords") or []
+        if isinstance(keyword, str)
+    }
+    now = datetime.now(timezone.utc)
+    new = [
+        CommodityRule(id=new_rule_id(), updated_by="seed", updated_at=now, **rule)
+        for rule in ACME_RULES
+        if not taken & {" ".join(words(keyword)) for keyword in rule["keywords"]}
+    ]
+    if new:
+        org.settings = {
+            **settings,
+            "commodity_rules": existing + [rule.model_dump(mode="json") for rule in new],
+        }
+    return len(new)
 
 
 def seed(db: Session) -> dict[str, int]:

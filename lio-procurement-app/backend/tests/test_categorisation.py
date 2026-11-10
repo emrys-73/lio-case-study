@@ -18,6 +18,7 @@ from app.services import extraction
 ELECTRICAL_ENGINEERING = 11
 IT_HARDWARE = 29
 SOFTWARE = 31
+OFFICE_EQUIPMENT = 15
 TONER_CARTRIDGES = 204
 
 ACME_RULES = [
@@ -487,7 +488,7 @@ def test_two_rules_on_one_line_first_in_the_list_wins(client, db_session):
         assert categorise(s, acme, line) == IT_HARDWARE
 
 
-def test_seed_gives_acme_only_the_cable_tie_rule(client, db_session):
+def test_seed_gives_acme_the_three_brief_rules_once(client, db_session):
     from app.services.categorisation import categorise
 
     with db_session() as s:
@@ -497,16 +498,35 @@ def test_seed_gives_acme_only_the_cable_tie_rule(client, db_session):
     rules = client.get(
         "/organizations/me/settings", headers=_token(client, "admin@acme.com")
     ).json()["commodity_rules"]
-    assert [rule["commodity_group_id"] for rule in rules] == [ELECTRICAL_ENGINEERING]
+    assert [rule["commodity_group_id"] for rule in rules] == [
+        ELECTRICAL_ENGINEERING, IT_HARDWARE, OFFICE_EQUIPMENT
+    ]
+    assert rules[2]["max_amount"] == 500
+    assert "confirm with Acme" in rules[2]["reason"]
     with db_session() as s:
         assert categorise(s, acme, "Kabelbinder 200mm") == ELECTRICAL_ENGINEERING
-        assert categorise(s, acme, "HP 305A toner") is None
+        assert categorise(s, acme, "HP 305A toner") == IT_HARDWARE
+        assert categorise(s, acme, "Notion subscription", 96.0) == OFFICE_EQUIPMENT
         assert categorise(s, walmart, "Kabelbinder 200mm") is None
         seed(s)
     again = client.get(
         "/organizations/me/settings", headers=_token(client, "admin@acme.com")
     ).json()["commodity_rules"]
     assert again == rules
+
+
+def test_reseed_adds_missing_defaults_and_keeps_admin_changes(client, db_session):
+    changed = dict(ACME_RULES[0], commodity_group_id=SOFTWARE, reason="Admin moved it")
+    saved = _save_rules(client, [changed])
+    with db_session() as s:
+        seed(s)
+    rules = client.get(
+        "/organizations/me/settings", headers=_token(client, "admin@acme.com")
+    ).json()["commodity_rules"]
+    assert rules[0] == saved[0]
+    assert [rule["commodity_group_id"] for rule in rules] == [
+        SOFTWARE, IT_HARDWARE, OFFICE_EQUIPMENT
+    ]
 
 
 def _line(text, total):
@@ -693,3 +713,287 @@ def test_save_gate_uses_only_the_own_company_rules(client, db_session):
     [detail] = _activity(db_session, created["id"], "created")
     assert "rule_id" not in detail["group"]
     assert _activity(db_session, created["id"], "group_overridden") == []
+
+
+def _seed_acme(db_session):
+    with db_session() as s:
+        seed(s)
+
+
+def _wrong(group):
+    return SOFTWARE if group != SOFTWARE else ELECTRICAL_ENGINEERING
+
+
+ACME_EXAMPLES = [
+    ("Kabelbinder 200mm schwarz, 100 Stk.", 40.0, ELECTRICAL_ENGINEERING),
+    ("Cable ties, black, 200 mm, pack of 100", 40.0, ELECTRICAL_ENGINEERING),
+    ("Tonerkartusche HP 305A schwarz", 120.0, IT_HARDWARE),
+    ("HP 305A toner cartridge, black", 120.0, IT_HARDWARE),
+    ("Adobe Acrobat Abo, 12 Monate", 239.88, OFFICE_EQUIPMENT),
+    ("Softwarelizenz Figma, 1 Jahr", 144.0, OFFICE_EQUIPMENT),
+    ("Notion software subscription, 12 months", 96.0, OFFICE_EQUIPMENT),
+    ("SaaS seat for Miro, annual", 500.0, OFFICE_EQUIPMENT),
+]
+
+OVER_LIMIT = [
+    ("Adobe Creative Cloud Abo, 10 Lizenzen", 7000.0),
+    ("Salesforce subscription, 25 seats", 30000.0),
+    ("SaaS seat for Miro, annual", 500.01),
+]
+
+
+def _correction_rows(db_session, request_id):
+    return _activity(db_session, request_id, "commodity_correction")
+
+
+@pytest.mark.parametrize("text, total, expected", ACME_EXAMPLES)
+def test_proof_manual_create_by_requester_gets_the_acme_group(
+    client, db_session, text, total, expected
+):
+    _seed_acme(db_session)
+    created = _create(client, "requester@acme.com", text, _wrong(expected), lines=[_line(text, total)])
+    assert created["commodity_group_id"] == expected
+    assert created["commodity"]["group_id"] == expected
+    assert created["commodity"]["source"] == "rule"
+    assert created["commodity"]["locked"] is True
+    assert created["commodity"]["corrected"] is True
+    assert created["commodity"]["corrected_from_group_id"] == _wrong(expected)
+    [row] = _correction_rows(db_session, created["id"])
+    assert row == {
+        "from_group_id": _wrong(expected),
+        "to_group_id": expected,
+        "rule_id": created["commodity"]["rule_id"],
+    }
+
+
+@pytest.mark.parametrize("text, total, expected", ACME_EXAMPLES)
+def test_proof_pdf_create_with_a_wrong_suggestion_gets_the_acme_group(
+    client, db_session, text, total, expected
+):
+    _seed_acme(db_session)
+    wrong = _wrong(expected)
+    snapshot = {"success": True, "data": {"commodityGroupId": wrong}}
+    created = _create(
+        client, "requester@acme.com", text, wrong, lines=[_line(text, total)], extraction=snapshot
+    )
+    assert created["commodity_group_id"] == expected
+    assert created["commodity"]["source"] == "rule"
+    assert created["commodity"]["corrected"] is True
+    [detail] = _activity(db_session, created["id"], "created")
+    assert detail["group"]["suggested_id"] == wrong
+    assert len(_correction_rows(db_session, created["id"])) == 1
+
+
+@pytest.mark.parametrize("text, total, expected", ACME_EXAMPLES)
+def test_proof_agent_api_create_and_update_get_the_acme_group(
+    client, db_session, text, total, expected
+):
+    _seed_acme(db_session)
+    created = _create(client, "requester@acme.com", "Office chair", 15, lines=[_line("Office chair", 80.0)])
+    assert created["commodity"]["source"] == "person"
+    assert created["commodity"]["corrected"] is False
+    edited = _edit(
+        client,
+        "requester@acme.com",
+        created,
+        orderLines=[_line(text, total)],
+        totalCost=total,
+        commodityGroupId=_wrong(expected),
+    )
+    assert edited["commodity_group_id"] == expected
+    assert edited["commodity"]["source"] == "rule"
+    assert edited["commodity"]["corrected"] is True
+    again = _edit(client, "requester@acme.com", edited, commodityGroupId=_wrong(expected))
+    assert again["commodity_group_id"] == expected
+    assert len(_correction_rows(db_session, created["id"])) == 2
+
+
+@pytest.mark.parametrize("text, total", OVER_LIMIT)
+def test_proof_software_over_the_limit_is_not_forced(client, db_session, text, total):
+    _seed_acme(db_session)
+    lines = [_line(text, total)]
+    typed = _create(client, "requester@acme.com", text, SOFTWARE, lines=lines)
+    snapshot = {"success": True, "data": {"commodityGroupId": SOFTWARE}}
+    from_pdf = _create(client, "requester@acme.com", text, SOFTWARE, lines=lines, extraction=snapshot)
+    base = _create(client, "requester@acme.com", "Office chair", 15, lines=[_line("Office chair", 80.0)])
+    agent = _edit(client, "requester@acme.com", base, orderLines=lines, totalCost=total, commodityGroupId=SOFTWARE)
+    for saved, source in [(typed, "person"), (from_pdf, "model"), (agent, "person")]:
+        assert saved["commodity_group_id"] == SOFTWARE
+        assert saved["commodity"]["source"] == source
+        assert saved["commodity"]["rule_id"] is None
+        assert saved["commodity"]["locked"] is False
+        assert saved["commodity"]["corrected"] is False
+        assert _correction_rows(db_session, saved["id"]) == []
+
+
+def test_commodity_block_on_save_names_the_rule(client, db_session):
+    _seed_acme(db_session)
+    rules = client.get(
+        "/organizations/me/settings", headers=_token(client, "admin@acme.com")
+    ).json()["commodity_rules"]
+    lines = [_line("Office chair", 80.0), _line("Tonerkartusche HP 305A", 120.0)]
+    created = _create(client, "requester@acme.com", "Buero", SOFTWARE, lines=lines)
+    assert created["commodity"] == {
+        "group_id": IT_HARDWARE,
+        "group_name": "Hardware",
+        "source": "rule",
+        "rule_id": rules[1]["id"],
+        "rule_position": 2,
+        "matched_keyword": "tonerkartusche",
+        "matched_line": "Tonerkartusche HP 305A",
+        "reason": rules[1]["reason"],
+        "locked": True,
+        "can_override": False,
+        "corrected": True,
+        "corrected_from_group_id": SOFTWARE,
+    }
+
+
+def test_no_correction_row_when_the_requester_sends_the_rule_group(client, db_session):
+    _seed_acme(db_session)
+    created = _create(client, "requester@acme.com", "Kabelbinder 200mm", ELECTRICAL_ENGINEERING)
+    assert created["commodity"]["corrected"] is False
+    assert created["commodity"]["corrected_from_group_id"] is None
+    assert _correction_rows(db_session, created["id"]) == []
+
+
+def test_detail_reruns_rules_and_never_says_corrected(client, db_session):
+    _seed_acme(db_session)
+    created = _create(client, "requester@acme.com", "Kabelbinder 200mm", SOFTWARE)
+    detail = client.get(
+        f"/requests/{created['id']}", headers=_token(client, "buyer@acme.com")
+    ).json()["commodity"]
+    assert detail["group_id"] == ELECTRICAL_ENGINEERING
+    assert detail["group_name"] == "Electrical Engineering"
+    assert detail["source"] == "rule"
+    assert detail["locked"] is True
+    assert detail["can_override"] is True
+    assert detail["corrected"] is False
+    assert detail["corrected_from_group_id"] is None
+    assert detail["matched_keyword"] == "kabelbinder"
+
+
+@pytest.mark.parametrize("email, role", [("buyer@acme.com", "buyer"), ("admin@acme.com", "admin")])
+def test_staff_override_shows_as_override_on_save_and_detail(client, db_session, email, role):
+    _seed_acme(db_session)
+    created = _create(client, email, "Kabelbinder 200mm", SOFTWARE)
+    assert created["commodity_group_id"] == SOFTWARE
+    assert created["commodity"]["source"] == "override"
+    assert created["commodity"]["locked"] is False
+    assert created["commodity"]["corrected"] is False
+    assert created["commodity"]["rule_id"] is not None
+    assert _correction_rows(db_session, created["id"]) == []
+    assert len(_activity(db_session, created["id"], "group_overridden")) == 1
+    detail = client.get(
+        f"/requests/{created['id']}", headers=_token(client, "requester@acme.com")
+    ).json()["commodity"]
+    assert detail["source"] == "override"
+    assert detail["group_id"] == SOFTWARE
+    assert detail["can_override"] is False
+
+
+def test_detail_without_a_rule_says_who_picked(client, db_session):
+    _seed_acme(db_session)
+    snapshot = {"success": True, "data": {"commodityGroupId": 15}}
+    from_pdf = _create(client, "requester@acme.com", "Office chair", 15, extraction=snapshot)
+    typed = _create(client, "requester@acme.com", "Office chair", 15)
+    headers = _token(client, "requester@acme.com")
+    assert client.get(f"/requests/{from_pdf['id']}", headers=headers).json()["commodity"]["source"] == "model"
+    plain = client.get(f"/requests/{typed['id']}", headers=headers).json()["commodity"]
+    assert plain["source"] == "person"
+    assert plain["rule_id"] is None
+    assert plain["group_name"] == "Office Equipment"
+
+
+def _categorise(client, lines, email="requester@acme.com"):
+    return client.post("/categorise", json={"lines": lines}, headers=_token(client, email))
+
+
+def test_categorise_returns_per_line_and_request_results_without_saving(client, db_session):
+    _seed_acme(db_session)
+    rules = client.get(
+        "/organizations/me/settings", headers=_token(client, "admin@acme.com")
+    ).json()["commodity_rules"]
+    from app.models import ProcurementRequest
+
+    with db_session() as s:
+        before = len(s.scalars(select(ProcurementRequest.id)).all())
+    r = _categorise(
+        client,
+        [
+            {"id": "a", "description": "Kabelbinder 200mm", "quantity": 100, "unit_price": "0.40"},
+            {"id": "b", "description": "Office chair", "quantity": 1, "unit_price": 80},
+            {"id": "c", "description": "Adobe Acrobat Abo", "quantity": 12, "unit_price": "19.99"},
+        ],
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["lines"] == [
+        {"line_id": "a", "group_id": ELECTRICAL_ENGINEERING, "source": "rule", "rule_id": rules[0]["id"], "matched_keyword": "kabelbinder"},
+        {"line_id": "b", "group_id": None, "source": "none", "rule_id": None, "matched_keyword": None},
+        {"line_id": "c", "group_id": OFFICE_EQUIPMENT, "source": "rule", "rule_id": rules[2]["id"], "matched_keyword": "abo"},
+    ]
+    assert body["commodity"] == {
+        "group_id": OFFICE_EQUIPMENT,
+        "group_name": "Office Equipment",
+        "source": "rule",
+        "rule_id": rules[2]["id"],
+        "rule_position": 3,
+        "matched_keyword": "abo",
+        "matched_line": "Adobe Acrobat Abo",
+        "reason": rules[2]["reason"],
+        "locked": True,
+        "can_override": False,
+        "corrected": False,
+        "corrected_from_group_id": None,
+    }
+    with db_session() as s:
+        assert len(s.scalars(select(ProcurementRequest.id)).all()) == before
+
+
+def test_categorise_max_amount_is_inclusive_on_the_line_total(client, db_session):
+    _seed_acme(db_session)
+    at = _categorise(client, [{"id": "a", "description": "Miro subscription", "quantity": 2, "unit_price": "250"}])
+    over = _categorise(client, [{"id": "a", "description": "Miro subscription", "quantity": 2, "unit_price": "250.01"}])
+    assert at.json()["lines"][0]["group_id"] == OFFICE_EQUIPMENT
+    assert over.json()["lines"][0]["source"] == "none"
+    assert over.json()["commodity"]["source"] == "none"
+    assert over.json()["commodity"]["group_id"] is None
+    assert over.json()["commodity"]["locked"] is False
+
+
+def test_categorise_takes_unfinished_lines(client, db_session):
+    _seed_acme(db_session)
+    r = _categorise(
+        client,
+        [
+            {"id": "a", "description": "Toner schwarz", "quantity": 1, "unit_price": ""},
+            {"id": "b", "description": "", "quantity": 0, "unit_price": 0},
+        ],
+    )
+    assert r.status_code == 200, r.text
+    assert [line["group_id"] for line in r.json()["lines"]] == [IT_HARDWARE, None]
+
+
+def test_categorise_needs_a_login_and_uses_only_the_own_company_rules(client, db_session):
+    _seed_acme(db_session)
+    line = [{"id": "a", "description": "Kabelbinder", "quantity": 1, "unit_price": 1}]
+    assert client.post("/categorise", json={"lines": line}).status_code == 401
+    walmart = _categorise(client, line, email="admin@walmart.com").json()
+    assert walmart["lines"][0]["source"] == "none"
+    assert walmart["commodity"]["can_override"] is True
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["Abonnement Fachzeitschrift", "Kabeltrommel 50m", "Drucker HP LaserJet", "Lizenzfreie Musik"],
+)
+def test_software_rule_edges_pin_the_known_false_hit(client, db_session, text):
+    from app.services.categorisation import categorise
+
+    _seed_acme(db_session)
+    acme = _org_id(db_session, "acme")
+    with db_session() as s:
+        hit = categorise(s, acme, text, 10.0)
+    expected = {"Abonnement Fachzeitschrift": OFFICE_EQUIPMENT}
+    assert hit == expected.get(text)

@@ -89,6 +89,24 @@ class RequestActivityOut(BaseModel):
     created_at: datetime
 
 
+CommoditySource = Literal["rule", "model", "person", "override", "none"]
+
+
+class CommodityOut(BaseModel):
+    group_id: int | None
+    group_name: str | None
+    source: CommoditySource
+    rule_id: str | None
+    rule_position: int | None
+    matched_keyword: str | None
+    matched_line: str | None
+    reason: str | None
+    locked: bool
+    can_override: bool
+    corrected: bool = False
+    corrected_from_group_id: int | None = None
+
+
 class RequestOut(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
@@ -115,3 +133,4 @@ class RequestOut(BaseModel):
     commodity_groups: CommodityGroupOut | None = Field(
         default=None, validation_alias="commodity_group"
     )
+    commodity: CommodityOut | None = None
