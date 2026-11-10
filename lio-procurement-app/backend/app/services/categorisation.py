@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
@@ -28,3 +29,29 @@ def categorise(
 ) -> int | None:
     rule = match_rule(company_rules(db, organization_id), text, amount)
     return rule.commodity_group_id if rule else None
+
+
+@dataclass(frozen=True)
+class RuleHit:
+    rule: CommodityRule
+    line: int
+    flagged: bool
+    hits: list[dict]
+
+
+def rule_for_lines(db: Session, organization_id: uuid.UUID, lines) -> RuleHit | None:
+    rules = company_rules(db, organization_id)
+    hits = []
+    for number, line in enumerate(lines, start=1):
+        rule = match_rule(rules, line.position_description, line.total_price)
+        if rule is not None:
+            hits.append((number, line.total_price, rule))
+    if not hits:
+        return None
+    number, _, rule = max(hits, key=lambda hit: hit[1])
+    return RuleHit(
+        rule=rule,
+        line=number,
+        flagged=len({hit_rule.id for _, _, hit_rule in hits}) > 1,
+        hits=[{"line": n, "rule_id": hit_rule.id} for n, _, hit_rule in hits],
+    )

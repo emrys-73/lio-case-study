@@ -24,6 +24,7 @@ from app.schemas.requests import (
     RequestUpdate,
     StatusUpdate,
 )
+from app.services.categorisation import rule_for_lines
 from app.services.organization_settings import load_settings
 from app.services.totals import add_up, same_amount
 
@@ -147,6 +148,88 @@ def _server_totals(payload: RequestCreate | RequestUpdate, printed: float | None
     }
 
 
+def _suggested_group(extraction: dict | None) -> int | None:
+    data = (extraction or {}).get("data")
+    value = data.get("commodityGroupId") if isinstance(data, dict) else None
+    return value if isinstance(value, int) else None
+
+
+def _standing_override(
+    db: Session, request_id: uuid.UUID, rule_id: str, group_id: int
+) -> bool:
+    last = db.scalar(
+        select(RequestActivity)
+        .where(
+            RequestActivity.request_id == request_id,
+            RequestActivity.action == "group_overridden",
+        )
+        .order_by(RequestActivity.created_at.desc())
+        .limit(1)
+    )
+    detail = (last.detail or {}) if last else {}
+    return detail.get("rule_id") == rule_id and detail.get("to") == group_id
+
+
+def _apply_company_rules(
+    db: Session,
+    membership: OrganizationMember,
+    payload: RequestCreate | RequestUpdate,
+    suggested_id: int | None = None,
+    stored: ProcurementRequest | None = None,
+):
+    submitted = payload.commodity_group_id
+    group = {
+        "id": submitted,
+        "source": "person",
+        "submitted_id": submitted,
+        "suggested_id": suggested_id,
+    }
+    hit = rule_for_lines(db, membership.organization_id, payload.order_lines)
+    if hit is None:
+        if suggested_id is not None and suggested_id == submitted:
+            group["source"] = "model"
+        return payload, group, None
+
+    rule_group = hit.rule.commodity_group_id
+    group.update(rule_id=hit.rule.id, line=hit.line, flagged=hit.flagged)
+    if hit.flagged:
+        group["hits"] = hit.hits
+    if submitted == rule_group:
+        group["source"] = "rule"
+        return payload, group, None
+    if (
+        stored is not None
+        and stored.commodity_group_id == submitted
+        and _standing_override(db, stored.id, hit.rule.id, submitted)
+    ):
+        return payload, group, None
+    if membership.role in ("buyer", "admin"):
+        override = {
+            "rule_id": hit.rule.id,
+            "from": rule_group,
+            "to": submitted,
+            "by_role": membership.role,
+        }
+        return payload, group, override
+    group.update(id=rule_group, source="rule")
+    return payload.model_copy(update={"commodity_group_id": rule_group}), group, None
+
+
+def _log_override(
+    db: Session, request_id: uuid.UUID, actor_id: uuid.UUID, override: dict | None
+) -> None:
+    if override is None:
+        return
+    _log_activity(
+        db,
+        request_id,
+        actor_id,
+        "group_overridden",
+        f"Kept commodity group {override['to']} over company rule {override['rule_id']}",
+        override,
+    )
+
+
 def _changed_fields(request: ProcurementRequest, payload: RequestUpdate) -> list[str]:
     """Return the field keys whose value differs between the request and payload."""
     changed: list[str] = []
@@ -207,6 +290,9 @@ def create_request(
     _validate_commodity_group(db, payload.commodity_group_id)
     _enforce_required_fields(db, membership.organization_id, payload)
     totals = _server_totals(payload, _printed_total(payload.extraction))
+    payload, group, override = _apply_company_rules(
+        db, membership, payload, suggested_id=_suggested_group(payload.extraction)
+    )
 
     # Vendor fields are already cleaned up during extraction, so we can persist
     # them directly here.
@@ -236,10 +322,15 @@ def create_request(
     ]
     db.add(request)
     db.flush()
-    created = {"source": "pdf" if payload.extraction else "manual", "totals": totals}
+    created = {
+        "source": "pdf" if payload.extraction else "manual",
+        "totals": totals,
+        "group": group,
+    }
     if payload.extraction:
         created["extraction"] = payload.extraction
     _log_activity(db, request.id, membership.user_id, "created", "Request created", created)
+    _log_override(db, request.id, membership.user_id, override)
     db.commit()
 
     request = _get_org_request(db, request.id, membership.organization_id)
@@ -258,6 +349,7 @@ def update_request(
     _enforce_required_fields(db, membership.organization_id, payload)
     totals = _server_totals(payload)
     payload = payload.model_copy(update={"total_cost": totals["computed"]})
+    payload, group, override = _apply_company_rules(db, membership, payload, stored=request)
 
     changed = _changed_fields(request, payload)
 
@@ -290,8 +382,9 @@ def update_request(
             membership.user_id,
             "updated",
             f"Updated {', '.join(labels)}",
-            {"changed_fields": changed, "totals": totals},
+            {"changed_fields": changed, "totals": totals, "group": group},
         )
+    _log_override(db, request.id, membership.user_id, override)
     db.commit()
 
     request = _get_org_request(db, request_id, membership.organization_id)
