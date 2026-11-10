@@ -1,7 +1,7 @@
 import pytest
 
 from app.schemas.extraction import AlternativeData, ExtractedVendorData, OrderLineData
-from app.services.lines import drop_listed_alternatives, drop_vat_lines, is_vat_label
+from app.services.lines import drop_listed_alternatives, drop_vat_lines, fill_lump_sum_charges, is_vat_label
 
 
 def _line(description, total, kind="charge"):
@@ -130,3 +130,25 @@ def test_charges_are_never_taken_out_as_alternatives():
     )
     drop_listed_alternatives(data)
     assert len(data.order_lines) == 2
+
+
+def test_a_charge_with_only_a_total_is_one_at_that_price():
+    data = ExtractedVendorData(orderLines=[
+        OrderLineData(positionDescription="Versandkosten", totalPrice=113.85, kind="charge"),
+    ])
+    fill_lump_sum_charges(data)
+    line = data.order_lines[0]
+    assert (line.amount, line.unit_price, line.total_price) == (1, 113.85, 113.85)
+
+
+@pytest.mark.parametrize("line", [
+    OrderLineData(positionDescription="Moos", totalPrice=500.0, kind="item"),
+    OrderLineData(positionDescription="Montage", totalPrice=300.0, amount=3, kind="charge"),
+    OrderLineData(positionDescription="Montage", totalPrice=300.0, unitPrice=100.0, kind="charge"),
+    OrderLineData(positionDescription="Versand", totalPrice=None, kind="charge"),
+])
+def test_other_lines_are_not_filled_in(line):
+    before = line.model_copy()
+    data = ExtractedVendorData(orderLines=[line])
+    fill_lump_sum_charges(data)
+    assert data.order_lines[0] == before

@@ -40,3 +40,11 @@ def drop_listed_alternatives(extracted: ExtractedVendorData) -> None:
     ]
     if len(kept) < len(extracted.order_lines) and _fits(extracted, kept):
         extracted.order_lines = kept
+
+
+def fill_lump_sum_charges(extracted: ExtractedVendorData) -> None:
+    for line in extracted.order_lines:
+        if (line.kind == "charge" and line.total_price is not None
+                and line.unit_price is None and line.amount is None):
+            line.amount = 1
+            line.unit_price = line.total_price
