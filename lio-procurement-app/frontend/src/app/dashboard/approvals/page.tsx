@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import * as api from '@/lib/api';
 import { Button, Alert } from '@/components/base';
+import { AutoApprovedChip } from '@/components/AutoApprovedChip';
 import type { ProcurementRequestWithDetails } from '@/types/database';
 
 export default function ApprovalsPage() {
@@ -151,15 +152,18 @@ export default function ApprovalsPage() {
                 <div className="text-sm font-medium text-ink whitespace-nowrap">
                   €{(request.total_cost || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                 </div>
-                <span
-                  className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${
-                    request.approval_status === 'approved'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {request.approval_status}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <AutoApprovedChip request={request} />
+                  <span
+                    className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${
+                      request.approval_status === 'approved'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {request.approval_status}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
