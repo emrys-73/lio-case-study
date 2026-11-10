@@ -97,3 +97,34 @@ def test_model_call_asks_for_the_strict_schema():
     assert fmt["json_schema"]["strict"] is True
     assert fmt["json_schema"]["schema"] == REPLY_SCHEMA
     assert params["temperature"] == 0
+
+
+def test_each_line_says_if_it_is_an_item_or_a_charge():
+    kind = REPLY_SCHEMA["properties"]["orderLines"]["items"]["properties"]["kind"]
+    assert kind == {"type": "string", "enum": ["item", "charge"]}
+    reply = dict(HOFFMANN_REPLY, orderLines=[
+        dict(HOFFMANN_REPLY["orderLines"][0], kind="item"),
+        dict(HOFFMANN_REPLY["orderLines"][1], kind="charge"),
+    ])
+    assert [line.kind for line in parse_reply(json.dumps(reply)).order_lines] == ["item", "charge"]
+
+
+def test_alternatives_have_their_own_list_and_stay_out_of_the_lines():
+    assert "alternatives" in REPLY_SCHEMA["properties"]
+    reply = dict(HOFFMANN_REPLY, alternatives=[
+        {"positionDescription": "Alternative 1.1a, nur Ballenmoos", "totalPrice": 1926.0},
+    ])
+    data = parse_reply(json.dumps(reply))
+    assert [a.total_price for a in data.alternatives] == [1926.0]
+    assert len(data.order_lines) == 2
+
+
+def test_alternatives_can_be_null():
+    assert parse_reply(json.dumps(dict(HOFFMANN_REPLY, alternatives=None))).alternatives == []
+
+
+def test_prompt_states_what_right_means():
+    prompt = request_params("Angebot", "1 | IT | Software")["messages"][1]["content"]
+    for rule in ("net total before VAT", "Charges are order lines", "Alternatives",
+                 "not order lines"):
+        assert rule in prompt

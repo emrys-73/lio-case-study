@@ -45,6 +45,14 @@ REPLY_SCHEMA = _strict_object({
             "amount": _nullable("number"),
             "unit": _nullable("string"),
             "totalPrice": _nullable("number"),
+            "kind": {"type": "string", "enum": ["item", "charge"]},
+        }),
+    },
+    "alternatives": {
+        "type": "array",
+        "items": _strict_object({
+            "positionDescription": _nullable("string"),
+            "totalPrice": _nullable("number"),
         }),
     },
     "totalCost": _nullable("number"),
@@ -54,59 +62,43 @@ REPLY_SCHEMA = _strict_object({
 
 
 def _build_prompt(pdf_text: str, commodity_groups_list: str) -> str:
-    return f"""You are a data extraction and classification specialist. Extract procurement/vendor offer information from the following German document text AND classify it into the appropriate commodity group.
+    return f"""Extract the purchase from this supplier quote (Angebot) AND classify it into one commodity group. The quote is usually German.
 
 Document Text:
 {pdf_text}
 
-Please extract the following information:
-1. Title/Short Description (A brief summary of what this procurement is for - e.g., "Office Equipment Purchase", "Software Licenses", etc.)
-2. Vendor Name (Lieferant/Anbieter/Firma/Company name)
-3. VAT ID (Umsatzsteuer-Identifikationsnummer/VAT ID/USt-IdNr/Tax ID)
-4. Department/Customer (Abteilung/Kunde/Offered to/Customer name)
-5. Order Lines/Items (All line items with):
-   - Position Description (Bezeichnung/Product/Item/Artikel)
-   - Unit Price (Einzelpreis/Unit Price/Preis/Price per unit)
-   - Amount (Menge/Quantity/Anzahl)
-   - Unit (Einheit/Unit/ME - e.g., "licenses", "pieces", "Stück", "items")
-   - Total Price (Gesamtpreis/Total/Gesamt)
-6. Total Cost (Gesamtsumme/Total Cost/Total Offer Cost)
-7. Commodity Group Classification - Select the SINGLE most appropriate commodity group from the list below
+Fields:
+1. title: a short (2-5 words) description of what is being bought.
+2. vendorName: the company that sent the quote (Lieferant/Anbieter/Firma).
+3. vatId: the vendor's VAT ID (USt-IdNr./UID/VAT ID/Umsatzsteuer-ID). null if the quote has none. A tax number (Steuernummer) or a customer number is not a VAT ID.
+4. department: the buyer's department if the quote names one (Abteilung). Otherwise null.
+5. orderLines: everything the buyer pays for, one line each:
+   - positionDescription: the item or charge as printed (Bezeichnung/Artikel)
+   - unitPrice: price per unit before VAT (Einzelpreis/E.P.)
+   - amount: the quantity (Menge/Anzahl). Can be a decimal: "1,28 qm" is 1.28
+   - unit: in English ("Stück" -> "pieces", "Lizenzen" -> "licenses", "qm" -> "sqm", "lfm" -> "m", "Pauschale" -> "lump sum")
+   - totalPrice: the line total before VAT, after any discount on that line (Gesamtpreis/G.P.)
+   - kind: "item" for goods and services, "charge" for shipping, delivery, installation, packaging, levies and other fees
+6. alternatives: positions offered as an alternative or option, with their total (or unit price if no total is printed).
+7. totalCost: the net total before VAT. Items plus charges.
+8. commodityGroupId and commodityGroupName: the SINGLE most appropriate commodity group from the list below.
+
+Rules:
+- Charges are order lines, also when the quote prints them under the table or in the totals block (Versandkosten, Fracht, Transport, Lieferung, Montage, Verpackung, Urheberrechtsabgabe). Without them the lines do not add up to the total.
+- Alternatives and optional positions are not order lines. Look for "Alternative", "Alt.", "Option", "optional", "Eventualposition", or a sub-position like 1.1a / 1.1b offered instead of another one. Put them in alternatives only.
+- Headings and group titles with no price of their own are not order lines.
+- totalCost is the net total before VAT (Nettobetrag, Summe netto, Zwischensumme plus charges). Never the gross amount with VAT (Bruttobetrag, Gesamtbetrag inkl. MwSt., Endbetrag, Rechnungsbetrag).
+- Copy numbers as printed, as plain numbers: dot for decimals, no thousands separator, no currency sign. "1.438,00 EUR" is 1438.00.
+- When something is not in the document, use null. Never guess.
 
 Available Commodity Groups (ID | Category | Name):
 {commodity_groups_list}
 
-IMPORTANT INSTRUCTIONS:
-- For the title, create a SHORT (2-5 words) description based on the main items being purchased
-- Extract ALL line items, even if there are many
-- For unit prices and totals, extract only the numeric value (remove currency symbols)
-- For the unit field, translate German terms to English (e.g., "Stück" -> "pieces", "Lizenzen" -> "licenses")
-- Be careful with German number formatting (e.g., "1.438,00" = 1438.00)
-- For classification, consider the PRIMARY nature and purpose of the items:
+For classification, consider the PRIMARY nature and purpose of the items:
   * Branded office decor/furniture → Office Equipment (15)
   * Traditional promotional items (brochures, giveaways, banners) → Promotional Materials (43)
   * Software/IT products → Software (31) or IT Services (30)
-  * If genuinely uncertain, set commodityGroupId to null
-
-Return ONLY valid JSON in this exact format (no markdown, no code blocks):
-{{
-  "title": "Short description of procurement",
-  "vendorName": "Company Name",
-  "vatId": "DE123456789",
-  "department": "Department Name",
-  "orderLines": [
-    {{
-      "positionDescription": "Item description",
-      "unitPrice": 150.00,
-      "amount": 10,
-      "unit": "licenses",
-      "totalPrice": 1500.00
-    }}
-  ],
-  "totalCost": 1500.00,
-  "commodityGroupId": 15,
-  "commodityGroupName": "Office Equipment"
-}}"""
+  * If genuinely uncertain, set commodityGroupId to null"""
 
 
 def _strip_markdown_fences(content: str) -> str:

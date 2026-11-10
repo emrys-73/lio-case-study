@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -19,6 +21,14 @@ class OrderLineData(BaseModel):
     amount: float | None = None
     unit: str | None = None
     total_price: float | None = Field(default=None, alias="totalPrice")
+    kind: Literal["item", "charge"] | None = None
+
+
+class AlternativeData(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    position_description: str | None = Field(default=None, alias="positionDescription")
+    total_price: float | None = Field(default=None, alias="totalPrice")
 
 
 class ExtractedVendorData(BaseModel):
@@ -30,8 +40,9 @@ class ExtractedVendorData(BaseModel):
     department: str | None = None
     order_lines: list[OrderLineData] = Field(default_factory=list, alias="orderLines")
     total_cost: float | None = Field(default=None, alias="totalCost")
+    alternatives: list[AlternativeData] = Field(default_factory=list)
 
-    @field_validator("order_lines", mode="before")
+    @field_validator("order_lines", "alternatives", mode="before")
     @classmethod
     def _null_lines_are_empty(cls, value):
         return [] if value is None else value
